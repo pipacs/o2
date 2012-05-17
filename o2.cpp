@@ -16,7 +16,13 @@
 #include "o2replyserver.h"
 #include "simplecrypt.h"
 
-O2::O2(const QString &clientId, const QString &clientSecret, const QString &scope, const QUrl &requestUrl, const QUrl &tokenUrl, const QUrl &refreshTokenUrl, QObject *parent): QObject(parent), clientId_(clientId), clientSecret_(clientSecret), scope_(scope), requestUrl_(requestUrl), tokenUrl_(tokenUrl), refreshTokenUrl_(refreshTokenUrl) {
+O2::O2(const QString &clientId, const QString &clientSecret, const QString &scope, const QUrl &requestUrl, const QUrl &tokenUrl, const QUrl &refreshTokenUrl, quint16 localPort, QObject *parent):
+    QObject(parent),
+    clientId_(clientId),
+    clientSecret_(clientSecret),
+    scope_(scope), requestUrl_(requestUrl),
+    tokenUrl_(tokenUrl), refreshTokenUrl_(refreshTokenUrl),
+    localPort_(localPort) {
     QByteArray hash = QCryptographicHash::hash(clientSecret.toUtf8() + "12345678", QCryptographicHash::Sha1);
     crypt_ = new SimpleCrypt(*((quint64 *)(void *)hash.data()));
     manager_ = new QNetworkAccessManager(this);
@@ -30,12 +36,14 @@ O2::~O2() {
 }
 
 void O2::link() {
+    qDebug() << "O2::link";
     if (linked()) {
+        qDebug() << " Linked already";
         return;
     }
 
     // Start listening to authentication replies
-    replyServer_->listen();
+    replyServer_->listen(QHostAddress::Any, localPort_);
 
     // Save redirect URI, as we have to reuse it when requesting the access token
     redirectUri_ = QString("http://localhost:%1").arg(replyServer_->serverPort());

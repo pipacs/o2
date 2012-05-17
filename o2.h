@@ -36,7 +36,7 @@ public:
     /// @param  tokenUrl        Token exchange target.
     /// @param  refreshTokenUrl Token refresh target.
     /// @param  parent          Parent object.
-    explicit O2(const QString &clientId, const QString &clientSecret, const QString &scope, const QUrl &requestUrl, const QUrl &tokenUrl, const QUrl &refreshTokenUrl, QObject *parent = 0);
+    explicit O2(const QString &clientId, const QString &clientSecret, const QString &scope, const QUrl &requestUrl, const QUrl &tokenUrl, const QUrl &refreshTokenUrl, quint16 localPort, QObject *parent);
 
     /// Destructor.
     virtual ~O2();
@@ -133,6 +133,7 @@ protected:
     QString code_;
     SimpleCrypt *crypt_;
     O2ReplyList timedReplies_;
+    quint16 localPort_;
 };
 
 #endif // O2_H
