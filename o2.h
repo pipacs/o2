@@ -90,19 +90,19 @@ signals:
 
 protected slots:
     /// Handle verification response.
-    void onVerificationReceived(QMap<QString, QString>);
+    virtual void onVerificationReceived(QMap<QString, QString>);
 
     /// Handle completion of a token request.
-    void onTokenReplyFinished();
+    virtual void onTokenReplyFinished();
 
     /// Handle failure of a token request.
-    void onTokenReplyError(QNetworkReply::NetworkError error);
+    virtual void onTokenReplyError(QNetworkReply::NetworkError error);
 
     /// Handle completion of a refresh request.
-    void onRefreshFinished();
+    virtual void onRefreshFinished();
 
     /// Handle failure of a refresh request.
-    void onRefreshError(QNetworkReply::NetworkError error);
+    virtual void onRefreshError(QNetworkReply::NetworkError error);
 
 protected:
     /// Build HTTP request body.
