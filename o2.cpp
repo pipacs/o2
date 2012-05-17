@@ -46,7 +46,7 @@ void O2::link() {
     replyServer_->listen(QHostAddress::Any, localPort_);
 
     // Save redirect URI, as we have to reuse it when requesting the access token
-    redirectUri_ = QString("http://localhost:%1").arg(replyServer_->serverPort());
+    redirectUri_ = QString("http://localhost:%1/").arg(replyServer_->serverPort());
 
     // Assemble intial authentication URL
     QList<QPair<QString, QString> > parameters;

@@ -29,11 +29,11 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
 
     // Exchange access code for access/refresh tokens
     QUrl url(tokenUrl_);
-    url.addQueryItem("redirect_uri", QUrl::toPercentEncoding(redirectUri_));
     url.addQueryItem("client_id", clientId_);
     url.addQueryItem("client_secret", clientSecret_);
     url.addQueryItem("scope", scope_);
     url.addQueryItem("code", code());
+    url.addQueryItem("redirect_uri", redirectUri_); // QUrl::toPercentEncoding(redirectUri_));
 
     QNetworkRequest tokenRequest(url);
     qDebug() << " Token request URL:" << url.toString();
