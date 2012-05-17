@@ -12,14 +12,14 @@ O2Facebook::O2Facebook(const QString &clientId, const QString &clientSecret, con
 }
 
 void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
-    qDebug() << "O2Facebook::onVerificationReceived";
-    foreach (QString key, response.keys()) {
-        qDebug() << "" << key << response.value(key);
-    }
+    qDebug() << "> O2Facebook::onVerificationReceived";
 
     emit closeBrowser();
     if (response.contains("error")) {
-        qDebug() << " Verification failed";
+        qDebug() << "Verification failed";
+        foreach (QString key, response.keys()) {
+            qDebug() << "" << key << response.value(key);
+        }
         emit linkingFailed();
         return;
     }
@@ -33,10 +33,9 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
     url.addQueryItem("client_secret", clientSecret_);
     url.addQueryItem("scope", scope_);
     url.addQueryItem("code", code());
-    url.addQueryItem("redirect_uri", redirectUri_); // QUrl::toPercentEncoding(redirectUri_));
+    url.addQueryItem("redirect_uri", redirectUri_);
 
     QNetworkRequest tokenRequest(url);
-    qDebug() << " Token request URL:" << url.toString();
     QNetworkReply *tokenReply = manager_->get(tokenRequest);
     timedReplies_.add(tokenReply);
     connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);

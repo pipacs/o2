@@ -73,10 +73,10 @@ signals:
     /// Emitted when client can close the browser window.
     void closeBrowser();
 
-    /// Emitted when authentication succeeded.
+    /// Emitted when authentication/deauthentication succeeded.
     void linkingSucceeded();
 
-    /// Emitted when authentication failed.
+    /// Emitted when authentication/deauthentication failed.
     void linkingFailed();
 
     /// Emitted when the authentication status changed.
