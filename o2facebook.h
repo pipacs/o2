@@ -15,7 +15,7 @@ signals:
 public slots:
 
 protected slots:
-    void onVerificationReceived();
+    void onVerificationReceived(QMap<QString, QString>);
 };
 
 #endif // O2FACEBOOK_H
