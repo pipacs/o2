@@ -13,6 +13,10 @@ O2Facebook::O2Facebook(const QString &clientId, const QString &clientSecret, con
 
 void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
     qDebug() << "O2Facebook::onVerificationReceived";
+    foreach (QString key, response.keys()) {
+        qDebug() << "" << key << response.value(key);
+    }
+
     emit closeBrowser();
     if (response.contains("error")) {
         qDebug() << " Verification failed";
@@ -25,13 +29,13 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
 
     // Exchange access code for access/refresh tokens
     QUrl url(tokenUrl_);
-    url.addQueryItem("client_id", clientId_);
     url.addQueryItem("redirect_uri", QUrl::toPercentEncoding(redirectUri_));
-    url.addQueryItem("scope", scope_);
+    url.addQueryItem("client_id", clientId_);
     url.addQueryItem("client_secret", clientSecret_);
+    url.addQueryItem("scope", scope_);
     url.addQueryItem("code", code());
 
-    QNetworkRequest tokenRequest(tokenUrl_);
+    QNetworkRequest tokenRequest(url);
     qDebug() << " Token request URL:" << url.toString();
     QNetworkReply *tokenReply = manager_->get(tokenRequest);
     timedReplies_.add(tokenReply);
