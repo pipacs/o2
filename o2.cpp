@@ -76,9 +76,10 @@ bool O2::linked() {
 }
 
 void O2::onVerificationReceived(const QMap<QString, QString> response) {
+    qDebug() << "O2::onVerificationReceived";
     emit closeBrowser();
     if (response.contains("error")) {
-        qDebug() << "O2::onVerificationReceived: Verification failed";
+        qDebug() << " Verification failed";
         emit linkingFailed();
         return;
     }
@@ -96,6 +97,7 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
     parameters.insert("redirect_uri", redirectUri_);
     parameters.insert("grant_type", "authorization_code");
     QByteArray data = buildRequestBody(parameters);
+    qDebug() << " Request body:" << data;
     QNetworkReply *tokenReply = manager_->post(tokenRequest, data);
     timedReplies_.add(tokenReply);
     connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
@@ -134,6 +136,7 @@ void O2::onTokenReplyFinished() {
 void O2::onTokenReplyError(QNetworkReply::NetworkError error) {
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     qDebug() << "O2::onTokenReplyError" << error << tokenReply->errorString();
+    qDebug() << "" << tokenReply->readAll();
     setToken(QString());
     setRefreshToken(QString());
     timedReplies_.remove(tokenReply);
