@@ -10,12 +10,9 @@ class O2Facebook: public O2 {
 public:
     explicit O2Facebook(const QString &clientId, const QString &clientSecret, const QString &scope, QObject *parent = 0);
 
-signals:
-
-public slots:
-
 protected slots:
     void onVerificationReceived(QMap<QString, QString>);
+    virtual void onTokenReplyFinished();
 };
 
 #endif // O2FACEBOOK_H

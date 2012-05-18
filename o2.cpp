@@ -119,13 +119,18 @@ void O2::onTokenReplyFinished() {
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     if (tokenReply->error() == QNetworkReply::NoError) {
         QByteArray replyData = tokenReply->readAll();
+        qDebug() << "Reply:" << replyData;
         QScriptValue value;
         QScriptEngine engine;
         value = engine.evaluate("(" + QString(replyData) + ")");
+        qDebug() << "Value:" << value.toString();
         setToken(value.property("access_token").toString());
-        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + value.property("expires_in").toInteger());
+        int expiresIn = value.property("expires_in").toInteger();
+        if (expiresIn > 0) {
+            qDebug() << "Token expires in" << expiresIn << "seconds";
+            setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
+        }
         setRefreshToken(value.property("refresh_token").toString());
-        qDebug() << "Token expires in" << value.property("expires_in").toInteger() << "seconds";
         timedReplies_.remove(tokenReply);
         emit linkedChanged();
         emit tokenChanged();

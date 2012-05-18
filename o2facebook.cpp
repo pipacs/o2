@@ -1,4 +1,8 @@
 #include <QDebug>
+#include <QDateTime>
+#include <QMap>
+#include <QString>
+#include <QStringList>
 
 #include "o2facebook.h"
 
@@ -41,3 +45,33 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
     connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
     connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
 }
+
+void O2Facebook::onTokenReplyFinished() {
+    qDebug() << "> O2Facebook::onTokenReplyFinished";
+    QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
+    if (tokenReply->error() == QNetworkReply::NoError) {
+
+        // Process reply
+        QByteArray replyData = tokenReply->readAll();
+        QMap<QString, QString> reply;
+        foreach (QString pair, QString(replyData).split("&")) {
+            QStringList kv = pair.split("=");
+            if (kv.length() == 2) {
+                qDebug() << kv[0];
+                reply.insert(kv[0], kv[1]);
+            }
+        }
+
+        // Interpret reply fields
+        setToken(reply.contains("access_token")? reply.value("access_token"): "");
+        // FIXME: I have no idea how to interpret the "expires" value. So let's use a default of 2 hours
+        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + 2 * 60 * 60);
+        setRefreshToken(reply.contains("refresh_token")? reply.value("refresh_token"): "");
+
+        timedReplies_.remove(tokenReply);
+        emit linkedChanged();
+        emit tokenChanged();
+        emit linkingSucceeded();
+    }
+}
+
