@@ -30,10 +30,10 @@ public:
 class O2ReplyList {
 public:
     /// Destructor.
-    /// Deletes the O2Reply instances in the list.
+    /// Deletes all O2Reply instances in the list.
     virtual ~O2ReplyList();
 
-    /// Create a new O2Reply from a QNetworkReply, and add it to the list.
+    /// Create a new O2Reply from a QNetworkReply, and add it to this list.
     void add(QNetworkReply *reply);
 
     /// Add an O2Reply to the list, while taking ownership of it.

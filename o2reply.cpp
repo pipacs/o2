@@ -29,7 +29,11 @@ void O2ReplyList::add(O2Reply *reply) {
 }
 
 void O2ReplyList::remove(QNetworkReply *reply) {
-    (void)replies_.removeOne(find(reply));
+    O2Reply *o2Reply = find(reply);
+    if (o2Reply) {
+        o2Reply->stop();
+        (void)replies_.removeOne(o2Reply);
+    }
 }
 
 O2Reply *O2ReplyList::find(QNetworkReply *reply) {
