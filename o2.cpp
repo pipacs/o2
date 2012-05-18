@@ -16,14 +16,8 @@
 #include "o2replyserver.h"
 #include "simplecrypt.h"
 
-O2::O2(const QString &clientId, const QString &clientSecret, const QString &scope, const QUrl &requestUrl, const QUrl &tokenUrl, const QUrl &refreshTokenUrl, quint16 localPort, QObject *parent):
-    QObject(parent),
-    clientId_(clientId),
-    clientSecret_(clientSecret),
-    scope_(scope), requestUrl_(requestUrl),
-    tokenUrl_(tokenUrl), refreshTokenUrl_(refreshTokenUrl),
-    localPort_(localPort) {
-    QByteArray hash = QCryptographicHash::hash(clientSecret.toUtf8() + "12345678", QCryptographicHash::Sha1);
+O2::O2(QObject *parent): QObject(parent) {
+    QByteArray hash = QCryptographicHash::hash("12345678", QCryptographicHash::Sha1);
     crypt_ = new SimpleCrypt(*((quint64 *)(void *)hash.data()));
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
@@ -33,6 +27,72 @@ O2::O2(const QString &clientId, const QString &clientSecret, const QString &scop
 
 O2::~O2() {
     delete crypt_;
+}
+
+QString O2::clientId() {
+    return clientId_;
+}
+
+void O2::setClientId(const QString &value) {
+    clientId_ = value;
+    emit clientIdChanged();
+}
+
+QString O2::clientSecret() {
+    return clientSecret_;
+}
+
+void O2::setClientSecret(const QString &value) {
+    clientSecret_ = value;
+    QByteArray hash = QCryptographicHash::hash(clientSecret_.toUtf8() + "12345678", QCryptographicHash::Sha1);
+    delete crypt_;
+    crypt_ = new SimpleCrypt(*((quint64 *)(void *)hash.data()));
+    emit clientSecretChanged();
+}
+
+QString O2::scope() {
+    return scope_;
+}
+
+void O2::setScope(const QString &value) {
+    scope_ = value;
+    emit scopeChanged();
+}
+
+QString O2::requestUrl() {
+    return requestUrl_.toString();
+}
+
+void O2::setRequestUrl(const QString &value) {
+    requestUrl_ = value;
+    emit requestUrlChanged();
+}
+
+QString O2::tokenUrl() {
+    return tokenUrl_.toString();
+}
+
+void O2::setTokenUrl(const QString &value) {
+    tokenUrl_= value;
+    emit tokenUrlChanged();
+}
+
+QString O2::refreshTokenUrl() {
+    return refreshTokenUrl_.toString();
+}
+
+void O2::setRefreshTokenUrl(const QString &value) {
+    refreshTokenUrl_ = value;
+    emit refreshTokenUrlChanged();
+}
+
+int O2::localPort() {
+    return localPort_;
+}
+
+void O2::setLocalPort(int value) {
+    localPort_ = value;
+    emit localPortChanged();
 }
 
 void O2::link() {

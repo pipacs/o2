@@ -8,7 +8,7 @@ class O2Facebook: public O2 {
     Q_OBJECT
 
 public:
-    explicit O2Facebook(const QString &clientId, const QString &clientSecret, const QString &scope, QObject *parent = 0);
+    explicit O2Facebook(QObject *parent = 0);
 
 protected slots:
     void onVerificationReceived(QMap<QString, QString>);

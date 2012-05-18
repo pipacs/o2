@@ -8,11 +8,12 @@
 
 static const char *FbEndpoint = "https://graph.facebook.com/oauth/authorize";
 static const char *FbTokenUrl = "https://graph.facebook.com/oauth/access_token";
-static const char *FbRefreshTokenUrl = "https://graph.facebook.com/oauth/access_token"; // FIXME
 static const quint16 FbLocalPort = 1965;
 
-O2Facebook::O2Facebook(const QString &clientId, const QString &clientSecret, const QString &scope, QObject *parent):
-    O2(clientId, clientSecret, scope, QUrl(FbEndpoint), QUrl(FbTokenUrl), QUrl(FbRefreshTokenUrl), FbLocalPort, parent) {
+O2Facebook::O2Facebook(QObject *parent): O2(parent) {
+    setRequestUrl(FbEndpoint);
+    setTokenUrl(FbTokenUrl);
+    setLocalPort(FbLocalPort);
 }
 
 void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
@@ -62,9 +63,9 @@ void O2Facebook::onTokenReplyFinished() {
             }
         }
 
-        // Interpret reply fields
+        // Interpret reply
         setToken(reply.contains("access_token")? reply.value("access_token"): "");
-        // FIXME: I have no idea how to interpret the "expires" value. So let's use a default of 2 hours
+        // FIXME: I have no idea how to interpret Facebook's "expires" value. So let's use a default of 2 hours
         setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + 2 * 60 * 60);
         setRefreshToken(reply.contains("refresh_token")? reply.value("refresh_token"): "");
 

@@ -19,8 +19,54 @@ class SimpleCrypt;
 /// Simple OAuth2 authenticator.
 class O2: public QObject {
     Q_OBJECT
+
+public:
+    /// Are we authenticated?
     Q_PROPERTY(bool linked READ linked NOTIFY linkedChanged)
+    bool linked();
+
+    /// Authentication token.
     Q_PROPERTY(QString token READ token NOTIFY tokenChanged)
+    QString token();
+
+    /// Client ID.
+    /// O2 instances with the same (client ID, client secret) share the same "linked" and "token" properties.
+    Q_PROPERTY(QString clientId READ clientId WRITE setClientId NOTIFY clientIdChanged)
+    QString clientId();
+    void setClientId(const QString &value);
+
+    /// Client secret.
+    /// O2 instances with the same (client ID, client secret) share the same "linked" and "token" properties.
+    Q_PROPERTY(QString clientSecret READ clientSecret WRITE setClientSecret NOTIFY clientSecretChanged)
+    QString clientSecret();
+    void setClientSecret(const QString &value);
+
+    /// Scope of authentication.
+    Q_PROPERTY(QString scope READ scope WRITE setScope NOTIFY scopeChanged)
+    QString scope();
+    void setScope(const QString &value);
+
+    /// Request URL.
+    Q_PROPERTY(QString requestUrl READ requestUrl WRITE setRequestUrl NOTIFY requestUrlChanged)
+    QString requestUrl();
+    void setRequestUrl(const QString &value);
+
+    /// Token request URL.
+    Q_PROPERTY(QString tokenUrl READ tokenUrl WRITE setTokenUrl NOTIFY tokenUrlChanged)
+    QString tokenUrl();
+    void setTokenUrl(const QString &value);
+
+    /// Token refresh URL.
+    Q_PROPERTY(QString refreshTokenUrl READ refreshTokenUrl WRITE setRefreshTokenUrl NOTIFY refreshTokenUrlChanged)
+    QString refreshTokenUrl();
+    void setRefreshTokenUrl(const QString &value);
+
+    /// TCP port number to use in local redirections.
+    /// The OAuth 2.0 "redirect_uri" will be set to "http://localhost:<localPort>/".
+    /// If localPort is set to 0 (default), O2 will replace it with a free one.
+    Q_PROPERTY(int localPort READ localPort WRITE setLocalPort NOTIFY localPortChanged)
+    int localPort();
+    void setLocalPort(int value);
 
 public:
     /// Request type.
@@ -29,26 +75,14 @@ public:
     };
 
     /// Constructor.
-    /// @param  clientId        Client ID.
-    /// @param  clientSecret    Client secret.
-    /// @param  scope           Scope of authentication.
-    /// @param  requestUrl      Authentication request target.
-    /// @param  tokenUrl        Token exchange target.
-    /// @param  refreshTokenUrl Token refresh target.
-    /// @param  parent          Parent object.
-    explicit O2(const QString &clientId, const QString &clientSecret, const QString &scope, const QUrl &requestUrl, const QUrl &tokenUrl, const QUrl &refreshTokenUrl, quint16 localPort, QObject *parent);
+    /// @param  parent  Parent object.
+    explicit O2(QObject *parent = 0);
 
     /// Destructor.
     virtual ~O2();
 
-    /// Are we authenticated?
-    bool linked();
-
     /// Get authentication code.
     QString code();
-
-    /// Get authentication token.
-    QString token();
 
     /// Get refresh token.
     QString refreshToken();
@@ -79,14 +113,19 @@ signals:
     /// Emitted when authentication/deauthentication failed.
     void linkingFailed();
 
-    /// Emitted when the authentication status changed.
-    void linkedChanged();
-
-    /// Emitted when the request token changed.
-    void tokenChanged();
-
     /// Emitted when a token refresh has been completed or failed.
     void refreshFinished(QNetworkReply::NetworkError error);
+
+    // Property change signals
+    void linkedChanged();
+    void tokenChanged();
+    void clientIdChanged();
+    void clientSecretChanged();
+    void scopeChanged();
+    void requestUrlChanged();
+    void tokenUrlChanged();
+    void refreshTokenUrlChanged();
+    void localPortChanged();
 
 protected slots:
     /// Handle verification response.
@@ -134,6 +173,7 @@ protected:
     SimpleCrypt *crypt_;
     O2ReplyList timedReplies_;
     quint16 localPort_;
+    QString pid_;
 };
 
 #endif // O2_H
