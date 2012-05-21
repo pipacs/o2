@@ -6,6 +6,7 @@
 #include <QPair>
 #include <QStringList>
 #include <QUrl>
+#include <QDebug>
 
 #include "o2replyserver.h"
 
@@ -22,6 +23,7 @@ void O2ReplyServer::onIncomingConnection() {
 }
 
 void O2ReplyServer::onBytesReady() {
+    qDebug() << "> O2ReplyServer::onBytesReady";
     QByteArray reply;
     QByteArray content;
     content.append("<HTML></HTML>");

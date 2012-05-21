@@ -179,11 +179,9 @@ void O2::onTokenReplyFinished() {
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     if (tokenReply->error() == QNetworkReply::NoError) {
         QByteArray replyData = tokenReply->readAll();
-        qDebug() << "Reply:" << replyData;
         QScriptValue value;
         QScriptEngine engine;
         value = engine.evaluate("(" + QString(replyData) + ")");
-        qDebug() << "Value:" << value.toString();
         setToken(value.property("access_token").toString());
         int expiresIn = value.property("expires_in").toInteger();
         if (expiresIn > 0) {
