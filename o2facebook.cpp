@@ -10,7 +10,6 @@
 static const char *FbEndpoint = "https://graph.facebook.com/oauth/authorize";
 static const char *FbTokenUrl = "https://graph.facebook.com/oauth/access_token";
 static const quint16 FbLocalPort = 1965;
-static const char *FbLogoutUrl = "https://www.facebook.com/logout.php"; // ?next=YOUR_REDIRECT_URL&access_token=USER_ACCESS_TOKEN
 
 O2Facebook::O2Facebook(QObject *parent): O2(parent) {
     setRequestUrl(FbEndpoint);
