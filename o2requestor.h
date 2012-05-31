@@ -33,6 +33,9 @@ signals:
     /// Emitted when a request has been completed or failed.
     void finished(int id, QNetworkReply::NetworkError error, QByteArray data);
 
+    /// Emitted when an upload has progressed.
+    void uploadProgress(int id, qint64 bytesSent, qint64 bytesTotal);
+
 protected slots:
     /// Handle refresh completion.
     void onRefreshFinished(QNetworkReply::NetworkError error);
@@ -48,6 +51,9 @@ protected slots:
 
     /// Finish the request, emit finished() signal.
     void finish();
+
+    /// Handle upload progress.
+    void onUploadProgress(qint64 uploaded, qint64 total);
 
 protected:
     int setup(const QNetworkRequest &request, QNetworkAccessManager::Operation operation);

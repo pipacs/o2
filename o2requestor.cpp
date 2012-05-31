@@ -34,6 +34,7 @@ int O2Requestor::post(const QNetworkRequest &req, const QByteArray &data) {
     timedReplies_.add(reply_);
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
     return id_;
 }
 
@@ -92,6 +93,18 @@ void O2Requestor::onRequestError(QNetworkReply::NetworkError error) {
         qDebug() << "O2Requestor::onRequestError: Reply" << (unsigned)(void *)reply_ << ", status" << (int)status_;
     }
     QTimer::singleShot(10, this, SLOT(finish()));
+}
+
+void O2Requestor::onUploadProgress(qint64 uploaded, qint64 total) {
+    if (status_ == Idle) {
+        qWarning() << "O2Requestor::onUploadProgress: No pending request";
+        return;
+    }
+    if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
+        qDebug() << "O2Requestor::onUploadProgress: Not a pending request";
+        return;
+    }
+    emit uploadProgress(id_, uploaded, total);
 }
 
 int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operation operation) {
@@ -153,4 +166,5 @@ void O2Requestor::retry() {
     timedReplies_.add(reply_);
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
 }
