@@ -92,10 +92,10 @@ public:
 
 public slots:
     /// Authenticate.
-    Q_INVOKABLE void link();
+    Q_INVOKABLE virtual void link();
 
     /// De-authenticate.
-    Q_INVOKABLE void unlink();
+    Q_INVOKABLE virtual void unlink();
 
     /// Refresh token.
     void refresh();
