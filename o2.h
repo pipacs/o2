@@ -69,11 +69,6 @@ public:
     void setLocalPort(int value);
 
 public:
-    /// Request type.
-    enum RequestType {
-        Get, Post
-    };
-
     /// Constructor.
     /// @param  parent  Parent object.
     explicit O2(QObject *parent = 0);
