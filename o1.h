@@ -12,6 +12,9 @@ class SimpleCrypt;
 
 /// Simple OAuth 1.0 authenticator.
 class O1: public QObject {
+    Q_OBJECT
+
+public:
     /// Are we authenticated?
     Q_PROPERTY(bool linked READ linked NOTIFY linkedChanged)
     bool linked();
@@ -22,13 +25,13 @@ class O1: public QObject {
     /// Authentication token secret..
     QString tokenSecret();
 
-    /// Client ID.
+    /// Client application ID.
     /// O1 instances with the same (client ID, client secret) share the same "linked" and "token" properties.
     Q_PROPERTY(QString clientId READ clientId WRITE setClientId NOTIFY clientIdChanged)
     QString clientId();
     void setClientId(const QString &value);
 
-    /// Client secret.
+    /// Client application secret.
     /// O1 instances with the same (client ID, client secret) share the same "linked" and "token" properties.
     Q_PROPERTY(QString clientSecret READ clientSecret WRITE setClientSecret NOTIFY clientSecretChanged)
     QString clientSecret();
@@ -91,6 +94,7 @@ signals:
     void linkingFailed();
 
     // Property change signals
+
     void linkedChanged();
     void clientIdChanged();
     void clientSecretChanged();
@@ -101,13 +105,13 @@ signals:
 
 protected slots:
     /// Handle verification received from the reply server.
-    void onVerificationReceived(QMap<QString,QString> params);
+    virtual void onVerificationReceived(QMap<QString,QString> params);
 
     /// Handle token request error.
-    void onTokenRequestError(QNetworkReply::NetworkError error);
+    virtual void onTokenRequestError(QNetworkReply::NetworkError error);
 
     /// Handle token request finished.
-    void onTokenRequestFinished();
+    virtual void onTokenRequestFinished();
 
 protected:
     /// Set authentication code.

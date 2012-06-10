@@ -4,6 +4,7 @@
 #include <QNetworkAccessManager>
 #include <QDateTime>
 #include <QByteArray>
+#include <QDebug>
 
 #include "o1.h"
 #include "simplecrypt.h"
@@ -12,7 +13,6 @@
 /// HTTP request header name + value.
 struct RequestHeader {
     RequestHeader(const QByteArray &n, const QByteArray &v): name(n), value(v) {}
-    RequestHeader(const char *n, const QByteArray &v): name(n), value(v) {}
     bool operator <(const RequestHeader &other) const {
         if (name == other.name) {
             return value < other.value;
@@ -121,6 +121,7 @@ void O1::setAccessTokenUrl(const QUrl &value) {
 }
 
 void O1::unlink() {
+    qDebug() << "O1::unlink";
     if (linked()) {
         setToken("");
         setTokenSecret("");
@@ -190,7 +191,7 @@ static QByteArray getRequestBase(const QList<RequestHeader> &oauthHeaders, const
 
     // Initialize base string with the operation name (e.g. "GET") and the base URL
     base.append(getOperationName(op).toUtf8() + "&");
-    base.append(QUrl::toPercentEncoding(baseUrl.toString(QUrl::RemoveQuery)) + "&");
+    base.append(QUrl::toPercentEncoding(baseUrl.toString()) + "&");
 
     // Append a sorted+encoded list of all request parameters to the base string
     QList<RequestHeader> headers;
@@ -203,7 +204,6 @@ static QByteArray getRequestBase(const QList<RequestHeader> &oauthHeaders, const
     qSort(headers);
     base.append(encodeHeaders(headers));
 
-    qDebug() << "getRequestBase: Signature base string:" << base;
     return base;
 }
 
@@ -211,14 +211,16 @@ static QByteArray getRequestBase(const QList<RequestHeader> &oauthHeaders, const
 static QByteArray sign(const QList<RequestHeader> &oauthHeaders, const QList<RequestHeader> &otherHeaders, const QUrl &baseUrl, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret) {
     QByteArray baseString = getRequestBase(oauthHeaders, otherHeaders, baseUrl, op);
     QByteArray secret = QUrl::toPercentEncoding(consumerSecret) + "&" + QUrl::toPercentEncoding(tokenSecret);
-    return hmacSha1(baseString, secret);
+    return hmacSha1(secret, baseString);
 }
 
 /// Build the "Authorization:" header value from a list of OAuth headers.
 static QByteArray getAuthorizationHeader(const QList<RequestHeader> &oauthHeaders) {
     bool first = true;
     QByteArray ret("OAuth ");
-    foreach (RequestHeader h, oauthHeaders) {
+    QList<RequestHeader> headers(oauthHeaders);
+    qSort(headers);
+    foreach (RequestHeader h, headers) {
         if (first) {
             first = false;
         } else {
@@ -229,12 +231,13 @@ static QByteArray getAuthorizationHeader(const QList<RequestHeader> &oauthHeader
         ret.append(QUrl::toPercentEncoding(h.value));
         ret.append("\"");
     }
-
     return ret;
 }
 
 void O1::link() {
+    qDebug() << "O1::link";
     if (linked()) {
+        qDebug() << " Linked already";
         emit linkingSucceeded();
         return;
     }
@@ -244,7 +247,6 @@ void O1::link() {
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
 
     // Create initial token request
-
     QList<RequestHeader> headers;
     headers.append(RequestHeader("oauth_callback", QString("http://localhost:%1").arg(replyServer_->serverPort()).toAscii()));
     headers.append(RequestHeader("oauth_consumer_key", clientId().toAscii()));
@@ -255,38 +257,21 @@ void O1::link() {
     QByteArray signature = sign(headers, QList<RequestHeader>(), requestTokenUrl(), QNetworkAccessManager::PostOperation, clientSecret(), "");
     headers.append(RequestHeader("oauth_signature", signature));
 
+    // Post request
     QNetworkRequest request(requestTokenUrl());
     request.setRawHeader("Authorization", getAuthorizationHeader(headers));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     delete manager_;
     manager_ = new QNetworkAccessManager(this);
     QNetworkReply *reply = manager_->post(request, QByteArray());
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenRequestError(QNetworkReply::NetworkError)));
     connect(reply, SIGNAL(finished()), this, SLOT(onTokenRequestFinished()));
-
-//    requestParameters.append( qMakePair( OAUTH_KEY_CALLBACK, oauthCallbackUrl.toString()) );  // This is so ugly that it is almost beautiful.
-//    requestParameters.append( qMakePair( OAUTH_KEY_SIGNATURE_METHOD, oauthSignatureMethod) );
-//    requestParameters.append( qMakePair( OAUTH_KEY_CONSUMER_KEY, oauthConsumerKey ));
-//    requestParameters.append( qMakePair( OAUTH_KEY_VERSION, oauthVersion ));
-//    requestParameters.append( qMakePair( OAUTH_KEY_TIMESTAMP, this->oauthTimestamp() ));
-//    requestParameters.append( qMakePair( OAUTH_KEY_NONCE, this->oauthNonce() ));
-
-//            const QString OAUTH_KEY_CONSUMER("oauth_consumer");
-//            const QString OAUTH_KEY_CONSUMER_KEY("oauth_consumer_key");
-//            const QString OAUTH_KEY_TOKEN("oauth_token");
-//            const QString OAUTH_KEY_TOKEN_SECRET("oauth_token_secret");
-//            const QString OAUTH_KEY_SIGNATURE_METHOD("oauth_signature_method");
-//            const QString OAUTH_KEY_TIMESTAMP("oauth_timestamp");
-//            const QString OAUTH_KEY_NONCE("oauth_nonce");
-//            const QString OAUTH_KEY_SIGNATURE("oauth_signature");
-//            const QString OAUTH_KEY_CALLBACK("oauth_callback");
-//            const QString OAUTH_KEY_VERIFIER("oauth_verifier");
-//            const QString OAUTH_KEY_VERSION("oauth_version");
-
 }
 
 void O1::onTokenRequestError(QNetworkReply::NetworkError error) {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     qDebug() << "O1::onTokenRequestError:" << (int)error << reply->errorString();
+    qDebug() << "" << reply->readAll();
     emit linkingFailed();
 }
 
@@ -294,7 +279,6 @@ void O1::onTokenRequestFinished() {
     qDebug() << "O1::onTokenRequestFinished";
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     if (reply->error() == QNetworkReply::NoError) {
-        qDebug() << "" << reply->readAll();
         // FIXME: Continue authorization flow
         emit linkingSucceeded();
     }
