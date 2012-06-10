@@ -89,12 +89,12 @@ public:
     /// Calculate the HMAC-SHA1 signature of a request.
     /// @param  oauthParams     OAuth parameters.
     /// @param  otherParams     Other parameters participating in signing.
-    /// @param  baseUrl         Request base URL.
+    /// @param  URL             Request URL. May contain query parameters, but they will not be used for signing.
     /// @param  op              HTTP operation.
     /// @param  consumerSecret  Consumer (application) secret.
     /// @param  tokenSecret     Authorization token secret (empty if not yet available).
     /// @return Signature that can be used as the value of the "oauth_signature" parameter.
-    static QByteArray sign(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &baseUrl, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret);
+    static QByteArray sign(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret);
 
 public slots:
     /// Authenticate.

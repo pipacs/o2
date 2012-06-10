@@ -165,12 +165,12 @@ static QByteArray encodeHeaders(const QList<O1RequestParameter> &headers) {
 }
 
 /// Build a base string for signing.
-static QByteArray getRequestBase(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &baseUrl, QNetworkAccessManager::Operation op) {
+static QByteArray getRequestBase(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op) {
     QByteArray base;
 
     // Initialize base string with the operation name (e.g. "GET") and the base URL
     base.append(getOperationName(op).toUtf8() + "&");
-    base.append(QUrl::toPercentEncoding(baseUrl.toString()) + "&");
+    base.append(QUrl::toPercentEncoding(url.toString(QUrl::RemoveQuery)) + "&");
 
     // Append a sorted+encoded list of all request parameters to the base string
     QList<O1RequestParameter> headers;
@@ -186,8 +186,8 @@ static QByteArray getRequestBase(const QList<O1RequestParameter> &oauthParams, c
     return base;
 }
 
-QByteArray O1::sign(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &baseUrl, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret) {
-    QByteArray baseString = getRequestBase(oauthParams, otherParams, baseUrl, op);
+QByteArray O1::sign(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret) {
+    QByteArray baseString = getRequestBase(oauthParams, otherParams, url, op);
     QByteArray secret = QUrl::toPercentEncoding(consumerSecret) + "&" + QUrl::toPercentEncoding(tokenSecret);
     return hmacSha1(secret, baseString);
 }
