@@ -9,7 +9,7 @@ class O1Twitter: public O1 {
 public:
     explicit O1Twitter(QObject *parent = 0): O1(parent) {
         setRequestTokenUrl(QUrl("https://api.twitter.com/oauth/request_token"));
-        setAuthorizeUrl(QUrl("https://api.twitter.com/oauth/authorize"));
+        setAuthorizeUrl(QUrl("https://api.twitter.com/oauth/authenticate"));
         setAccessTokenUrl(QUrl("https://api.twitter.com/oauth/access_token"));
     }
 };

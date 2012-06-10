@@ -23,7 +23,6 @@ void O2ReplyServer::onIncomingConnection() {
 }
 
 void O2ReplyServer::onBytesReady() {
-    qDebug() << "> O2ReplyServer::onBytesReady";
     QByteArray reply;
     QByteArray content;
     content.append("<HTML></HTML>");

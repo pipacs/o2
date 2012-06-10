@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QMap>
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkReply>
@@ -59,7 +60,6 @@ public:
     int localPort();
     void setLocalPort(int value);
 
-public:
     /// Constructor.
     /// @param  parent  Parent object.
     explicit O1(QObject *parent = 0);
@@ -67,11 +67,8 @@ public:
     /// Destructor.
     virtual ~O1();
 
-    /// Get authentication code.
-    QString code();
-
-    /// Get refresh token.
-    QString refreshToken();
+    /// Parse OAuth response parameters.
+    static QMap<QString, QString> parseResponse(const QByteArray &response);
 
 public slots:
     /// Authenticate.
@@ -113,18 +110,21 @@ protected slots:
     /// Handle token request finished.
     virtual void onTokenRequestFinished();
 
-protected:
-    /// Set authentication code.
-    void setCode(const QString &v);
+    /// Handle token exchange error.
+    void onTokenExchangeError(QNetworkReply::NetworkError error);
 
+    /// Handle token exchange finished.
+    void onTokenExchangeFinished();
+
+protected:
     /// Set authentication token.
     void setToken(const QString &v);
 
     /// Set authentication token secret.
     void setTokenSecret(const QString &v);
 
-    /// Set refresh token.
-    void setRefreshToken(const QString &v);
+    /// Exchange token for authorizaton token.
+    virtual void exchangeToken();
 
 protected:
     QString clientId_;
@@ -139,6 +139,9 @@ protected:
     QString code_;
     SimpleCrypt *crypt_;
     quint16 localPort_;
+    QString requestToken_;
+    QString requestTokenSecret_;
+    QString verifier_;
 };
 
 #endif // O1_H

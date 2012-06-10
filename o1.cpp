@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QByteArray>
 #include <QDebug>
+#include <QStringList>
 
 #include "o1.h"
 #include "simplecrypt.h"
@@ -134,22 +135,16 @@ void O1::unlink() {
 /// @author     http://qt-project.org/wiki/HMAC-SHA1.
 /// @copyright  Creative Commons Attribution-ShareAlike 2.5 Generic.
 static QByteArray hmacSha1(QByteArray key, QByteArray baseString) {
-    int blockSize = 64; // HMAC-SHA-1 block size, defined in SHA-1 standard
-    if (key.length() > blockSize) { // if key is longer than block size (64), reduce key length with SHA-1 compression
+    int blockSize = 64;
+    if (key.length() > blockSize) {
         key = QCryptographicHash::hash(key, QCryptographicHash::Sha1);
     }
-
-    QByteArray innerPadding(blockSize, char(0x36)); // initialize inner padding with char "6"
-    QByteArray outerPadding(blockSize, char(0x5c)); // initialize outer padding with char "\"
-    // ascii characters 0x36 ("6") and 0x5c ("\") are selected because they have large
-    // Hamming distance (http://en.wikipedia.org/wiki/Hamming_distance)
-
+    QByteArray innerPadding(blockSize, char(0x36));
+    QByteArray outerPadding(blockSize, char(0x5c));
     for (int i = 0; i < key.length(); i++) {
-        innerPadding[i] = innerPadding[i] ^ key.at(i); // XOR operation between every byte in key and innerpadding, of key length
-        outerPadding[i] = outerPadding[i] ^ key.at(i); // XOR operation between every byte in key and outerpadding, of key length
+        innerPadding[i] = innerPadding[i] ^ key.at(i);
+        outerPadding[i] = outerPadding[i] ^ key.at(i);
     }
-
-    // result = hash ( outerPadding CONCAT hash ( innerPadding CONCAT baseString ) ).toBase64
     QByteArray total = outerPadding;
     QByteArray part = innerPadding;
     part.append(baseString);
@@ -244,7 +239,6 @@ void O1::link() {
 
     // Start reply server
     replyServer_->listen(QHostAddress::Any, localPort());
-    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
 
     // Create initial token request
     QList<RequestHeader> headers;
@@ -256,6 +250,10 @@ void O1::link() {
     headers.append(RequestHeader("oauth_version", "1.0"));
     QByteArray signature = sign(headers, QList<RequestHeader>(), requestTokenUrl(), QNetworkAccessManager::PostOperation, clientSecret(), "");
     headers.append(RequestHeader("oauth_signature", signature));
+
+    // Clear request token
+    requestToken_ = "";
+    requestTokenSecret_ = "";
 
     // Post request
     QNetworkRequest request(requestTokenUrl());
@@ -278,14 +276,111 @@ void O1::onTokenRequestError(QNetworkReply::NetworkError error) {
 void O1::onTokenRequestFinished() {
     qDebug() << "O1::onTokenRequestFinished";
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    if (reply->error() == QNetworkReply::NoError) {
-        // FIXME: Continue authorization flow
-        emit linkingSucceeded();
-    }
     reply->deleteLater();
+    if (reply->error() != QNetworkReply::NoError) {
+        return;
+    }
+
+    // Get request token and secret
+    QMap<QString, QString> response = parseResponse(reply->readAll());
+    requestToken_ = response.value("oauth_token", "");
+    requestTokenSecret_ = response.value("oauth_token_secret", "");
+    if (requestToken_.isEmpty() || requestTokenSecret_.isEmpty()) {
+        qDebug() << " No oauth_token or oauth_token_secret in response";
+        qDebug() << "" << response;
+        emit linkingFailed();
+        return;
+    }
+
+    // Continue authorization flow in the browser
+    QUrl url(authorizeUrl());
+    url.addQueryItem("oauth_token", requestToken_);
+    emit openBrowser(url);
 }
 
 void O1::onVerificationReceived(QMap<QString, QString> params) {
     qDebug() << "O1::onVerificationReceived";
     qDebug() << "" << params;
+    emit closeBrowser();
+    verifier_ = params.value("oauth_verifier", "");
+    if (params.contains("oauth_token")) {
+        if (params.value("oauth_token") == requestToken_) {
+            qDebug() << " Access granted by user";
+            // Exchange request token for access token
+            exchangeToken();
+            return;
+        }
+    }
+    emit linkingFailed();
+}
+
+void O1::exchangeToken() {
+    qDebug() << "O1::exchangeToken";
+    // Create token exchange request
+
+    QList<RequestHeader> oauthHeaders;
+    oauthHeaders.append(RequestHeader("oauth_consumer_key", clientId().toAscii()));
+    oauthHeaders.append(RequestHeader("oauth_nonce", QString::number(qrand()).toAscii()));
+    oauthHeaders.append(RequestHeader("oauth_signature_method", "HMAC-SHA1"));
+    oauthHeaders.append(RequestHeader("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
+    oauthHeaders.append(RequestHeader("oauth_version", "1.0"));
+    oauthHeaders.append(RequestHeader("oauth_token", requestToken_.toAscii()));
+
+    QList<RequestHeader> extraHeaders;
+    extraHeaders.append(RequestHeader("oauth_verifier", verifier_.toAscii()));
+
+    QByteArray signature = sign(oauthHeaders, extraHeaders, requestTokenUrl(), QNetworkAccessManager::PostOperation, clientSecret(), "");
+    oauthHeaders.append(RequestHeader("oauth_signature", signature));
+
+    // Post request
+    QNetworkRequest request(requestTokenUrl());
+    request.setRawHeader("Authorization", getAuthorizationHeader(oauthHeaders));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    QByteArray body;
+    body.append("oauth_verifier=");
+    body.append(QUrl::toPercentEncoding(verifier_));
+    request.setHeader(QNetworkRequest::ContentLengthHeader, body.length());
+    QNetworkReply *reply = manager_->post(request, body);
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenExchangeError(QNetworkReply::NetworkError)));
+    connect(reply, SIGNAL(finished()), this, SLOT(onTokenExchangeFinished()));
+}
+
+void O1::onTokenExchangeError(QNetworkReply::NetworkError error) {
+    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    qDebug() << "O1::onTokenExchangeError:" << (int)error << reply->errorString();
+    qDebug() << "" << reply->readAll();
+    emit linkingFailed();
+}
+
+void O1::onTokenExchangeFinished() {
+    qDebug() << "O1::onTokenExchangeFinished";
+    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    reply->deleteLater();
+    if (reply->error() != QNetworkReply::NoError) {
+        return;
+    }
+
+    // Get access token and secret
+    QMap<QString, QString> response = parseResponse(reply->readAll());
+    if (response.contains("oauth_token") && response.contains("oauth_token_secret")) {
+        setToken(response.value("oauth_token"));
+        setTokenSecret(response.value("oauth_token_secret"));
+        emit linkedChanged();
+        emit linkingSucceeded();
+    } else {
+        qDebug() << " No oauth_token or oauth_token_secret in response";
+        qDebug() << "" << response;
+        emit linkingFailed();
+    }
+}
+
+QMap<QString, QString> O1::parseResponse(const QByteArray &response) {
+    QMap<QString, QString> ret;
+    foreach (QByteArray param, response.split('&')) {
+        QList<QByteArray> kv = param.split('=');
+        if (kv.length() == 2) {
+            ret.insert(QUrl::fromPercentEncoding(kv[0]), QUrl::fromPercentEncoding(kv[1]));
+        }
+    }
+    return ret;
 }
