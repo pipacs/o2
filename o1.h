@@ -4,12 +4,25 @@
 #include <QObject>
 #include <QString>
 #include <QMap>
+#include <QList>
+#include <QByteArray>
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkReply>
 
 class O2ReplyServer;
 class SimpleCrypt;
+
+/// Request parameter (name-value pair) participating in authentication.
+struct O1RequestParameter {
+    O1RequestParameter(const QByteArray &n, const QByteArray &v): name(n), value(v) {
+    }
+    bool operator <(const O1RequestParameter &other) const {
+        return (name == other.name)? (value < other.value): (name < other.name);
+    }
+    QByteArray name;
+    QByteArray value;
+};
 
 /// Simple OAuth 1.0 authenticator.
 class O1: public QObject {
@@ -23,17 +36,17 @@ public:
     /// Authentication token.
     QString token();
 
-    /// Authentication token secret..
+    /// Authentication token secret.
     QString tokenSecret();
 
     /// Client application ID.
-    /// O1 instances with the same (client ID, client secret) share the same "linked" and "token" properties.
+    /// O1 instances with the same (client ID, client secret) share the same "linked", "token" and "tokenSecret" properties.
     Q_PROPERTY(QString clientId READ clientId WRITE setClientId NOTIFY clientIdChanged)
     QString clientId();
     void setClientId(const QString &value);
 
     /// Client application secret.
-    /// O1 instances with the same (client ID, client secret) share the same "linked" and "token" properties.
+    /// O1 instances with the same (client ID, client secret) share the same "linked", "token" and "tokenSecret" properties.
     Q_PROPERTY(QString clientSecret READ clientSecret WRITE setClientSecret NOTIFY clientSecretChanged)
     QString clientSecret();
     void setClientSecret(const QString &value);
@@ -67,8 +80,21 @@ public:
     /// Destructor.
     virtual ~O1();
 
-    /// Parse OAuth response parameters.
+    /// Parse a URL-encoded response string.
     static QMap<QString, QString> parseResponse(const QByteArray &response);
+
+    /// Build the value of the "Authorization:" header.
+    static QByteArray buildAuthorizationHeader(const QList<O1RequestParameter> &oauthParams);
+
+    /// Calculate the HMAC-SHA1 signature of a request.
+    /// @param  oauthParams     OAuth parameters.
+    /// @param  otherParams     Other parameters participating in signing.
+    /// @param  baseUrl         Request base URL.
+    /// @param  op              HTTP operation.
+    /// @param  consumerSecret  Consumer (application) secret.
+    /// @param  tokenSecret     Authorization token secret (empty if not yet available).
+    /// @return Signature that can be used as the value of the "oauth_signature" parameter.
+    static QByteArray sign(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &baseUrl, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret);
 
 public slots:
     /// Authenticate.
