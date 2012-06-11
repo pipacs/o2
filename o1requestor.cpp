@@ -28,7 +28,6 @@ public slots:
 O1Requestor::O1Requestor(QNetworkAccessManager *manager, O1 *authenticator, QObject *parent): QObject(parent) {
     manager_ = manager;
     authenticator_ = authenticator;
-    connect(authenticator, SIGNAL(refreshFinished(QNetworkReply::NetworkError)), this, SLOT(onRefreshFinished(QNetworkReply::NetworkError)), Qt::QueuedConnection);
 }
 
 QNetworkReply *O1Requestor::get(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters) {
@@ -52,18 +51,21 @@ QNetworkReply *O1Requestor::addTimer(QNetworkReply *reply) {
 }
 
 QNetworkRequest O1Requestor::setup(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
-    QNetworkRequest request(req);
+    // Collect OAuth parameters
     QList<O1RequestParameter> oauthParams;
     oauthParams.append(O1RequestParameter("oauth_consumer_key", authenticator_->clientId().toAscii()));
-    oauthParams.append(O1RequestParameter("oauth_nonce", QString::number(qrand()).toAscii()));
-    oauthParams.append(O1RequestParameter("oauth_signature_method", "HMAC-SHA1"));
-    oauthParams.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
     oauthParams.append(O1RequestParameter("oauth_version", "1.0"));
     oauthParams.append(O1RequestParameter("oauth_token", authenticator_->token().toAscii()));
+    oauthParams.append(O1RequestParameter("oauth_signature_method", "HMAC-SHA1"));
+    oauthParams.append(O1RequestParameter("oauth_nonce", QString::number(qrand()).toAscii()));
+    oauthParams.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
 
+    // Add signature parameter
     QByteArray signature = authenticator_->sign(oauthParams, signingParameters, req.url(), operation, authenticator_->clientSecret(), authenticator_->tokenSecret());
     oauthParams.append(O1RequestParameter("oauth_signature", signature));
 
+    // Return a copy of the original request with authorization header set
+    QNetworkRequest request(req);
     request.setRawHeader("Authorization", O1::buildAuthorizationHeader(oauthParams));
     return request;
 }

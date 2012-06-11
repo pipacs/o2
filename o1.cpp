@@ -201,7 +201,7 @@ QByteArray O1::buildAuthorizationHeader(const QList<O1RequestParameter> &oauthPa
         if (first) {
             first = false;
         } else {
-            ret.append(", ");
+            ret.append(",");
         }
         ret.append(h.name);
         ret.append("=\"");
@@ -306,7 +306,7 @@ void O1::exchangeToken() {
     oauthParams.append(O1RequestParameter("oauth_signature", signature));
 
     // Post request
-    QNetworkRequest request(requestTokenUrl());
+    QNetworkRequest request(accessTokenUrl());
     request.setRawHeader("Authorization", buildAuthorizationHeader(oauthParams));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     QByteArray body;
@@ -335,8 +335,10 @@ void O1::onTokenExchangeFinished() {
     QByteArray data = reply->readAll();
     QMap<QString, QString> response = parseResponse(data);
     if (response.contains("oauth_token") && response.contains("oauth_token_secret")) {
-        setToken(response.value("oauth_token"));
-        setTokenSecret(response.value("oauth_token_secret"));
+        QString token = response.value("oauth_token");
+        QString secret = response.value("oauth_token_secret");
+        setToken(token);
+        setTokenSecret(secret);
         emit linkedChanged();
         emit linkingSucceeded();
     } else {
