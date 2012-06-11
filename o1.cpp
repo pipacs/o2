@@ -273,6 +273,7 @@ void O1::onTokenRequestFinished() {
     // Continue authorization flow in the browser
     QUrl url(authorizeUrl());
     url.addQueryItem("oauth_token", requestToken_);
+    url.addQueryItem("oauth_callback", QString("http://localhost:%1").arg(replyServer_->serverPort()).toAscii());
     emit openBrowser(url);
 }
 
@@ -292,28 +293,21 @@ void O1::exchangeToken() {
     // Create token exchange request
 
     QList<O1RequestParameter> oauthParams;
-    oauthParams.append(O1RequestParameter("oauth_consumer_key", clientId().toAscii()));
-    oauthParams.append(O1RequestParameter("oauth_nonce", QString::number(qrand()).toAscii()));
     oauthParams.append(O1RequestParameter("oauth_signature_method", "HMAC-SHA1"));
-    oauthParams.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
+    oauthParams.append(O1RequestParameter("oauth_consumer_key", clientId().toAscii()));
     oauthParams.append(O1RequestParameter("oauth_version", "1.0"));
+    oauthParams.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
+    oauthParams.append(O1RequestParameter("oauth_nonce", QString::number(qrand()).toAscii()));
     oauthParams.append(O1RequestParameter("oauth_token", requestToken_.toAscii()));
+    oauthParams.append(O1RequestParameter("oauth_verifier", verifier_.toAscii()));
 
-    QList<O1RequestParameter> extraHeaders;
-    extraHeaders.append(O1RequestParameter("oauth_verifier", verifier_.toAscii()));
-
-    QByteArray signature = sign(oauthParams, extraHeaders, requestTokenUrl(), QNetworkAccessManager::PostOperation, clientSecret(), "");
+    QByteArray signature = sign(oauthParams, QList<O1RequestParameter>(), accessTokenUrl(), QNetworkAccessManager::PostOperation, clientSecret(), requestTokenSecret_);
     oauthParams.append(O1RequestParameter("oauth_signature", signature));
 
     // Post request
     QNetworkRequest request(accessTokenUrl());
     request.setRawHeader("Authorization", buildAuthorizationHeader(oauthParams));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    QByteArray body;
-    body.append("oauth_verifier=");
-    body.append(QUrl::toPercentEncoding(verifier_));
-    request.setHeader(QNetworkRequest::ContentLengthHeader, body.length());
-    QNetworkReply *reply = manager_->post(request, body);
+    QNetworkReply *reply = manager_->post(request, QByteArray());
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenExchangeError(QNetworkReply::NetworkError)));
     connect(reply, SIGNAL(finished()), this, SLOT(onTokenExchangeFinished()));
 }
