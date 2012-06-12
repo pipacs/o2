@@ -86,6 +86,9 @@ public:
     /// Build the value of the "Authorization:" header.
     static QByteArray buildAuthorizationHeader(const QList<O1RequestParameter> &oauthParams);
 
+    /// Create unique bytes to prevent replay attacks.
+    static QByteArray nonce();
+
     /// Calculate the HMAC-SHA1 signature of a request.
     /// @param  oauthParams     OAuth parameters.
     /// @param  otherParams     Other parameters participating in signing.

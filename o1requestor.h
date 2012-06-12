@@ -21,27 +21,31 @@ public:
 public slots:
     /// Make a GET request.
     /// @param  req                 Network request.
-    /// @param  signingParameters   Request parameters participating in signing.
+    /// @param  signingParameters   Extra (non-OAuth) parameters participating in signing.
     /// @return Reply.
     QNetworkReply *get(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters);
 
     /// Make a POST request.
     /// @param  req                 Network request.
-    /// @param  signingParameters   Request parameters participating in signing.
+    /// @param  signingParameters   Extra (non-OAuth) parameters participating in signing.
     /// @param  data                Request payload.
     /// @return Reply.
     QNetworkReply *post(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, const QByteArray &data);
 
     /// Make a PUT request.
     /// @param  req                 Network request.
-    /// @param  signingParameters   Request parameters participating in signing.
+    /// @param  signingParameters   Extra (non-OAuth) parameters participating in signing.
     /// @param  data                Request payload.
     /// @return Reply.
     QNetworkReply *put(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, const QByteArray &data);
 
 protected:
+    /// Return new request based on the original, with the "Authentication:" header added.
     QNetworkRequest setup(const QNetworkRequest &request, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation);
+
+    /// Augment reply with a timer.
     QNetworkReply *addTimer(QNetworkReply *reply);
+
     QNetworkAccessManager *manager_;
     O1 *authenticator_;
 };

@@ -57,7 +57,7 @@ QNetworkRequest O1Requestor::setup(const QNetworkRequest &req, const QList<O1Req
     oauthParams.append(O1RequestParameter("oauth_version", "1.0"));
     oauthParams.append(O1RequestParameter("oauth_token", authenticator_->token().toAscii()));
     oauthParams.append(O1RequestParameter("oauth_signature_method", "HMAC-SHA1"));
-    oauthParams.append(O1RequestParameter("oauth_nonce", QString::number(qrand()).toAscii()));
+    oauthParams.append(O1RequestParameter("oauth_nonce", O1::nonce()));
     oauthParams.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
 
     // Add signature parameter

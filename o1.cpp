@@ -18,7 +18,6 @@ O1::O1(QObject *parent): QObject(parent) {
     replyServer_ = new O2ReplyServer(this);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
-    qsrand(QTime::currentTime().msec());
 }
 
 O1::~O1() {
@@ -224,7 +223,7 @@ void O1::link() {
     QList<O1RequestParameter> headers;
     headers.append(O1RequestParameter("oauth_callback", QString("http://localhost:%1").arg(replyServer_->serverPort()).toAscii()));
     headers.append(O1RequestParameter("oauth_consumer_key", clientId().toAscii()));
-    headers.append(O1RequestParameter("oauth_nonce", QString::number(qrand()).toAscii()));
+    headers.append(O1RequestParameter("oauth_nonce", nonce()));
     headers.append(O1RequestParameter("oauth_signature_method", "HMAC-SHA1"));
     headers.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
     headers.append(O1RequestParameter("oauth_version", "1.0"));
@@ -297,7 +296,7 @@ void O1::exchangeToken() {
     oauthParams.append(O1RequestParameter("oauth_consumer_key", clientId().toAscii()));
     oauthParams.append(O1RequestParameter("oauth_version", "1.0"));
     oauthParams.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
-    oauthParams.append(O1RequestParameter("oauth_nonce", QString::number(qrand()).toAscii()));
+    oauthParams.append(O1RequestParameter("oauth_nonce", nonce()));
     oauthParams.append(O1RequestParameter("oauth_token", requestToken_.toAscii()));
     oauthParams.append(O1RequestParameter("oauth_verifier", verifier_.toAscii()));
 
@@ -350,4 +349,15 @@ QMap<QString, QString> O1::parseResponse(const QByteArray &response) {
         }
     }
     return ret;
+}
+
+QByteArray O1::nonce() {
+    static bool firstTime = true;
+    if (firstTime) {
+        firstTime = false;
+        qsrand(QTime::currentTime().msec());
+    }
+    QString u = QString::number(QDateTime::currentDateTimeUtc().toTime_t());
+    u.append(QString::number(qrand()));
+    return u.toAscii();
 }
