@@ -9,7 +9,7 @@ class O1Dropbox: public O1 {
 public:
     explicit O1Dropbox(QObject *parent = 0): O1(parent) {
         setRequestTokenUrl(QUrl("https://api.dropbox.com/1/oauth/request_token"));
-        setAuthorizeUrl(QUrl("https://www.dropbox.com/1/oauth/authorize"));
+        setAuthorizeUrl(QUrl("https://www.dropbox.com/1/oauth/authorize?display=mobile"));
         setAccessTokenUrl(QUrl("https://api.dropbox.com/1/oauth/access_token"));
         setLocalPort(1965);
     }
