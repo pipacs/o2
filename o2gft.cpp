@@ -15,6 +15,6 @@ static const char *GftRefreshUrl = "https://accounts.google.com/o/oauth2/token";
 O2Gft::O2Gft(QObject *parent): O2(parent) {
     setRequestUrl(GftEndpoint);
     setTokenUrl(GftTokenUrl);
-    setRefreshTokenUrl(GftTokenUrl);
+    setRefreshTokenUrl(GftRefresUrl);
     setScope(GftScope);
 }

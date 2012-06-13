@@ -1,6 +1,6 @@
 QT += network
 INCLUDEPATH += $$PWD
-SOURCES = \
+SOURCES += \
     $$PWD/o1.cpp \
     $$PWD/o1requestor.cpp \
     $$PWD/o2.cpp \
