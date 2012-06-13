@@ -9,7 +9,9 @@ SOURCES += \
     $$PWD/o2reply.cpp \
     $$PWD/o2replyserver.cpp \
     $$PWD/o2requestor.cpp \
-    $$PWD/simplecrypt.cpp
+    $$PWD/simplecrypt.cpp \
+    $$PWD/o2skydrive.cpp
+
 HEADERS += \
     $$PWD/o1.h \
     $$PWD/o1dropbox.h \
@@ -22,4 +24,5 @@ HEADERS += \
     $$PWD/o2reply.h \
     $$PWD/o2replyserver.h \
     $$PWD/o2requestor.h \
-    $$PWD/simplecrypt.h
+    $$PWD/simplecrypt.h \
+    $$PWD/o2skydrive.h
