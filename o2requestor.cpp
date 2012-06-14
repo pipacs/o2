@@ -39,7 +39,6 @@ int O2Requestor::post(const QNetworkRequest &req, const QByteArray &data) {
 }
 
 void O2Requestor::onRefreshFinished(QNetworkReply::NetworkError error) {
-    qDebug() << "O2Requestor::onRefreshFinished";
     if (status_ != Requesting) {
         qWarning() << "O2Reqestor::onRefreshFinished: No pending request";
         return;
@@ -54,13 +53,10 @@ void O2Requestor::onRefreshFinished(QNetworkReply::NetworkError error) {
 void O2Requestor::onRequestFinished() {
     QNetworkReply *senderReply = qobject_cast<QNetworkReply *>(sender());
     QNetworkReply::NetworkError error = senderReply->error();
-    qDebug() << "O2Requestor::onRequestFinished: Error" << (int)error;
     if (status_ == Idle) {
-        qDebug() << "O2Requestor::onRequestFinished: No pending request";
         return;
     }
     if (reply_ != senderReply) {
-        qDebug() << "O2Requestor::onRequestFinished: Not a pending request";
         return;
     }
     if (error == QNetworkReply::NoError) {
@@ -69,28 +65,23 @@ void O2Requestor::onRequestFinished() {
 }
 
 void O2Requestor::onRequestError(QNetworkReply::NetworkError error) {
-    qDebug() << "O2Requestor::onRequestError: Error" << (int)error;
+    qWarning() << "O2Requestor::onRequestError: Error" << (int)error;
     if (status_ == Idle) {
-        qWarning() << "O2Requestor::onRequestError: No pending request";
         return;
     }
     if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
-        qDebug() << "O2Requestor::onRequestFinished: Not a pending request";
         return;
     }
     int httpStatus = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    qDebug() << "O2Requestor::onRequestError: HTTP status" << httpStatus << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+    qWarning() << "O2Requestor::onRequestError: HTTP status" << httpStatus << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
     if (status_ == Requesting) {
         if (httpStatus == 401) {
             // Call O2::refresh. Note the O2 instance might live in a different thread
-            qDebug() << "O2Requestor::onRequestError: Refreshing token";
             if (QMetaObject::invokeMethod(authenticator_, "refresh")) {
                 return;
             }
             qCritical() << "O2Requestor::onRequestError: Invoking remote refresh failed";
         }
-    } else {
-        qDebug() << "O2Requestor::onRequestError: Reply" << (unsigned)(void *)reply_ << ", status" << (int)status_;
     }
     QTimer::singleShot(10, this, SLOT(finish()));
 }
@@ -101,7 +92,6 @@ void O2Requestor::onUploadProgress(qint64 uploaded, qint64 total) {
         return;
     }
     if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
-        qDebug() << "O2Requestor::onUploadProgress: Not a pending request";
         return;
     }
     emit uploadProgress(id_, uploaded, total);
@@ -133,7 +123,6 @@ void O2Requestor::finish() {
         return;
     }
     QNetworkReply::NetworkError error = reply_->error();
-    qDebug() << "O2Requestor::finish: Error" << (int)error;
     if (QNetworkReply::NoError == error) {
         data = reply_->readAll();
     }
@@ -145,7 +134,6 @@ void O2Requestor::finish() {
 }
 
 void O2Requestor::retry() {
-    qDebug() << "O2Requestor::retry: Old reply" << (unsigned)(void *)reply_;
     if (status_ != Requesting) {
         qWarning() << "O2Requestor::retry: No pending request";
         return;
@@ -162,7 +150,6 @@ void O2Requestor::retry() {
     } else {
         reply_ = manager_->post(request_, data_);
     }
-    qDebug() << "O2Requestor::retry: New reply" << (unsigned)(void *)reply_;
     timedReplies_.add(reply_);
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);

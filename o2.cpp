@@ -112,7 +112,7 @@ void O2::setLocalPort(int value) {
 void O2::link() {
     trace() << "O2::link";
     if (linked()) {
-        trace() << "Linked already";
+        trace() << " Linked already";
         return;
     }
 
@@ -158,7 +158,7 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
 
     emit closeBrowser();
     if (response.contains("error")) {
-        qDebug() << "Verification failed";
+        trace() << " Verification failed";
         emit linkingFailed();
         return;
     }
@@ -274,6 +274,7 @@ QString O2::refreshToken() {
 }
 
 void O2::setRefreshToken(const QString &v) {
+    trace() << "O2::setRefreshToken" << v.left(4) << "...";
     QString key = QString("refreshtoken.%1").arg(clientId_);
     QSettings().setValue(key, crypt_->encryptToString(v));
 }
@@ -317,7 +318,7 @@ void O2::onRefreshFinished() {
         emit tokenChanged();
         emit linkedChanged();
         emit refreshFinished(QNetworkReply::NoError);
-        qDebug() << "New token expires in" << expires() << "seconds";
+        trace() << " New token expires in" << expires() << "seconds";
     }
     refreshReply->deleteLater();
 }

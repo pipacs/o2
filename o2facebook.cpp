@@ -18,13 +18,11 @@ O2Facebook::O2Facebook(QObject *parent): O2(parent) {
 }
 
 void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
-    qDebug() << "> O2Facebook::onVerificationReceived";
-
     emit closeBrowser();
     if (response.contains("error")) {
-        qDebug() << "Verification failed";
+        qWarning() << "O2Facebook::onVerificationReceived: Verification failed";
         foreach (QString key, response.keys()) {
-            qDebug() << "" << key << response.value(key);
+            qWarning() << "O2Facebook::onVerificationReceived:" << key << response.value(key);
         }
         emit linkingFailed();
         return;
@@ -49,7 +47,6 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
 }
 
 void O2Facebook::onTokenReplyFinished() {
-    qDebug() << "> O2Facebook::onTokenReplyFinished";
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     if (tokenReply->error() == QNetworkReply::NoError) {
 
@@ -59,7 +56,6 @@ void O2Facebook::onTokenReplyFinished() {
         foreach (QString pair, QString(replyData).split("&")) {
             QStringList kv = pair.split("=");
             if (kv.length() == 2) {
-                qDebug() << kv[0];
                 reply.insert(kv[0], kv[1]);
             }
         }
@@ -78,7 +74,6 @@ void O2Facebook::onTokenReplyFinished() {
 }
 
 void O2Facebook::unlink() {
-    qDebug() << "> O2Facebook::unlink";
     O2::unlink();
     // FIXME: Delete relevant cookies, too
 }
