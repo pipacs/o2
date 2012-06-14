@@ -12,15 +12,7 @@ public:
 
 public slots:
     Q_INVOKABLE void link();
-
-#if 0
-public slots:
-    Q_INVOKABLE void unlink();
-
-protected slots:
-    void onVerificationReceived(QMap<QString, QString>);
-    virtual void onTokenReplyFinished();
-#endif
+    Q_INVOKABLE virtual void redirected(const QUrl &url);
 };
 
 #endif // O2SKYDRIVE_H

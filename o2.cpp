@@ -183,7 +183,7 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
         connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     } else {
         setToken(response.value("access_token"));
-        setRefreshToken("");
+        setRefreshToken(response.value("refresh_token"));
     }
 }
 
@@ -208,7 +208,7 @@ void O2::onTokenReplyFinished() {
         setToken(value.property("access_token").toString());
         int expiresIn = value.property("expires_in").toInteger();
         if (expiresIn > 0) {
-            qDebug() << "Token expires in" << expiresIn << "seconds";
+            trace() << "Token expires in" << expiresIn << "seconds";
             setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
         }
         setRefreshToken(value.property("refresh_token").toString());
