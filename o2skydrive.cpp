@@ -7,6 +7,9 @@
 
 #include "o2skydrive.h"
 
+#define trace() if (1) qDebug()
+// define trace() if (0) qDebug()
+
 static const char *sbEndpoint = "https://login.live.com/oauth20_authorize.srf";
 static const char *sbTokenUrl = "https://login.live.com/oauth20_token.srf";
 
@@ -15,7 +18,33 @@ static const char *sbTokenUrl = "https://login.live.com/oauth20_token.srf";
 O2Skydrive::O2Skydrive(QObject *parent): O2(parent) {
     setRequestUrl(sbEndpoint);
     setTokenUrl(sbTokenUrl);
-    // setLocalPort(sbLocalPort);
+}
+
+void O2Skydrive::link() {
+    trace() << "O2::link";
+    if (linked()) {
+        trace() << "Linked already";
+        return;
+    }
+
+    redirectUri_ = QString("https://login.live.com/oauth20_desktop.srf");
+
+    // Assemble intial authentication URL
+    QList<QPair<QString, QString> > parameters;
+    parameters.append(qMakePair(QString("response_type"), (grantFlow_ == GrantFlowAuthorizationCode)? QString("code"): QString("token")));
+    parameters.append(qMakePair(QString("client_id"), clientId_));
+    // parameters.append(qMakePair(QString("redirect_uri"), redirectUri_));
+    parameters.append(qMakePair(QString("redirect_uri"), QString(QUrl::toPercentEncoding(redirectUri_))));
+    parameters.append(qMakePair(QString("scope"), scope_));
+
+    // Show authentication URL with a web browser
+    QUrl url(requestUrl_);
+    url.setQueryItems(parameters);
+    trace() << " Emit openBrowser" << url.toString();
+    emit openBrowser(url);
+
+    // Access code can only be retrieved from the browser, upon detecting redirection to https://login.live.com/oauth20_desktop.srf.
+    // After retrieved, the browser client should set it using "setToken".
 }
 
 #if 0

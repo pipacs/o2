@@ -16,17 +16,31 @@
 #include "o2replyserver.h"
 #include "simplecrypt.h"
 
+#define trace() if (1) qDebug()
+// define trace() if (0) qDebug()
+
 O2::O2(QObject *parent): QObject(parent) {
     QByteArray hash = QCryptographicHash::hash("12345678", QCryptographicHash::Sha1);
     crypt_ = new SimpleCrypt(*((quint64 *)(void *)hash.data()));
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
+    grantFlow_ = GrantFlowAuthorizationCode;
+    localPort_ = 0;
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
 }
 
 O2::~O2() {
     delete crypt_;
+}
+
+O2::GrantFlow O2::grantFlow() {
+    return grantFlow_;
+}
+
+void O2::setGrantFlow(O2::GrantFlow value) {
+    grantFlow_ = value;
+    emit grantFlowChanged();
 }
 
 QString O2::clientId() {
@@ -96,9 +110,9 @@ void O2::setLocalPort(int value) {
 }
 
 void O2::link() {
-    qDebug() << "> O2::link";
+    trace() << "O2::link";
     if (linked()) {
-        qDebug() << "Linked already";
+        trace() << "Linked already";
         return;
     }
 
@@ -110,14 +124,16 @@ void O2::link() {
 
     // Assemble intial authentication URL
     QList<QPair<QString, QString> > parameters;
-    parameters.append(qMakePair(QString("response_type"), QString("code")));
+    parameters.append(qMakePair(QString("response_type"), (grantFlow_ == GrantFlowAuthorizationCode)? QString("code"): QString("token")));
     parameters.append(qMakePair(QString("client_id"), clientId_));
     parameters.append(qMakePair(QString("redirect_uri"), redirectUri_));
+    // parameters.append(qMakePair(QString("redirect_uri"), QString(QUrl::toPercentEncoding(redirectUri_))));
     parameters.append(qMakePair(QString("scope"), scope_));
 
     // Show authentication URL with a web browser
     QUrl url(requestUrl_);
     url.setQueryItems(parameters);
+    trace() << " Emit openBrowser" << url.toString();
     emit openBrowser(url);
 }
 
@@ -137,7 +153,9 @@ bool O2::linked() {
 }
 
 void O2::onVerificationReceived(const QMap<QString, QString> response) {
-    qDebug() << "> O2::onVerificationReceived";
+    trace() << "O2::onVerificationReceived";
+    trace() << "" << response;
+
     emit closeBrowser();
     if (response.contains("error")) {
         qDebug() << "Verification failed";
@@ -145,23 +163,28 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
         return;
     }
 
-    // Save access code
-    setCode(response.value(QString("code")));
+    if (grantFlow_ == GrantFlowAuthorizationCode) {
+        // Save access code
+        setCode(response.value(QString("code")));
 
-    // Exchange access code for access/refresh tokens
-    QNetworkRequest tokenRequest(tokenUrl_);
-    tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    QMap<QString, QString> parameters;
-    parameters.insert("code", code());
-    parameters.insert("client_id", clientId_);
-    parameters.insert("client_secret", clientSecret_);
-    parameters.insert("redirect_uri", redirectUri_);
-    parameters.insert("grant_type", "authorization_code");
-    QByteArray data = buildRequestBody(parameters);
-    QNetworkReply *tokenReply = manager_->post(tokenRequest, data);
-    timedReplies_.add(tokenReply);
-    connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
-    connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+        // Exchange access code for access/refresh tokens
+        QNetworkRequest tokenRequest(tokenUrl_);
+        tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+        QMap<QString, QString> parameters;
+        parameters.insert("code", code());
+        parameters.insert("client_id", clientId_);
+        parameters.insert("client_secret", clientSecret_);
+        parameters.insert("redirect_uri", redirectUri_);
+        parameters.insert("grant_type", "authorization_code");
+        QByteArray data = buildRequestBody(parameters);
+        QNetworkReply *tokenReply = manager_->post(tokenRequest, data);
+        timedReplies_.add(tokenReply);
+        connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
+        connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+    } else {
+        setToken(response.value("access_token"));
+        setRefreshToken("");
+    }
 }
 
 QString O2::code() {
@@ -175,7 +198,7 @@ void O2::setCode(const QString &c) {
 }
 
 void O2::onTokenReplyFinished() {
-    qDebug() << "> O2::onTokenReplyFinished";
+    trace() << "O2::onTokenReplyFinished";
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     if (tokenReply->error() == QNetworkReply::NoError) {
         QByteArray replyData = tokenReply->readAll();
@@ -199,8 +222,8 @@ void O2::onTokenReplyFinished() {
 
 void O2::onTokenReplyError(QNetworkReply::NetworkError error) {
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
-    qDebug() << "> O2::onTokenReplyError" << error << tokenReply->errorString();
-    qDebug() << tokenReply->readAll();
+    trace() << "O2::onTokenReplyError" << error << tokenReply->errorString();
+    trace() << "" << tokenReply->readAll();
     setToken(QString());
     setRefreshToken(QString());
     timedReplies_.remove(tokenReply);
@@ -256,7 +279,7 @@ void O2::setRefreshToken(const QString &v) {
 }
 
 void O2::refresh() {
-    qDebug() << "> O2::refresh: Token: ..." << refreshToken().right(7);
+    trace() << "O2::refresh: Token: ..." << refreshToken().right(7);
 
     if (!refreshToken().length()) {
         qWarning() << "O2::refresh: No refresh token";
@@ -280,7 +303,7 @@ void O2::refresh() {
 
 void O2::onRefreshFinished() {
     QNetworkReply *refreshReply = qobject_cast<QNetworkReply *>(sender());
-    qDebug() << "> O2::onRefreshFinished: Error" << (int)refreshReply->error() << refreshReply->errorString();
+    trace() << "O2::onRefreshFinished: Error" << (int)refreshReply->error() << refreshReply->errorString();
     if (refreshReply->error() == QNetworkReply::NoError) {
         QByteArray reply = refreshReply->readAll();
         QScriptValue value;
@@ -301,7 +324,7 @@ void O2::onRefreshFinished() {
 
 void O2::onRefreshError(QNetworkReply::NetworkError error) {
     QNetworkReply *refreshReply = qobject_cast<QNetworkReply *>(sender());
-    qDebug() << "> O2::onRefreshFailed: Error" << error << ", resetting tokens";
+    qWarning() << "O2::onRefreshFailed: Error" << error << ", resetting tokens";
     setToken(QString());
     setRefreshToken(QString());
     timedReplies_.remove(refreshReply);

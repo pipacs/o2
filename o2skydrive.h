@@ -10,6 +10,9 @@ class O2Skydrive: public O2 {
 public:
     explicit O2Skydrive(QObject *parent = 0);
 
+public slots:
+    Q_INVOKABLE void link();
+
 #if 0
 public slots:
     Q_INVOKABLE void unlink();

@@ -19,15 +19,24 @@ class SimpleCrypt;
 /// Simple OAuth2 authenticator.
 class O2: public QObject {
     Q_OBJECT
+    Q_ENUMS(GrantFlow)
 
 public:
+    enum GrantFlow {GrantFlowAuthorizationCode, GrantFlowImplicit};
+
+    /// Authorization flow: Authorization Code (default, see http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.1) or Implicit (see http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.2)
+    Q_PROPERTY(GrantFlow grantFlow READ grantFlow WRITE setGrantFlow NOTIFY grantFlowChanged)
+    GrantFlow grantFlow();
+    void setGrantFlow(GrantFlow value);
+
     /// Are we authenticated?
     Q_PROPERTY(bool linked READ linked NOTIFY linkedChanged)
     bool linked();
 
     /// Authentication token.
-    Q_PROPERTY(QString token READ token NOTIFY tokenChanged)
+    Q_PROPERTY(QString token READ token WRITE setToken NOTIFY tokenChanged)
     QString token();
+    void setToken(const QString &v);
 
     /// Client ID.
     /// O2 instances with the same (client ID, client secret) share the same "linked" and "token" properties.
@@ -112,6 +121,7 @@ signals:
     void refreshFinished(QNetworkReply::NetworkError error);
 
     // Property change signals
+    void grantFlowChanged();
     void linkedChanged();
     void tokenChanged();
     void clientIdChanged();
@@ -145,9 +155,6 @@ protected:
     /// Set authentication code.
     void setCode(const QString &v);
 
-    /// Set authentication token.
-    void setToken(const QString &v);
-
     /// Set refresh token.
     void setRefreshToken(const QString &v);
 
@@ -169,6 +176,7 @@ protected:
     O2ReplyList timedReplies_;
     quint16 localPort_;
     QString pid_;
+    GrantFlow grantFlow_;
 };
 
 #endif // O2_H
