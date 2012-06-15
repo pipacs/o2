@@ -38,6 +38,19 @@ int O2Requestor::post(const QNetworkRequest &req, const QByteArray &data) {
     return id_;
 }
 
+int O2Requestor::put(const QNetworkRequest &req, const QByteArray &data) {
+    if (-1 == setup(req, QNetworkAccessManager::PutOperation)) {
+        return -1;
+    }
+    data_ = data;
+    reply_ = manager_->put(request_, data_);
+    timedReplies_.add(reply_);
+    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
+    return id_;
+}
+
 void O2Requestor::onRefreshFinished(QNetworkReply::NetworkError error) {
     if (status_ != Requesting) {
         qWarning() << "O2Reqestor::onRefreshFinished: No pending request";
@@ -145,10 +158,15 @@ void O2Requestor::retry() {
     url.addQueryItem("access_token", authenticator_->token());
     request_.setUrl(url);
     status_ = ReRequesting;
-    if (operation_ == QNetworkAccessManager::GetOperation) {
+    switch (operation_) {
+    case QNetworkAccessManager::GetOperation:
         reply_ = manager_->get(request_);
-    } else {
+        break;
+    case QNetworkAccessManager::PostOperation:
         reply_ = manager_->post(request_, data_);
+        break;
+    default:
+        reply_ = manager_->put(request_, data_);
     }
     timedReplies_.add(reply_);
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);

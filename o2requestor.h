@@ -29,6 +29,10 @@ public slots:
     /// @return Request ID or -1 if there are too many requests in the queue.
     int post(const QNetworkRequest &req, const QByteArray &data);
 
+    /// Make a PUT request.
+    /// @return Request ID or -1 if there are too many requests in the queue.
+    int put(const QNetworkRequest &req, const QByteArray &data);
+
 signals:
     /// Emitted when a request has been completed or failed.
     void finished(int id, QNetworkReply::NetworkError error, QByteArray data);
