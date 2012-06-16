@@ -10,7 +10,7 @@ SOURCES += \
     $$PWD/o2replyserver.cpp \
     $$PWD/o2requestor.cpp \
     $$PWD/simplecrypt.cpp \
-    $$PWD/o2skydrive.cpp
+    $$PWD/o2skydrive.cpp \
 
 HEADERS += \
     $$PWD/o1.h \
@@ -25,4 +25,4 @@ HEADERS += \
     $$PWD/o2replyserver.h \
     $$PWD/o2requestor.h \
     $$PWD/simplecrypt.h \
-    $$PWD/o2skydrive.h
+    $$PWD/o2skydrive.h \

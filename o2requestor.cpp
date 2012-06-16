@@ -4,6 +4,9 @@
 #include "o2requestor.h"
 #include "o2.h"
 
+#define trace() if (1) qDebug()
+// define trace() if (0) qDebug()
+
 O2Requestor::O2Requestor(QNetworkAccessManager *manager, O2 *authenticator, QObject *parent): QObject(parent), reply_(NULL), status_(Idle) {
     manager_ = manager;
     authenticator_ = authenticator;
@@ -53,7 +56,7 @@ int O2Requestor::put(const QNetworkRequest &req, const QByteArray &data) {
 
 void O2Requestor::onRefreshFinished(QNetworkReply::NetworkError error) {
     if (status_ != Requesting) {
-        qWarning() << "O2Reqestor::onRefreshFinished: No pending request";
+        qWarning() << "O2Requestor::onRefreshFinished: No pending request";
         return;
     }
     if (QNetworkReply::NoError == error) {
@@ -87,6 +90,7 @@ void O2Requestor::onRequestError(QNetworkReply::NetworkError error) {
     }
     int httpStatus = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     qWarning() << "O2Requestor::onRequestError: HTTP status" << httpStatus << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+    trace() << reply_->readAll();
     if (status_ == Requesting) {
         if (httpStatus == 401) {
             // Call O2::refresh. Note the O2 instance might live in a different thread

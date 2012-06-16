@@ -13,6 +13,7 @@
 O2Skydrive::O2Skydrive(QObject *parent): O2(parent) {
     setRequestUrl("https://login.live.com/oauth20_authorize.srf");
     setTokenUrl("https://login.live.com/oauth20_token.srf");
+    setRefreshTokenUrl("https://login.live.com/oauth20_token.srf");
 }
 
 void O2Skydrive::link() {

@@ -282,8 +282,13 @@ void O2::setRefreshToken(const QString &v) {
 void O2::refresh() {
     trace() << "O2::refresh: Token: ..." << refreshToken().right(7);
 
-    if (!refreshToken().length()) {
+    if (refreshToken().isEmpty()) {
         qWarning() << "O2::refresh: No refresh token";
+        onRefreshError(QNetworkReply::AuthenticationRequiredError);
+        return;
+    }
+    if (refreshTokenUrl_.isEmpty()) {
+        qWarning() << "O2::refresh: Refresh token URL not set";
         onRefreshError(QNetworkReply::AuthenticationRequiredError);
         return;
     }
