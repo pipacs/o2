@@ -11,6 +11,9 @@
 #include "simplecrypt.h"
 #include "o2replyserver.h"
 
+#define trace() if (1) qDebug()
+// define trace() if (0) qDebug()
+
 O1::O1(QObject *parent): QObject(parent) {
     QByteArray hash = QCryptographicHash::hash("12345678", QCryptographicHash::Sha1);
     crypt_ = new SimpleCrypt(*((quint64 *)(void *)hash.data()));
@@ -252,6 +255,7 @@ void O1::onTokenRequestError(QNetworkReply::NetworkError error) {
 }
 
 void O1::onTokenRequestFinished() {
+    trace() << "O1::onTokenRequestFinished";
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     reply->deleteLater();
     if (reply->error() != QNetworkReply::NoError) {
@@ -272,7 +276,7 @@ void O1::onTokenRequestFinished() {
     // Continue authorization flow in the browser
     QUrl url(authorizeUrl());
     url.addQueryItem("oauth_token", requestToken_);
-    url.addQueryItem("oauth_callback", QString("http://localhost:%1").arg(replyServer_->serverPort()).toAscii());
+    url.addQueryItem("oauth_callback", QString("http://127.0.0.1:%1").arg(replyServer_->serverPort()).toAscii());
     emit openBrowser(url);
 }
 
