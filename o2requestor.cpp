@@ -62,6 +62,7 @@ void O2Requestor::onRefreshFinished(QNetworkReply::NetworkError error) {
     if (QNetworkReply::NoError == error) {
         QTimer::singleShot(100, this, SLOT(retry()));
     } else {
+        error_ = error;
         QTimer::singleShot(10, this, SLOT(finish()));
     }
 }
@@ -91,15 +92,14 @@ void O2Requestor::onRequestError(QNetworkReply::NetworkError error) {
     int httpStatus = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     qWarning() << "O2Requestor::onRequestError: HTTP status" << httpStatus << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
     trace() << reply_->readAll();
-    if (status_ == Requesting) {
-        if (httpStatus == 401) {
-            // Call O2::refresh. Note the O2 instance might live in a different thread
-            if (QMetaObject::invokeMethod(authenticator_, "refresh")) {
-                return;
-            }
-            qCritical() << "O2Requestor::onRequestError: Invoking remote refresh failed";
+    if ((status_ == Requesting) && (httpStatus == 401)) {
+        // Call O2::refresh. Note the O2 instance might live in a different thread
+        if (QMetaObject::invokeMethod(authenticator_, "refresh")) {
+            return;
         }
+        qCritical() << "O2Requestor::onRequestError: Invoking remote refresh failed";
     }
+    error_ = error;
     QTimer::singleShot(10, this, SLOT(finish()));
 }
 
@@ -130,6 +130,7 @@ int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operat
     url.addQueryItem("access_token", authenticator_->token());
     request_.setUrl(url);
     status_ = Requesting;
+    error_ = QNetworkReply::NoError;
     return id_;
 }
 
@@ -139,15 +140,12 @@ void O2Requestor::finish() {
         qWarning() << "O2Requestor::finish: No pending request";
         return;
     }
-    QNetworkReply::NetworkError error = reply_->error();
-    if (QNetworkReply::NoError == error) {
-        data = reply_->readAll();
-    }
+    data = reply_->readAll();
     status_ = Idle;
     timedReplies_.remove(reply_);
     reply_->disconnect(this);
     reply_->deleteLater();
-    emit finished(id_, error, data);
+    emit finished(id_, error_, data);
 }
 
 void O2Requestor::retry() {

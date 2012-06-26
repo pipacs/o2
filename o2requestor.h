@@ -76,6 +76,7 @@ protected:
     QNetworkAccessManager::Operation operation_;
     QUrl url_;
     O2ReplyList timedReplies_;
+    QNetworkReply::NetworkError error_;
 };
 
 #endif // O2REQUESTOR_H
