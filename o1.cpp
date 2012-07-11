@@ -12,7 +12,7 @@
 #include "o2replyserver.h"
 
 #define trace() if (1) qDebug()
-// define trace() if (0) qDebug()
+// #define trace() if (0) qDebug()
 
 O1::O1(QObject *parent): QObject(parent) {
     QByteArray hash = QCryptographicHash::hash("12345678", QCryptographicHash::Sha1);
@@ -110,6 +110,7 @@ void O1::setAccessTokenUrl(const QUrl &value) {
 }
 
 void O1::unlink() {
+    trace() << "O1::unlink";
     if (linked()) {
         setToken("");
         setTokenSecret("");
@@ -214,7 +215,9 @@ QByteArray O1::buildAuthorizationHeader(const QList<O1RequestParameter> &oauthPa
 }
 
 void O1::link() {
+    trace() << "O1::link";
     if (linked()) {
+        trace() << "O1::link: Linked already";
         emit linkingSucceeded();
         return;
     }
@@ -281,6 +284,7 @@ void O1::onTokenRequestFinished() {
 }
 
 void O1::onVerificationReceived(QMap<QString, QString> params) {
+    trace() << "O1::onVerificationReceived";
     emit closeBrowser();
     verifier_ = params.value("oauth_verifier", "");
     if (params.value("oauth_token") == requestToken_) {

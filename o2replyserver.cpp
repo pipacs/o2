@@ -10,6 +10,9 @@
 
 #include "o2replyserver.h"
 
+#define trace() if (1) qDebug()
+// #define trace() if (0) qDebug()
+
 O2ReplyServer::O2ReplyServer(QObject *parent): QTcpServer(parent) {
     connect(this, SIGNAL(newConnection()), this, SLOT(onIncomingConnection()));
 }
@@ -40,17 +43,22 @@ void O2ReplyServer::onBytesReady() {
 }
 
 QMap<QString, QString> O2ReplyServer::parseQueryParams(QByteArray *data) {
-    QString splitGetLine = QString(*data).split("\r\n").first();   // Retrieve the first line with query params.
-    splitGetLine.remove("GET ");                                   // Clean the line from GET
-    splitGetLine.remove("HTTP/1.1");                               // From HTTP
-    splitGetLine.remove("\r\n");                                   // And from rest.
-    splitGetLine.prepend("http://localhost");                      // Now, make it a URL
+    trace() << "O2ReplyServer::parseQueryParams";
+
+    QString splitGetLine = QString(*data).split("\r\n").first();
+    splitGetLine.remove("GET ");
+    splitGetLine.remove("HTTP/1.1");
+    splitGetLine.remove("\r\n");
+    splitGetLine.prepend("http://localhost");
     QUrl getTokenUrl(splitGetLine);
     QList< QPair<QString, QString> > tokens = getTokenUrl.queryItems();
     QMultiMap<QString, QString> queryParams;
     QPair<QString, QString> tokenPair;
     foreach (tokenPair, tokens) {
-        queryParams.insert(tokenPair.first.trimmed(), tokenPair.second.trimmed());
+        // FIXME: We are decoding key and value again. This helps with Google OAuth, but is it mandated by the standard?
+        QString key = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.first.trimmed()));
+        QString value = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.second.trimmed()));
+        queryParams.insert(key, value);
     }
     return queryParams;
 }
