@@ -132,7 +132,13 @@ void O2::link() {
 
     // Show authentication URL with a web browser
     QUrl url(requestUrl_);
+#if !O2_USE_QURLQUERY
     url.setQueryItems(parameters);
+#else
+	QUrlQuery query(url);
+	query.setQueryItems(parameters);
+	url.setQuery(query);
+#endif
     trace() << " Emit openBrowser" << url.toString();
     emit openBrowser(url);
 }

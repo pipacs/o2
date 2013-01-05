@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QByteArray>
 #include <QString>
+#include "common.h"
 
 /// HTTP server to process authentication response.
 class O2ReplyServer: public QTcpServer {

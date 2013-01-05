@@ -33,11 +33,21 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
 
     // Exchange access code for access/refresh tokens
     QUrl url(tokenUrl_);
+#if !O2_USE_QURLQUERY
     url.addQueryItem("client_id", clientId_);
     url.addQueryItem("client_secret", clientSecret_);
     url.addQueryItem("scope", scope_);
     url.addQueryItem("code", code());
     url.addQueryItem("redirect_uri", redirectUri_);
+#else
+	QUrlQuery query(url);
+	query.addQueryItem("client_id", clientId_);
+    query.addQueryItem("client_secret", clientSecret_);
+    query.addQueryItem("scope", scope_);
+    query.addQueryItem("code", code());
+    query.addQueryItem("redirect_uri", redirectUri_);
+	url.setQuery(query);
+#endif
 
     QNetworkRequest tokenRequest(url);
     QNetworkReply *tokenReply = manager_->get(tokenRequest);

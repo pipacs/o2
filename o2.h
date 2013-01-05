@@ -10,6 +10,7 @@
 #include <QNetworkReply>
 #include <QList>
 #include <QPair>
+#include "common.h"
 
 #include "o2reply.h"
 

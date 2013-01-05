@@ -34,7 +34,13 @@ void O2Skydrive::link() {
 
     // Show authentication URL with a web browser
     QUrl url(requestUrl_);
+#if !O2_USE_QURLQUERY
     url.setQueryItems(parameters);
+#else
+	QUrlQuery query(url);
+	query.setQueryItems(parameters);
+	url.setQuery(query);
+#endif
     emit openBrowser(url);
 }
 
@@ -45,7 +51,7 @@ void O2Skydrive::redirected(const QUrl &url) {
 
     if (grantFlow_ == GrantFlowAuthorizationCode) {
         // Get access code
-        QString urlCode = url.queryItemValue("code");
+        QString urlCode = QUrlQuery(url).queryItemValue("code");
         if (urlCode.isEmpty()) {
             trace() << " Code not received";
             emit linkingFailed();
