@@ -51,7 +51,7 @@ QMap<QString, QString> O2ReplyServer::parseQueryParams(QByteArray *data) {
     splitGetLine.remove("\r\n");
     splitGetLine.prepend("http://localhost");
     QUrl getTokenUrl(splitGetLine);
-    QList< QPair<QString, QString> > tokens = getTokenUrl.queryItems();
+    QList< QPair<QString, QString> > tokens = QUrlQuery(getTokenUrl).queryItems();
     QMultiMap<QString, QString> queryParams;
     QPair<QString, QString> tokenPair;
     foreach (tokenPair, tokens) {

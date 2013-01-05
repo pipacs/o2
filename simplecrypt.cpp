@@ -26,6 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "simplecrypt.h"
 #include <QByteArray>
+#include <QDataStream>
 #include <QtDebug>
 #include <QtGlobal>
 #include <QDateTime>
@@ -139,20 +140,20 @@ QString SimpleCrypt::encryptToString(const QString& plaintext)
 {
     QByteArray plaintextArray = plaintext.toUtf8();
     QByteArray cypher = encryptToByteArray(plaintextArray);
-    QString cypherString = QString::fromAscii(cypher.toBase64());
+    QString cypherString = QString::fromUtf8(cypher.toBase64());
     return cypherString;
 }
 
 QString SimpleCrypt::encryptToString(QByteArray plaintext)
 {
     QByteArray cypher = encryptToByteArray(plaintext);
-    QString cypherString = QString::fromAscii(cypher.toBase64());
+    QString cypherString = QString::fromUtf8(cypher.toBase64());
     return cypherString;
 }
 
 QString SimpleCrypt::decryptToString(const QString &cyphertext)
 {
-    QByteArray cyphertextArray = QByteArray::fromBase64(cyphertext.toAscii());
+    QByteArray cyphertextArray = QByteArray::fromBase64(cyphertext.toUtf8());
     QByteArray plaintextArray = decryptToByteArray(cyphertextArray);
     QString plaintext = QString::fromUtf8(plaintextArray, plaintextArray.size());
 
@@ -169,7 +170,7 @@ QString SimpleCrypt::decryptToString(QByteArray cypher)
 
 QByteArray SimpleCrypt::decryptToByteArray(const QString& cyphertext)
 {
-    QByteArray cyphertextArray = QByteArray::fromBase64(cyphertext.toAscii());
+    QByteArray cyphertextArray = QByteArray::fromBase64(cyphertext.toUtf8());
     QByteArray ba = decryptToByteArray(cyphertextArray);
 
     return ba;

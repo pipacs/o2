@@ -9,6 +9,7 @@
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkReply>
+#include "common.h"
 
 class O2ReplyServer;
 class SimpleCrypt;

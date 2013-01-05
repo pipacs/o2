@@ -227,11 +227,11 @@ void O1::link() {
 
     // Create initial token request
     QList<O1RequestParameter> headers;
-    headers.append(O1RequestParameter("oauth_callback", QString("http://localhost:%1").arg(replyServer_->serverPort()).toAscii()));
-    headers.append(O1RequestParameter("oauth_consumer_key", clientId().toAscii()));
+    headers.append(O1RequestParameter("oauth_callback", QString("http://localhost:%1").arg(replyServer_->serverPort()).toUtf8()));
+    headers.append(O1RequestParameter("oauth_consumer_key", clientId().toUtf8()));
     headers.append(O1RequestParameter("oauth_nonce", nonce()));
     headers.append(O1RequestParameter("oauth_signature_method", "HMAC-SHA1"));
-    headers.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
+    headers.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toUtf8()));
     headers.append(O1RequestParameter("oauth_version", "1.0"));
     QByteArray signature = sign(headers, QList<O1RequestParameter>(), requestTokenUrl(), QNetworkAccessManager::PostOperation, clientSecret(), "");
     headers.append(O1RequestParameter("oauth_signature", signature));
@@ -278,8 +278,15 @@ void O1::onTokenRequestFinished() {
 
     // Continue authorization flow in the browser
     QUrl url(authorizeUrl());
+#if !O2_USE_QURLQUERY
     url.addQueryItem("oauth_token", requestToken_);
-    url.addQueryItem("oauth_callback", QString("http://127.0.0.1:%1").arg(replyServer_->serverPort()).toAscii());
+    url.addQueryItem("oauth_callback", QString("http://127.0.0.1:%1").arg(replyServer_->serverPort()).toUtf8());
+#else
+	QUrlQuery query(url);
+	query.addQueryItem("oauth_token", requestToken_);
+    query.addQueryItem("oauth_callback", QString("http://127.0.0.1:%1").arg(replyServer_->serverPort()).toUtf8());
+	url.setQuery(query);
+#endif
     emit openBrowser(url);
 }
 
@@ -301,12 +308,12 @@ void O1::exchangeToken() {
 
     QList<O1RequestParameter> oauthParams;
     oauthParams.append(O1RequestParameter("oauth_signature_method", "HMAC-SHA1"));
-    oauthParams.append(O1RequestParameter("oauth_consumer_key", clientId().toAscii()));
+    oauthParams.append(O1RequestParameter("oauth_consumer_key", clientId().toUtf8()));
     oauthParams.append(O1RequestParameter("oauth_version", "1.0"));
-    oauthParams.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
+    oauthParams.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toUtf8()));
     oauthParams.append(O1RequestParameter("oauth_nonce", nonce()));
-    oauthParams.append(O1RequestParameter("oauth_token", requestToken_.toAscii()));
-    oauthParams.append(O1RequestParameter("oauth_verifier", verifier_.toAscii()));
+    oauthParams.append(O1RequestParameter("oauth_token", requestToken_.toUtf8()));
+    oauthParams.append(O1RequestParameter("oauth_verifier", verifier_.toUtf8()));
 
     QByteArray signature = sign(oauthParams, QList<O1RequestParameter>(), accessTokenUrl(), QNetworkAccessManager::PostOperation, clientSecret(), requestTokenSecret_);
     oauthParams.append(O1RequestParameter("oauth_signature", signature));
@@ -367,5 +374,5 @@ QByteArray O1::nonce() {
     }
     QString u = QString::number(QDateTime::currentDateTimeUtc().toTime_t());
     u.append(QString::number(qrand()));
-    return u.toAscii();
+    return u.toUtf8();
 }
