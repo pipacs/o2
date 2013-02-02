@@ -21,11 +21,11 @@ O2Reply | o2reply.h | A network request/reply that can time out
 O2ReplyServer | o2replyserver.h | HTTP server to process authentication responses
 O2Requestor | o2requestor.h | Makes authenticated OAuth 2.0 requests (GET, POST or PUT), handles timeouts and token expiry
 O2Skydrive | o2skydrive.h | Skydrive OAuth specialization
-SimpleCrypt | simplecrypt.h | Simple encryption and decryption
+SimpleCrypt | simplecrypt.h | Simple encryption and decryption by Andre Somers
 
 ## Installation
 
-Clone the Github reporitory, then add all files to your Qt project.
+Clone the Github repository, then add all files to your Qt project.
 
 ## Basic Usage
 
