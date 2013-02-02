@@ -130,7 +130,8 @@ Then we create an HTTP request containing the image and the message, in the form
     data += QString("\r\n--") + boundary + "--\r\n";
 
     QNetworkRequest request;
-    request.setUrl(QUrl(uploadFileUrl));
+    static const char *uploadUrl = "https://upload.twitter.com/1/statuses/update_with_media.json";
+    request.setUrl(QUrl(uploadUrl));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=" + boundary);
     request.setHeader(QNetworkRequest::ContentLengthHeader, data.length());
     
