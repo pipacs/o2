@@ -8,48 +8,53 @@
 #include <QStringList>
 
 #include "o1.h"
-#include "simplecrypt.h"
 #include "o2replyserver.h"
 
 #define trace() if (1) qDebug()
 // #define trace() if (0) qDebug()
 
-O1::O1(QObject *parent): QObject(parent) {
-    QByteArray hash = QCryptographicHash::hash("12345678", QCryptographicHash::Sha1);
-    crypt_ = new SimpleCrypt(*((quint64 *)(void *)hash.data()));
+const char ENC_KEY[] = "12345678";
+const char TOK_NAME[] = "token.%1";
+const char TOK_SEC_NAME[] = "tokensecret.%1";
+
+static inline QByteArray getHash()
+{
+    return QCryptographicHash::hash(ENC_KEY, QCryptographicHash::Sha1);
+}
+
+O1::O1(QObject *parent) :
+    QObject(parent), crypt_((qint64) getHash().toLongLong()) {
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
-    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)),
+            this, SLOT(onVerificationReceived(QMap<QString,QString>)));
 }
 
-O1::~O1() {
-    delete crypt_;
-    delete manager_;
-}
+O1::~O1() {}
 
 bool O1::linked() {
     return !token().isEmpty();
 }
 
 QString O1::tokenSecret() {
-    QString key = QString("tokensecret.%1").arg(clientId_);
-    return crypt_->decryptToString(QSettings().value(key).toString());
+    QString key = QString(TOK_SEC_NAME).arg(clientId_);
+    return crypt_.decryptToString(QSettings().value(key).toString());
 }
 
 void O1::setTokenSecret(const QString &v) {
-    QString key = QString("tokensecret.%1").arg(clientId_);
-    QSettings().setValue(key, crypt_->encryptToString(v));
+    QString key = QString(TOK_SEC_NAME).arg(clientId_);
+    QSettings().setValue(key, crypt_.encryptToString(v));
 }
 
 QString O1::token() {
-    QString key = QString("token.%1").arg(clientId_);
-    return crypt_->decryptToString(QSettings().value(key).toString());
+    QString key = QString(TOK_NAME).arg(clientId_);
+    return crypt_.decryptToString(QSettings().value(key).toString());
 }
 
 void O1::setToken(const QString &v) {
-    QString key = QString("token.%1").arg(clientId_);
-    QSettings().setValue(key, crypt_->encryptToString(v));
+    QString key = QString(TOK_NAME).arg(clientId_);
+    QSettings().setValue(key, crypt_.encryptToString(v));
 }
 
 QString O1::clientId() {
@@ -67,9 +72,7 @@ QString O1::clientSecret() {
 
 void O1::setClientSecret(const QString &value) {
     clientSecret_ = value;
-    QByteArray hash = QCryptographicHash::hash(clientSecret_.toUtf8() + "12345678", QCryptographicHash::Sha1);
-    delete crypt_;
-    crypt_ = new SimpleCrypt(*((quint64 *)(void *)hash.data()));
+    crypt_.setKey((qint64) getHash().toLongLong());
     emit clientSecretChanged();
 }
 

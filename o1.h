@@ -10,6 +10,8 @@
 #include <QUrl>
 #include <QNetworkReply>
 
+#include "simplecrypt.h"
+
 class O2ReplyServer;
 class SimpleCrypt;
 
@@ -156,21 +158,21 @@ protected:
     virtual void exchangeToken();
 
 protected:
-    QString clientId_;
-    QString clientSecret_;
-    QString scope_;
-    QUrl requestTokenUrl_;
-    QUrl authorizeUrl_;
-    QUrl accessTokenUrl_;
-    QString redirectUri_;
+    QString clientId_,
+            clientSecret_,
+            scope_,
+            code_,
+            redirectUri_,
+            requestToken_,
+            requestTokenSecret_,
+            verifier_;
+    QUrl requestTokenUrl_,
+         authorizeUrl_,
+         accessTokenUrl_;
     QNetworkAccessManager *manager_;
     O2ReplyServer *replyServer_;
-    QString code_;
-    SimpleCrypt *crypt_;
+    SimpleCrypt crypt_;
     quint16 localPort_;
-    QString requestToken_;
-    QString requestTokenSecret_;
-    QString verifier_;
 };
 
 #endif // O1_H
