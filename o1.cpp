@@ -13,19 +13,17 @@
 #define trace() if (1) qDebug()
 // #define trace() if (0) qDebug()
 
-const char ENC_KEY[] = "12345678";
-const char TOK_NAME[] = "token.%1";
-const char TOK_SEC_NAME[] = "tokensecret.%1";
-
-static inline QByteArray getHash()
+static inline quint64 getHash()
 {
-    return QCryptographicHash::hash(ENC_KEY, QCryptographicHash::Sha1);
+    return QCryptographicHash::hash("12345678",
+                                    QCryptographicHash::Sha1).toULongLong();
 }
 
 O1::O1(QObject *parent) :
-    QObject(parent), crypt_((qint64) getHash().toLongLong()) {
+    QObject(parent), crypt_(getHash()) {
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
+    localPort_ = 0;
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)),
             this, SLOT(onVerificationReceived(QMap<QString,QString>)));
@@ -38,22 +36,22 @@ bool O1::linked() {
 }
 
 QString O1::tokenSecret() {
-    QString key = QString(TOK_SEC_NAME).arg(clientId_);
+    QString key = QString("tokensecret.%1").arg(clientId_);
     return crypt_.decryptToString(QSettings().value(key).toString());
 }
 
 void O1::setTokenSecret(const QString &v) {
-    QString key = QString(TOK_SEC_NAME).arg(clientId_);
+    QString key = QString("tokensecret.%1").arg(clientId_);
     QSettings().setValue(key, crypt_.encryptToString(v));
 }
 
 QString O1::token() {
-    QString key = QString(TOK_NAME).arg(clientId_);
+    QString key = QString("token.%1").arg(clientId_);
     return crypt_.decryptToString(QSettings().value(key).toString());
 }
 
 void O1::setToken(const QString &v) {
-    QString key = QString(TOK_NAME).arg(clientId_);
+    QString key = QString("token.%1").arg(clientId_);
     QSettings().setValue(key, crypt_.encryptToString(v));
 }
 
@@ -72,7 +70,6 @@ QString O1::clientSecret() {
 
 void O1::setClientSecret(const QString &value) {
     clientSecret_ = value;
-    crypt_.setKey((qint64) getHash().toLongLong());
     emit clientSecretChanged();
 }
 
@@ -179,13 +176,8 @@ static QByteArray getRequestBase(const QList<O1RequestParameter> &oauthParams, c
     base.append(QUrl::toPercentEncoding(url.toString(QUrl::RemoveQuery)) + "&");
 
     // Append a sorted+encoded list of all request parameters to the base string
-    QList<O1RequestParameter> headers;
-    foreach (O1RequestParameter header, oauthParams) {
-        headers.append(header);
-    }
-    foreach (O1RequestParameter header, otherParams) {
-        headers.append(header);
-    }
+    QList<O1RequestParameter> headers(oauthParams);
+    headers.append(otherParams);
     qSort(headers);
     base.append(encodeHeaders(headers));
 
@@ -230,7 +222,7 @@ void O1::link() {
 
     // Create initial token request
     QList<O1RequestParameter> headers;
-    headers.append(O1RequestParameter("oauth_callback", QString("http://localhost:%1").arg(replyServer_->serverPort()).toAscii()));
+    headers.append(O1RequestParameter("oauth_callback", QString("http://127.0.0.1:%1/").arg(replyServer_->serverPort()).toAscii()));
     headers.append(O1RequestParameter("oauth_consumer_key", clientId().toAscii()));
     headers.append(O1RequestParameter("oauth_nonce", nonce()));
     headers.append(O1RequestParameter("oauth_signature_method", "HMAC-SHA1"));
@@ -240,15 +232,13 @@ void O1::link() {
     headers.append(O1RequestParameter("oauth_signature", signature));
 
     // Clear request token
-    requestToken_ = "";
-    requestTokenSecret_ = "";
+    requestToken_.clear();
+    requestTokenSecret_.clear();
 
     // Post request
     QNetworkRequest request(requestTokenUrl());
     request.setRawHeader("Authorization", buildAuthorizationHeader(headers));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    delete manager_;
-    manager_ = new QNetworkAccessManager(this);
     QNetworkReply *reply = manager_->post(request, QByteArray());
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenRequestError(QNetworkReply::NetworkError)));
     connect(reply, SIGNAL(finished()), this, SLOT(onTokenRequestFinished()));
@@ -273,8 +263,10 @@ void O1::onTokenRequestFinished() {
     QMap<QString, QString> response = parseResponse(data);
     requestToken_ = response.value("oauth_token", "");
     requestTokenSecret_ = response.value("oauth_token_secret", "");
-    if (requestToken_.isEmpty() || requestTokenSecret_.isEmpty()) {
-        qWarning() << "O1::onTokenRequestFinished: No oauth_token or oauth_token_secret in response:" << data;
+    // Checking for "oauth_callback_confirmed" is present and set to true
+    QString oAuthCbConfirmed = response.value("oauth_callback_confirmed", "false");
+    if (requestToken_.isEmpty() || requestTokenSecret_.isEmpty() || (oAuthCbConfirmed == "false")) {
+        qWarning() << "O1::onTokenRequestFinished: No oauth_token, oauth_token_secret or oauth_callback_confirmed in response :" << data;
         emit linkingFailed();
         return;
     }

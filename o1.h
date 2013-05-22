@@ -13,7 +13,6 @@
 #include "simplecrypt.h"
 
 class O2ReplyServer;
-class SimpleCrypt;
 
 /// Request parameter (name-value pair) participating in authentication.
 struct O1RequestParameter {

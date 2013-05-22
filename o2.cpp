@@ -14,25 +14,27 @@
 
 #include "o2.h"
 #include "o2replyserver.h"
-#include "simplecrypt.h"
 
 #define trace() if (1) qDebug()
 // define trace() if (0) qDebug()
 
-O2::O2(QObject *parent): QObject(parent) {
-    QByteArray hash = QCryptographicHash::hash("12345678", QCryptographicHash::Sha1);
-    crypt_ = new SimpleCrypt(*((quint64 *)(void *)hash.data()));
+static inline quint64 getHash()
+{
+    return QCryptographicHash::hash("12345678",
+                                    QCryptographicHash::Sha1).toULongLong();
+}
+
+O2::O2(QObject *parent): QObject(parent), crypt_(getHash()) {
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
     grantFlow_ = GrantFlowAuthorizationCode;
     localPort_ = 0;
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
-    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)),
+            this, SLOT(onVerificationReceived(QMap<QString,QString>)));
 }
 
-O2::~O2() {
-    delete crypt_;
-}
+O2::~O2() {}
 
 O2::GrantFlow O2::grantFlow() {
     return grantFlow_;
@@ -58,9 +60,6 @@ QString O2::clientSecret() {
 
 void O2::setClientSecret(const QString &value) {
     clientSecret_ = value;
-    QByteArray hash = QCryptographicHash::hash(clientSecret_.toUtf8() + "12345678", QCryptographicHash::Sha1);
-    delete crypt_;
-    crypt_ = new SimpleCrypt(*((quint64 *)(void *)hash.data()));
     emit clientSecretChanged();
 }
 
@@ -120,7 +119,7 @@ void O2::link() {
     replyServer_->listen(QHostAddress::Any, localPort_);
 
     // Save redirect URI, as we have to reuse it when requesting the access token
-    redirectUri_ = QString("http://localhost:%1/").arg(replyServer_->serverPort());
+    redirectUri_ = QString("http://127.0.0.1:%1/").arg(replyServer_->serverPort());
 
     // Assemble intial authentication URL
     QList<QPair<QString, QString> > parameters;
@@ -133,7 +132,7 @@ void O2::link() {
     // Show authentication URL with a web browser
     QUrl url(requestUrl_);
     url.setQueryItems(parameters);
-    trace() << " Emit openBrowser" << url.toString();
+    trace() << "Emit openBrowser" << url.toString();
     emit openBrowser(url);
 }
 
@@ -189,12 +188,12 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
 
 QString O2::code() {
     QString key = QString("code.%1").arg(clientId_);
-    return crypt_->decryptToString(QSettings().value(key).toString());
+    return crypt_.decryptToString(QSettings().value(key).toString());
 }
 
 void O2::setCode(const QString &c) {
     QString key = QString("code.%1").arg(clientId_);
-    QSettings().setValue(key, crypt_->encryptToString(c));
+    QSettings().setValue(key, crypt_.encryptToString(c));
 }
 
 void O2::onTokenReplyFinished() {
@@ -249,12 +248,12 @@ QByteArray O2::buildRequestBody(const QMap<QString, QString> &parameters) {
 
 QString O2::token() {
     QString key = QString("token.%1").arg(clientId_);
-    return crypt_->decryptToString(QSettings().value(key).toString());
+    return crypt_.decryptToString(QSettings().value(key).toString());
 }
 
 void O2::setToken(const QString &v) {
     QString key = QString("token.%1").arg(clientId_);
-    QSettings().setValue(key, crypt_->encryptToString(v));
+    QSettings().setValue(key, crypt_.encryptToString(v));
 }
 
 int O2::expires() {
@@ -269,14 +268,14 @@ void O2::setExpires(int v) {
 
 QString O2::refreshToken() {
     QString key = QString("refreshtoken.%1").arg(clientId_);
-    QString ret = crypt_->decryptToString(QSettings().value(key).toString());
+    QString ret = crypt_.decryptToString(QSettings().value(key).toString());
     return ret;
 }
 
 void O2::setRefreshToken(const QString &v) {
     trace() << "O2::setRefreshToken" << v.left(4) << "...";
     QString key = QString("refreshtoken.%1").arg(clientId_);
-    QSettings().setValue(key, crypt_->encryptToString(v));
+    QSettings().setValue(key, crypt_.encryptToString(v));
 }
 
 void O2::refresh() {
