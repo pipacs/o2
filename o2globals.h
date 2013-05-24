@@ -1,18 +1,3 @@
-/*
- *   Copyright 2012 Infosys Technologies Ltd. All rights reserved.
- *   Use of copyright notice does not imply publication.
- *
- *             CONFIDENTIAL INFORMATION
- *             ------------------------
- *   This Document contains Confidential Information or Trade Secrets,
- *   or both, which are the property of Infosys Technologies Ltd.
- *   This document may not be copied, reproduced, reduced to any
- *   electronic medium or machine readable form or otherwise
- *   duplicated and the information herein may not be used,
- *   disseminated or otherwise disclosed except with the prior
- *   written consent of Infosys Technologies Ltd.
- */
-
 #ifndef O2GLOBALS_H
 #define O2GLOBALS_H
 
