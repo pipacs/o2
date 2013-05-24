@@ -3,6 +3,7 @@
 
 #include "o2requestor.h"
 #include "o2.h"
+#include "o2globals.h"
 
 #define trace() if (1) qDebug()
 // define trace() if (0) qDebug()
@@ -127,7 +128,7 @@ int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operat
     operation_ = operation;
     id_ = currentId++;
     url_ = url = req.url();
-    url.addQueryItem("access_token", authenticator_->token());
+    url.addQueryItem(OAUTH2_ACCESS_TOK, authenticator_->token());
     request_.setUrl(url);
     status_ = Requesting;
     error_ = QNetworkReply::NoError;
@@ -157,7 +158,7 @@ void O2Requestor::retry() {
     reply_->disconnect(this);
     reply_->deleteLater();
     QUrl url = url_;
-    url.addQueryItem("access_token", authenticator_->token());
+    url.addQueryItem(OAUTH2_ACCESS_TOK, authenticator_->token());
     request_.setUrl(url);
     status_ = ReRequesting;
     switch (operation_) {

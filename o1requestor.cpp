@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 
 #include "o1requestor.h"
+#include "o2globals.h"
 
 /// A timer connected to a network reply.
 class TimedReply: public QTimer {
@@ -53,20 +54,20 @@ QNetworkReply *O1Requestor::addTimer(QNetworkReply *reply) {
 QNetworkRequest O1Requestor::setup(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
     // Collect OAuth parameters
     QList<O1RequestParameter> oauthParams;
-    oauthParams.append(O1RequestParameter("oauth_consumer_key", authenticator_->clientId().toAscii()));
-    oauthParams.append(O1RequestParameter("oauth_version", "1.0"));
-    oauthParams.append(O1RequestParameter("oauth_token", authenticator_->token().toAscii()));
-    oauthParams.append(O1RequestParameter("oauth_signature_method", "HMAC-SHA1"));
-    oauthParams.append(O1RequestParameter("oauth_nonce", O1::nonce()));
-    oauthParams.append(O1RequestParameter("oauth_timestamp", QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
+    oauthParams.append(O1RequestParameter(OAUTH_CONSUMER_KEY, authenticator_->clientId().toAscii()));
+    oauthParams.append(O1RequestParameter(OAUTH_VERSION, "1.0"));
+    oauthParams.append(O1RequestParameter(OAUTH_TOK, authenticator_->token().toAscii()));
+    oauthParams.append(O1RequestParameter(OAUTH_SIG_METHOD, SIG_TYPE_HMAC_SHA1));
+    oauthParams.append(O1RequestParameter(OAUTH_NONCE, O1::nonce()));
+    oauthParams.append(O1RequestParameter(OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
 
     // Add signature parameter
     QByteArray signature = authenticator_->sign(oauthParams, signingParameters, req.url(), operation, authenticator_->clientSecret(), authenticator_->tokenSecret());
-    oauthParams.append(O1RequestParameter("oauth_signature", signature));
+    oauthParams.append(O1RequestParameter(OAUTH_SIG, signature));
 
     // Return a copy of the original request with authorization header set
     QNetworkRequest request(req);
-    request.setRawHeader("Authorization", O1::buildAuthorizationHeader(oauthParams));
+    request.setRawHeader(HTTP_AUTH_HEADER, O1::buildAuthorizationHeader(oauthParams));
     return request;
 }
 
