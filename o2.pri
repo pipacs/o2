@@ -26,3 +26,4 @@ HEADERS += \
     $$PWD/o2requestor.h \
     $$PWD/simplecrypt.h \
     $$PWD/o2skydrive.h \
+    $$PWD/o2globals.h \
