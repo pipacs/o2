@@ -10,8 +10,9 @@
 #include <QUrl>
 #include <QNetworkReply>
 
+#include "simplecrypt.h"
+
 class O2ReplyServer;
-class SimpleCrypt;
 
 /// Request parameter (name-value pair) participating in authentication.
 struct O1RequestParameter {
@@ -159,18 +160,18 @@ protected:
     QString clientId_;
     QString clientSecret_;
     QString scope_;
-    QUrl requestTokenUrl_;
-    QUrl authorizeUrl_;
-    QUrl accessTokenUrl_;
-    QString redirectUri_;
-    QNetworkAccessManager *manager_;
-    O2ReplyServer *replyServer_;
     QString code_;
-    SimpleCrypt *crypt_;
-    quint16 localPort_;
+    QString redirectUri_;
     QString requestToken_;
     QString requestTokenSecret_;
     QString verifier_;
+    QUrl requestTokenUrl_;
+    QUrl authorizeUrl_;
+    QUrl accessTokenUrl_;
+    QNetworkAccessManager *manager_;
+    O2ReplyServer *replyServer_;
+    SimpleCrypt crypt_;
+    quint16 localPort_;
 };
 
 #endif // O1_H

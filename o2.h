@@ -12,9 +12,9 @@
 #include <QPair>
 
 #include "o2reply.h"
+#include "simplecrypt.h"
 
 class O2ReplyServer;
-class SimpleCrypt;
 
 /// Simple OAuth2 authenticator.
 class O2: public QObject {
@@ -165,17 +165,16 @@ protected:
     QString clientId_;
     QString clientSecret_;
     QString scope_;
+    QString code_;
+    QString redirectUri_;
     QUrl requestUrl_;
     QUrl tokenUrl_;
     QUrl refreshTokenUrl_;
-    QString redirectUri_;
     QNetworkAccessManager *manager_;
     O2ReplyServer *replyServer_;
-    QString code_;
-    SimpleCrypt *crypt_;
+    SimpleCrypt crypt_;
     O2ReplyList timedReplies_;
     quint16 localPort_;
-    QString pid_;
     GrantFlow grantFlow_;
 };
 
