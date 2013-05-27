@@ -128,7 +128,7 @@ int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operat
     operation_ = operation;
     id_ = currentId++;
     url_ = url = req.url();
-    url.addQueryItem(OAUTH2_ACCESS_TOK, authenticator_->token());
+    url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
     request_.setUrl(url);
     status_ = Requesting;
     error_ = QNetworkReply::NoError;
@@ -158,7 +158,7 @@ void O2Requestor::retry() {
     reply_->disconnect(this);
     reply_->deleteLater();
     QUrl url = url_;
-    url.addQueryItem(OAUTH2_ACCESS_TOK, authenticator_->token());
+    url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
     request_.setUrl(url);
     status_ = ReRequesting;
     switch (operation_) {

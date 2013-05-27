@@ -28,10 +28,10 @@ void O2Skydrive::link() {
 
     // Assemble intial authentication URL
     QList<QPair<QString, QString> > parameters;
-    parameters.append(qMakePair(QString(OAUTH2_RESP_TYPE), (grantFlow_ == GrantFlowAuthorizationCode) ? QString(OAUTH2_CODE) : QString(OAUTH2_TOK)));
-    parameters.append(qMakePair(QString(OAUTH2_CLIENT_ID), clientId_));
-    parameters.append(qMakePair(QString(OAUTH2_REDIRECT_URI), redirectUri_));
-    parameters.append(qMakePair(QString(OAUTH2_SCOPE), scope_));
+    parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode) ? QString(O2_OAUTH2_CODE) : QString(O2_OAUTH2_TOKEN)));
+    parameters.append(qMakePair(QString(O2_OAUTH2_CLIENT_ID), clientId_));
+    parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
+    parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_));
 
     // Show authentication URL with a web browser
     QUrl url(requestUrl_);
@@ -46,7 +46,7 @@ void O2Skydrive::redirected(const QUrl &url) {
 
     if (grantFlow_ == GrantFlowAuthorizationCode) {
         // Get access code
-        QString urlCode = url.queryItemValue(OAUTH2_CODE);
+        QString urlCode = url.queryItemValue(O2_OAUTH2_CODE);
         if (urlCode.isEmpty()) {
             trace() << " Code not received";
             emit linkingFailed();
@@ -58,11 +58,11 @@ void O2Skydrive::redirected(const QUrl &url) {
         QNetworkRequest tokenRequest(tokenUrl_);
         tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
         QMap<QString, QString> parameters;
-        parameters.insert(OAUTH2_CODE, code());
-        parameters.insert(OAUTH2_CLIENT_ID, clientId_);
-        parameters.insert(OAUTH2_CLIENT_SECRET, clientSecret_);
-        parameters.insert(OAUTH2_REDIRECT_URI, redirectUri_);
-        parameters.insert(OAUTH2_GRANT_TYPE, GRANT_TYPE_AUTH_CODE);
+        parameters.insert(O2_OAUTH2_CODE, code());
+        parameters.insert(O2_OAUTH2_CLIENT_ID, clientId_);
+        parameters.insert(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
+        parameters.insert(O2_OAUTH2_REDIRECT_URI, redirectUri_);
+        parameters.insert(O2_OAUTH2_GRANT_TYPE, O2_AUTHORIZATION_CODE);
         QByteArray data = buildRequestBody(parameters);
         QNetworkReply *tokenReply = manager_->post(tokenRequest, data);
         timedReplies_.add(tokenReply);
@@ -84,11 +84,11 @@ void O2Skydrive::redirected(const QUrl &url) {
                 QString key = item.left(index);
                 QString value = item.mid(index + 1);
                 trace() << "" << key;
-                if (key == OAUTH2_ACCESS_TOK) {
+                if (key == O2_OAUTH2_ACCESS_TOKEN) {
                     urlToken = value;
-                } else if (key == OAUTH2_EXPIRES_IN) {
+                } else if (key == O2_OAUTH2_EXPIRES_IN) {
                     urlExpiresIn = value.toInt();
-                } else if (key == OAUTH2_REFRESH_TOK) {
+                } else if (key == O2_OAUTH2_REFRESH_TOKEN) {
                     urlRefreshToken = value;
                 }
             }

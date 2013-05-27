@@ -19,9 +19,8 @@
 #define trace() if (1) qDebug()
 // define trace() if (0) qDebug()
 
-static inline quint64 getHash()
-{
-    return QCryptographicHash::hash(ENC_KEY, QCryptographicHash::Sha1).toULongLong();
+static quint64 getHash() {
+    return QCryptographicHash::hash(O2_ENCRYPTION_KEY, QCryptographicHash::Sha1).toULongLong();
 }
 
 O2::O2(QObject *parent): QObject(parent), crypt_(getHash()) {
@@ -34,7 +33,8 @@ O2::O2(QObject *parent): QObject(parent), crypt_(getHash()) {
             this, SLOT(onVerificationReceived(QMap<QString,QString>)));
 }
 
-O2::~O2() {}
+O2::~O2() {
+}
 
 O2::GrantFlow O2::grantFlow() {
     return grantFlow_;
@@ -119,15 +119,15 @@ void O2::link() {
     replyServer_->listen(QHostAddress::Any, localPort_);
 
     // Save redirect URI, as we have to reuse it when requesting the access token
-    redirectUri_ = QString(CALLBACK_URL).arg(replyServer_->serverPort());
+    redirectUri_ = QString(O2_CALLBACK_URL).arg(replyServer_->serverPort());
 
     // Assemble intial authentication URL
     QList<QPair<QString, QString> > parameters;
-    parameters.append(qMakePair(QString(OAUTH2_RESP_TYPE), (grantFlow_ == GrantFlowAuthorizationCode) ? QString(OAUTH2_CODE) : QString(OAUTH2_TOK)));
-    parameters.append(qMakePair(QString(OAUTH2_CLIENT_ID), clientId_));
-    parameters.append(qMakePair(QString(OAUTH2_REDIRECT_URI), redirectUri_));
+    parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode) ? QString(O2_OAUTH2_CODE) : QString(O2_OAUTH2_TOKEN)));
+    parameters.append(qMakePair(QString(O2_OAUTH2_CLIENT_ID), clientId_));
+    parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
     // parameters.append(qMakePair(QString(OAUTH2_REDIRECT_URI), QString(QUrl::toPercentEncoding(redirectUri_))));
-    parameters.append(qMakePair(QString(OAUTH2_SCOPE), scope_));
+    parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_));
 
     // Show authentication URL with a web browser
     QUrl url(requestUrl_);
@@ -164,35 +164,35 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
 
     if (grantFlow_ == GrantFlowAuthorizationCode) {
         // Save access code
-        setCode(response.value(QString(OAUTH2_CODE)));
+        setCode(response.value(QString(O2_OAUTH2_CODE)));
 
         // Exchange access code for access/refresh tokens
         QNetworkRequest tokenRequest(tokenUrl_);
-        tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, HTTP_AUTH_HEADER);
+        tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
         QMap<QString, QString> parameters;
-        parameters.insert(OAUTH2_CODE, code());
-        parameters.insert(OAUTH2_CLIENT_ID, clientId_);
-        parameters.insert(OAUTH2_CLIENT_SECRET, clientSecret_);
-        parameters.insert(OAUTH2_REDIRECT_URI, redirectUri_);
-        parameters.insert(OAUTH2_GRANT_TYPE, GRANT_TYPE_AUTH_CODE);
+        parameters.insert(O2_OAUTH2_CODE, code());
+        parameters.insert(O2_OAUTH2_CLIENT_ID, clientId_);
+        parameters.insert(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
+        parameters.insert(O2_OAUTH2_REDIRECT_URI, redirectUri_);
+        parameters.insert(O2_OAUTH2_GRANT_TYPE, O2_AUTHORIZATION_CODE);
         QByteArray data = buildRequestBody(parameters);
         QNetworkReply *tokenReply = manager_->post(tokenRequest, data);
         timedReplies_.add(tokenReply);
         connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
         connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     } else {
-        setToken(response.value(OAUTH2_ACCESS_TOK));
-        setRefreshToken(response.value(OAUTH2_REFRESH_TOK));
+        setToken(response.value(O2_OAUTH2_ACCESS_TOKEN));
+        setRefreshToken(response.value(O2_OAUTH2_REFRESH_TOKEN));
     }
 }
 
 QString O2::code() {
-    QString key = QString(KEY_CODE).arg(clientId_);
+    QString key = QString(O2_KEY_CODE).arg(clientId_);
     return crypt_.decryptToString(QSettings().value(key).toString());
 }
 
 void O2::setCode(const QString &c) {
-    QString key = QString(KEY_CODE).arg(clientId_);
+    QString key = QString(O2_KEY_CODE).arg(clientId_);
     QSettings().setValue(key, crypt_.encryptToString(c));
 }
 
@@ -204,13 +204,13 @@ void O2::onTokenReplyFinished() {
         QScriptValue value;
         QScriptEngine engine;
         value = engine.evaluate("(" + QString(replyData) + ")");
-        setToken(value.property(OAUTH2_ACCESS_TOK).toString());
-        int expiresIn = value.property(OAUTH2_EXPIRES_IN).toInteger();
+        setToken(value.property(O2_OAUTH2_ACCESS_TOKEN).toString());
+        int expiresIn = value.property(O2_OAUTH2_EXPIRES_IN).toInteger();
         if (expiresIn > 0) {
             trace() << "Token expires in" << expiresIn << "seconds";
             setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
         }
-        setRefreshToken(value.property(OAUTH2_REFRESH_TOK).toString());
+        setRefreshToken(value.property(O2_OAUTH2_REFRESH_TOKEN).toString());
         timedReplies_.remove(tokenReply);
         emit linkedChanged();
         emit tokenChanged();
@@ -247,34 +247,34 @@ QByteArray O2::buildRequestBody(const QMap<QString, QString> &parameters) {
 }
 
 QString O2::token() {
-    QString key = QString(KEY_TOK).arg(clientId_);
+    QString key = QString(O2_KEY_TOKEN).arg(clientId_);
     return crypt_.decryptToString(QSettings().value(key).toString());
 }
 
 void O2::setToken(const QString &v) {
-    QString key = QString(KEY_TOK).arg(clientId_);
+    QString key = QString(O2_KEY_TOKEN).arg(clientId_);
     QSettings().setValue(key, crypt_.encryptToString(v));
 }
 
 int O2::expires() {
-    QString key = QString(KEY_EXPIRES).arg(clientId_);
+    QString key = QString(O2_KEY_EXPIRES).arg(clientId_);
     return QSettings().value(key).toInt();
 }
 
 void O2::setExpires(int v) {
-    QString key = QString(KEY_EXPIRES).arg(clientId_);
+    QString key = QString(O2_KEY_EXPIRES).arg(clientId_);
     QSettings().setValue(key, v);
 }
 
 QString O2::refreshToken() {
-    QString key = QString(KEY_REFRESH_TOK).arg(clientId_);
+    QString key = QString(O2_KEY_REFRESH_TOKEN).arg(clientId_);
     QString ret = crypt_.decryptToString(QSettings().value(key).toString());
     return ret;
 }
 
 void O2::setRefreshToken(const QString &v) {
     trace() << "O2::setRefreshToken" << v.left(4) << "...";
-    QString key = QString(KEY_REFRESH_TOK).arg(clientId_);
+    QString key = QString(O2_KEY_REFRESH_TOKEN).arg(clientId_);
     QSettings().setValue(key, crypt_.encryptToString(v));
 }
 
@@ -293,12 +293,12 @@ void O2::refresh() {
     }
 
     QNetworkRequest refreshRequest(refreshTokenUrl_);
-    refreshRequest.setHeader(QNetworkRequest::ContentTypeHeader, HTTP_AUTH_HEADER);
+    refreshRequest.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
     QMap<QString, QString> parameters;
-    parameters.insert(OAUTH2_CLIENT_ID, clientId_);
-    parameters.insert(OAUTH2_CLIENT_SECRET, clientSecret_);
-    parameters.insert(OAUTH2_REFRESH_TOK, refreshToken());
-    parameters.insert(OAUTH2_GRANT_TYPE, OAUTH2_REFRESH_TOK);
+    parameters.insert(O2_OAUTH2_CLIENT_ID, clientId_);
+    parameters.insert(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
+    parameters.insert(O2_OAUTH2_REFRESH_TOKEN, refreshToken());
+    parameters.insert(O2_OAUTH2_GRANT_TYPE, O2_OAUTH2_REFRESH_TOKEN);
     QByteArray data = buildRequestBody(parameters);
     QNetworkReply *refreshReply = manager_->post(refreshRequest, data);
     timedReplies_.add(refreshReply);
@@ -314,9 +314,9 @@ void O2::onRefreshFinished() {
         QScriptValue value;
         QScriptEngine engine;
         value = engine.evaluate("(" + QString(reply) + ")");
-        setToken(value.property(OAUTH2_ACCESS_TOK).toString());
-        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + value.property(OAUTH2_EXPIRES_IN).toInteger());
-        setRefreshToken(value.property(OAUTH2_REFRESH_TOK).toString());
+        setToken(value.property(O2_OAUTH2_ACCESS_TOKEN).toString());
+        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + value.property(O2_OAUTH2_EXPIRES_IN).toInteger());
+        setRefreshToken(value.property(O2_OAUTH2_REFRESH_TOKEN).toString());
         timedReplies_.remove(refreshReply);
         emit linkingSucceeded();
         emit tokenChanged();

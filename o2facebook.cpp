@@ -12,7 +12,7 @@ static const char *FbEndpoint = "https://graph.facebook.com/oauth/authorize?disp
 static const char *FbTokenUrl = "https://graph.facebook.com/oauth/access_token";
 static const quint16 FbLocalPort = 1965;
 
-#define SECS_IN_2_HOURS 2 * 60 * 60
+#define SECONDS_IN_2_HOURS (2 * 60 * 60)
 
 O2Facebook::O2Facebook(QObject *parent): O2(parent) {
     setRequestUrl(FbEndpoint);
@@ -32,15 +32,15 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
     }
 
     // Save access code
-    setCode(response.value(OAUTH2_CODE));
+    setCode(response.value(O2_OAUTH2_CODE));
 
     // Exchange access code for access/refresh tokens
     QUrl url(tokenUrl_);
-    url.addQueryItem(OAUTH2_CLIENT_ID, clientId_);
-    url.addQueryItem(OAUTH2_CLIENT_SECRET, clientSecret_);
-    url.addQueryItem(OAUTH2_SCOPE, scope_);
-    url.addQueryItem(OAUTH2_CODE, code());
-    url.addQueryItem(OAUTH2_REDIRECT_URI, redirectUri_);
+    url.addQueryItem(O2_OAUTH2_CLIENT_ID, clientId_);
+    url.addQueryItem(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
+    url.addQueryItem(O2_OAUTH2_SCOPE, scope_);
+    url.addQueryItem(O2_OAUTH2_CODE, code());
+    url.addQueryItem(O2_OAUTH2_REDIRECT_URI, redirectUri_);
 
     QNetworkRequest tokenRequest(url);
     QNetworkReply *tokenReply = manager_->get(tokenRequest);
@@ -64,10 +64,10 @@ void O2Facebook::onTokenReplyFinished() {
         }
 
         // Interpret reply
-        setToken(reply.contains(OAUTH2_ACCESS_TOK)? reply.value(OAUTH2_ACCESS_TOK): "");
+        setToken(reply.contains(O2_OAUTH2_ACCESS_TOKEN)? reply.value(O2_OAUTH2_ACCESS_TOKEN): "");
         // FIXME: I have no idea how to interpret Facebook's "expires" value. So let's use a default of 2 hours
-        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + SECS_IN_2_HOURS);
-        setRefreshToken(reply.contains(OAUTH2_REFRESH_TOK)? reply.value(OAUTH2_REFRESH_TOK): "");
+        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + SECONDS_IN_2_HOURS);
+        setRefreshToken(reply.contains(O2_OAUTH2_REFRESH_TOKEN)? reply.value(O2_OAUTH2_REFRESH_TOKEN): "");
 
         timedReplies_.remove(tokenReply);
         emit linkedChanged();

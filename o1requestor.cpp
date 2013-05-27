@@ -54,20 +54,20 @@ QNetworkReply *O1Requestor::addTimer(QNetworkReply *reply) {
 QNetworkRequest O1Requestor::setup(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
     // Collect OAuth parameters
     QList<O1RequestParameter> oauthParams;
-    oauthParams.append(O1RequestParameter(OAUTH_CONSUMER_KEY, authenticator_->clientId().toAscii()));
-    oauthParams.append(O1RequestParameter(OAUTH_VERSION, "1.0"));
-    oauthParams.append(O1RequestParameter(OAUTH_TOK, authenticator_->token().toAscii()));
-    oauthParams.append(O1RequestParameter(OAUTH_SIG_METHOD, SIG_TYPE_HMAC_SHA1));
-    oauthParams.append(O1RequestParameter(OAUTH_NONCE, O1::nonce()));
-    oauthParams.append(O1RequestParameter(OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_CONSUMER_KEY, authenticator_->clientId().toAscii()));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_VERSION, "1.0"));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_TOKEN, authenticator_->token().toAscii()));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, O2_SIGNATURE_TYPE_HMAC_SHA1));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_NONCE, O1::nonce()));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
 
     // Add signature parameter
     QByteArray signature = authenticator_->sign(oauthParams, signingParameters, req.url(), operation, authenticator_->clientSecret(), authenticator_->tokenSecret());
-    oauthParams.append(O1RequestParameter(OAUTH_SIG, signature));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE, signature));
 
     // Return a copy of the original request with authorization header set
     QNetworkRequest request(req);
-    request.setRawHeader(HTTP_AUTH_HEADER, O1::buildAuthorizationHeader(oauthParams));
+    request.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER, O1::buildAuthorizationHeader(oauthParams));
     return request;
 }
 

@@ -162,14 +162,14 @@ protected:
     void setExpires(int v);
 
 protected:
-    QString clientId_,
-            clientSecret_,
-            scope_,
-            code_,
-            redirectUri_;
-    QUrl    requestUrl_,
-            tokenUrl_,
-            refreshTokenUrl_;
+    QString clientId_;
+    QString clientSecret_;
+    QString scope_;
+    QString code_;
+    QString redirectUri_;
+    QUrl requestUrl_;
+    QUrl tokenUrl_;
+    QUrl refreshTokenUrl_;
     QNetworkAccessManager *manager_;
     O2ReplyServer *replyServer_;
     SimpleCrypt crypt_;

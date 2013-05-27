@@ -157,17 +157,17 @@ protected:
     virtual void exchangeToken();
 
 protected:
-    QString clientId_,
-            clientSecret_,
-            scope_,
-            code_,
-            redirectUri_,
-            requestToken_,
-            requestTokenSecret_,
-            verifier_;
-    QUrl requestTokenUrl_,
-         authorizeUrl_,
-         accessTokenUrl_;
+    QString clientId_;
+    QString clientSecret_;
+    QString scope_;
+    QString code_;
+    QString redirectUri_;
+    QString requestToken_;
+    QString requestTokenSecret_;
+    QString verifier_;
+    QUrl requestTokenUrl_;
+    QUrl authorizeUrl_;
+    QUrl accessTokenUrl_;
     QNetworkAccessManager *manager_;
     O2ReplyServer *replyServer_;
     SimpleCrypt crypt_;

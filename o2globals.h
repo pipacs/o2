@@ -2,51 +2,50 @@
 #define O2GLOBALS_H
 
 // Common constants
-const char ENC_KEY[]            = "12345678";
-const char CALLBACK_URL[]       = "http://127.0.0.1:%1/";
-const char MIME_TYPE_XFORM[]    = "application/x-www-form-urlencoded";
+const char O2_ENCRYPTION_KEY[] = "12345678";
+const char O2_CALLBACK_URL[] = "http://127.0.0.1:%1/";
+const char O2_MIME_TYPE_XFORM[] = "application/x-www-form-urlencoded";
 
 // QSettings key names
-const char KEY_TOK[]            = "token.%1";
-const char KEY_TOK_SECRET[]     = "tokensecret.%1";
-const char KEY_CODE[]           = "code.%1";
-const char KEY_EXPIRES[]        = "expires.%1";
-const char KEY_REFRESH_TOK[]    = "refreshtoken.%1";
+const char O2_KEY_TOKEN[] = "token.%1";
+const char O2_KEY_TOKEN_SECRET[] = "tokensecret.%1";
+const char O2_KEY_CODE[] = "code.%1";
+const char O2_KEY_EXPIRES[] = "expires.%1";
+const char O2_KEY_REFRESH_TOKEN[] = "refreshtoken.%1";
 
+// OAuth 1/1.1 Request Parameters
+const char O2_OAUTH_CALLBACK[] = "oauth_callback";
+const char O2_OAUTH_CONSUMER_KEY[] = "oauth_consumer_key";
+const char O2_OAUTH_NONCE[] = "oauth_nonce";
+const char O2_OAUTH_SIGNATURE[] = "oauth_signature";
+const char O2_OAUTH_SIGNATURE_METHOD[] = "oauth_signature_method";
+const char O2_OAUTH_TIMESTAMP[] = "oauth_timestamp";
+const char O2_OAUTH_VERSION[] = "oauth_version";
+// OAuth 1/1.1 Response Parameters
+const char O2_OAUTH_TOKEN[] = "oauth_token";
+const char O2_OAUTH_TOKEN_SECRET[] = "oauth_token_secret";
+const char O2_OAUTH_CALLBACK_CONFIRMED[] = "oauth_callback_confirmed";
+const char O2_OAUTH_VERFIER[] = "oauth_verifier";
 
-// OAuth 1/1.1 Request Params
-const char OAUTH_CB[]           = "oauth_callback";
-const char OAUTH_CONSUMER_KEY[] = "oauth_consumer_key";
-const char OAUTH_NONCE[]        = "oauth_nonce";
-const char OAUTH_SIG[]          = "oauth_signature";
-const char OAUTH_SIG_METHOD[]   = "oauth_signature_method";
-const char OAUTH_TIMESTAMP[]    = "oauth_timestamp";
-const char OAUTH_VERSION[]      = "oauth_version";
-// OAuth 1/1.1 Response Params
-const char OAUTH_TOK[]          = "oauth_token";
-const char OAUTH_TOK_SEC[]      = "oauth_token_secret";
-const char OAUTH_CB_CONFIRMED[] = "oauth_callback_confirmed";
-const char OAUTH_VERFIER[]      = "oauth_verifier";
-
-// OAuth 2 Request Params
-const char OAUTH2_RESP_TYPE[]       = "response_type";
-const char OAUTH2_CLIENT_ID[]       = "client_id";
-const char OAUTH2_CLIENT_SECRET[]   = "client_secret";
-const char OAUTH2_REDIRECT_URI[]    = "redirect_uri";
-const char OAUTH2_SCOPE[]           = "scope";
-const char OAUTH2_CODE[]            = "code";
-const char OAUTH2_TOK[]             = "token";
-const char OAUTH2_GRANT_TYPE[]      = "grant_type";
-// OAuth 2 Response Params
-const char OAUTH2_ACCESS_TOK[]      = "access_token";
-const char OAUTH2_REFRESH_TOK[]     = "refresh_token";
-const char OAUTH2_EXPIRES_IN[]      = "expires_in";
+// OAuth 2 Request Parameters
+const char O2_OAUTH2_RESPONSE_TYPE[] = "response_type";
+const char O2_OAUTH2_CLIENT_ID[] = "client_id";
+const char O2_OAUTH2_CLIENT_SECRET[] = "client_secret";
+const char O2_OAUTH2_REDIRECT_URI[] = "redirect_uri";
+const char O2_OAUTH2_SCOPE[] = "scope";
+const char O2_OAUTH2_CODE[] = "code";
+const char O2_OAUTH2_TOKEN[] = "token";
+const char O2_OAUTH2_GRANT_TYPE[] = "grant_type";
+// OAuth 2 Response Parameters
+const char O2_OAUTH2_ACCESS_TOKEN[] = "access_token";
+const char O2_OAUTH2_REFRESH_TOKEN[] = "refresh_token";
+const char O2_OAUTH2_EXPIRES_IN[] = "expires_in";
 
 // Parameter values
-const char SIG_TYPE_HMAC_SHA1[]     = "HMAC-SHA1";
-const char GRANT_TYPE_AUTH_CODE[]   = "authorization_code";
+const char O2_SIGNATURE_TYPE_HMAC_SHA1[] = "HMAC-SHA1";
+const char O2_AUTHORIZATION_CODE[] = "authorization_code";
 
-// Std HTTP headres
-const char HTTP_AUTH_HEADER[]   = "Authorization";
+// Standard HTTP headers
+const char O2_HTTP_AUTHORIZATION_HEADER[] = "Authorization";
 
 #endif // O2GLOBALS_H
