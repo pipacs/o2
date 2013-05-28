@@ -4,6 +4,9 @@
 #include <QString>
 #include <QStringList>
 #include <QDesktopServices>
+#if QT_VERSION >= 0x050000
+#include <QUrlQuery>
+#endif
 
 #include "o2skydrive.h"
 #include "o2globals.h"
@@ -35,7 +38,13 @@ void O2Skydrive::link() {
 
     // Show authentication URL with a web browser
     QUrl url(requestUrl_);
+#if QT_VERSION < 0x050000
     url.setQueryItems(parameters);
+#else
+    QUrlQuery query(url);
+    query.setQueryItems(parameters);
+    url.setQuery(query);
+#endif
     emit openBrowser(url);
 }
 
@@ -46,7 +55,13 @@ void O2Skydrive::redirected(const QUrl &url) {
 
     if (grantFlow_ == GrantFlowAuthorizationCode) {
         // Get access code
-        QString urlCode = url.queryItemValue(O2_OAUTH2_CODE);
+        QString urlCode;
+#if QT_VERSION < 0x050000
+        urlCode = url.queryItemValue(O2_OAUTH2_CODE);
+#else
+        QUrlQuery query(url);
+        urlCode = query.queryItemValue(O2_OAUTH2_CODE);
+#endif
         if (urlCode.isEmpty()) {
             trace() << " Code not received";
             emit linkingFailed();

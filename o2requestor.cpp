@@ -1,5 +1,8 @@
 #include <QDebug>
 #include <QTimer>
+#if QT_VERSION >= 0x050000
+#include <QUrlQuery>
+#endif
 
 #include "o2requestor.h"
 #include "o2.h"
@@ -128,7 +131,13 @@ int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operat
     operation_ = operation;
     id_ = currentId++;
     url_ = url = req.url();
+#if QT_VERSION < 0x050000
     url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
+#else
+    QUrlQuery query(url);
+    query.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
+    url.setQuery(query);
+#endif
     request_.setUrl(url);
     status_ = Requesting;
     error_ = QNetworkReply::NoError;
@@ -158,7 +167,13 @@ void O2Requestor::retry() {
     reply_->disconnect(this);
     reply_->deleteLater();
     QUrl url = url_;
+#if QT_VERSION < 0x050000
     url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
+#else
+    QUrlQuery query(url);
+    query.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
+    url.setQuery(query);
+#endif
     request_.setUrl(url);
     status_ = ReRequesting;
     switch (operation_) {
