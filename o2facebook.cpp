@@ -4,6 +4,9 @@
 #include <QString>
 #include <QStringList>
 #include <QDesktopServices>
+#if QT_VERSION >= 0x050000
+#include <QUrlQuery>
+#endif
 
 #include "o2facebook.h"
 #include "o2globals.h"
@@ -36,11 +39,21 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
 
     // Exchange access code for access/refresh tokens
     QUrl url(tokenUrl_);
+#if QT_VERSION < 0x050000
     url.addQueryItem(O2_OAUTH2_CLIENT_ID, clientId_);
     url.addQueryItem(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
     url.addQueryItem(O2_OAUTH2_SCOPE, scope_);
     url.addQueryItem(O2_OAUTH2_CODE, code());
     url.addQueryItem(O2_OAUTH2_REDIRECT_URI, redirectUri_);
+#else
+    QUrlQuery query(url);
+    query.addQueryItem(O2_OAUTH2_CLIENT_ID, clientId_);
+    query.addQueryItem(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
+    query.addQueryItem(O2_OAUTH2_SCOPE, scope_);
+    query.addQueryItem(O2_OAUTH2_CODE, code());
+    query.addQueryItem(O2_OAUTH2_REDIRECT_URI, redirectUri_);
+    url.setQuery(query);
+#endif
 
     QNetworkRequest tokenRequest(url);
     QNetworkReply *tokenReply = manager_->get(tokenRequest);

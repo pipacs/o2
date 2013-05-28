@@ -7,6 +7,9 @@
 #include <QStringList>
 #include <QUrl>
 #include <QDebug>
+#if QT_VERSION >= 0x050000
+#include <QUrlQuery>
+#endif
 
 #include "o2replyserver.h"
 
@@ -51,7 +54,14 @@ QMap<QString, QString> O2ReplyServer::parseQueryParams(QByteArray *data) {
     splitGetLine.remove("\r\n");
     splitGetLine.prepend("http://localhost");
     QUrl getTokenUrl(splitGetLine);
-    QList< QPair<QString, QString> > tokens = getTokenUrl.queryItems();
+
+    QList< QPair<QString, QString> > tokens;
+#if QT_VERSION < 0x050000
+    tokens = getTokenUrl.queryItems();
+#else
+    QUrlQuery query(getTokenUrl);
+    tokens = query.queryItems();
+#endif
     QMultiMap<QString, QString> queryParams;
     QPair<QString, QString> tokenPair;
     foreach (tokenPair, tokens) {
