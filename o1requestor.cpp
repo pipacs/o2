@@ -54,12 +54,12 @@ QNetworkReply *O1Requestor::addTimer(QNetworkReply *reply) {
 QNetworkRequest O1Requestor::setup(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
     // Collect OAuth parameters
     QList<O1RequestParameter> oauthParams;
-    oauthParams.append(O1RequestParameter(O2_OAUTH_CONSUMER_KEY, authenticator_->clientId().toAscii()));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_CONSUMER_KEY, authenticator_->clientId().toLatin1()));
     oauthParams.append(O1RequestParameter(O2_OAUTH_VERSION, "1.0"));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_TOKEN, authenticator_->token().toAscii()));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_TOKEN, authenticator_->token().toLatin1()));
     oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, O2_SIGNATURE_TYPE_HMAC_SHA1));
     oauthParams.append(O1RequestParameter(O2_OAUTH_NONCE, O1::nonce()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toAscii()));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
 
     // Add signature parameter
     QByteArray signature = authenticator_->sign(oauthParams, signingParameters, req.url(), operation, authenticator_->clientSecret(), authenticator_->tokenSecret());

@@ -11,6 +11,9 @@
 #include <QDateTime>
 #include <QCryptographicHash>
 #include <QTimer>
+#if QT_VERSION >= 0x050000
+#include <QUrlQuery>
+#endif
 
 #include "o2.h"
 #include "o2replyserver.h"
@@ -131,7 +134,14 @@ void O2::link() {
 
     // Show authentication URL with a web browser
     QUrl url(requestUrl_);
+#if QT_VERSION < 0x050000
     url.setQueryItems(parameters);
+#else
+    QUrlQuery query(url);
+    query.setQueryItems(parameters);
+    url.setQuery(query);
+#endif
+
     trace() << "Emit openBrowser" << url.toString();
     emit openBrowser(url);
 }
