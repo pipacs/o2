@@ -100,6 +100,15 @@ public:
     /// @return Signature that can be used as the value of the "oauth_signature" parameter.
     static QByteArray sign(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret);
 
+    /// Build a base string for signing.
+    static QByteArray getRequestBase(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op);
+
+    /// Build a concatenated/percent-encoded string from a list of headers.
+    static QByteArray encodeHeaders(const QList<O1RequestParameter> &headers);
+
+    /// Construct query string from list of headers
+    static QByteArray createQueryParams(const QList<O1RequestParameter> &params);
+
 public slots:
     /// Authenticate.
     Q_INVOKABLE virtual void link();

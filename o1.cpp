@@ -156,10 +156,16 @@ static QString getOperationName(QNetworkAccessManager::Operation op) {
 }
 
 /// Build a concatenated/percent-encoded string from a list of headers.
-static QByteArray encodeHeaders(const QList<O1RequestParameter> &headers) {
+QByteArray O1::encodeHeaders(const QList<O1RequestParameter> &headers) {
+    return QUrl::toPercentEncoding(createQueryParams(headers));
+}
+
+/// Construct query string from list of headers
+QByteArray O1::createQueryParams(const QList<O1RequestParameter> &params)
+{
     QByteArray ret;
     bool first = true;
-    foreach (O1RequestParameter h, headers) {
+    foreach (O1RequestParameter h, params) {
         if (first) {
             first = false;
         } else {
@@ -167,11 +173,11 @@ static QByteArray encodeHeaders(const QList<O1RequestParameter> &headers) {
         }
         ret.append(QUrl::toPercentEncoding(h.name) + "=" + QUrl::toPercentEncoding(h.value));
     }
-    return QUrl::toPercentEncoding(ret);
+    return ret;
 }
 
 /// Build a base string for signing.
-static QByteArray getRequestBase(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op) {
+QByteArray O1::getRequestBase(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op) {
     QByteArray base;
 
     // Initialize base string with the operation name (e.g. "GET") and the base URL
