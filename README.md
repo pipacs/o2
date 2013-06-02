@@ -53,7 +53,7 @@ Instantiate one of the authenticator classes, like O1Twitter, set your applicati
     connect(o1, SIGNAL(openBrowser(QUrl)), this, SLOT(onOpenBrowser(QUrl)));
     connect(o1, SIGNAL(closeBrowser()), this, SLOT(onCloseBrowser()));
 
-**Note:** For browserless Twitter authentication, you can use the OXTwitter specialized class which can do Twitter XAuth. You will need to additionally provide your Twitter login credentials (username & password) by calling *setXAuthParameters()* before calling *link()*.
+**Note:** For browserless Twitter authentication, you can use the OXTwitter specialized class which can do Twitter XAuth. You will need to additionally provide your Twitter login credentials (username & password) before calling *link()*.
 
 ### Handling Signals
 
