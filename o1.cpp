@@ -161,8 +161,7 @@ QByteArray O1::encodeHeaders(const QList<O1RequestParameter> &headers) {
 }
 
 /// Construct query string from list of headers
-QByteArray O1::createQueryParams(const QList<O1RequestParameter> &params)
-{
+QByteArray O1::createQueryParams(const QList<O1RequestParameter> &params) {
     QByteArray ret;
     bool first = true;
     foreach (O1RequestParameter h, params) {

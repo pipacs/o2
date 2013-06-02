@@ -14,10 +14,22 @@ const char XAUTH_MODE_VALUE[] = "client_auth";
 OXTwitter::OXTwitter(QObject *parent): O1Twitter(parent) {
 }
 
-void OXTwitter::setXAuthParameters(const QString &username, const QString &password) {
-    xAuthParams_.append(O1RequestParameter(QByteArray(XAUTH_USERNAME), username.toLatin1()));
-    xAuthParams_.append(O1RequestParameter(QByteArray(XAUTH_PASSWORD), password.toLatin1()));
-    xAuthParams_.append(O1RequestParameter(QByteArray(XAUTH_MODE), QByteArray(XAUTH_MODE_VALUE)));
+QString OXTwitter::username() {
+    return username_;
+}
+
+void OXTwitter::setUsername(const QString &username) {
+    username_ = username;
+    emit usernameChanged();
+}
+
+QString OXTwitter::password() {
+    return password_;
+}
+
+void OXTwitter::setPassword(const QString &password) {
+    password_ = password;
+    emit passwordChanged();
 }
 
 void OXTwitter::link() {
@@ -27,10 +39,15 @@ void OXTwitter::link() {
         return;
     }
 
-    if (xAuthParams_.isEmpty()) {
+    if (username_.isEmpty() || password_.isEmpty()) {
         qWarning() << "Error: XAuth parameters not set. Aborting!";
         return;
     }
+
+    // prepare XAuth parameters
+    xAuthParams_.append(O1RequestParameter(QByteArray(XAUTH_USERNAME), username_.toLatin1()));
+    xAuthParams_.append(O1RequestParameter(QByteArray(XAUTH_PASSWORD), password_.toLatin1()));
+    xAuthParams_.append(O1RequestParameter(QByteArray(XAUTH_MODE), QByteArray(XAUTH_MODE_VALUE)));
 
     QList<O1RequestParameter> oauthParams;
     oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, O2_SIGNATURE_TYPE_HMAC_SHA1));
