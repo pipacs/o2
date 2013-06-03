@@ -11,6 +11,7 @@ SOURCES += \
     $$PWD/o2requestor.cpp \
     $$PWD/simplecrypt.cpp \
     $$PWD/o2skydrive.cpp \
+    $$PWD/oxtwitter.cpp \
 
 HEADERS += \
     $$PWD/o1.h \
@@ -27,3 +28,4 @@ HEADERS += \
     $$PWD/simplecrypt.h \
     $$PWD/o2skydrive.h \
     $$PWD/o2globals.h \
+    $$PWD/oxtwitter.h \
