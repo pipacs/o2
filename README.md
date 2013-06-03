@@ -14,6 +14,7 @@ O1Dropbox | o1dropbox.h | Dropbox OAuth specializations
 O1Flickr | o1flickr.h | Flickr OAuth specializations
 O1Requestor | o1requestor.h | Makes authenticated OAuth 1.0 requests: GET, POST or PUT, handles timeouts
 O1Twitter | o1twitter.h | Twitter OAuth specializations
+OXTwitter | oxtwitter.h | Twitter XAuth specialization
 O2 | o2.h | Generic OAuth 2.0 authentication
 O2Facebook | o2facebook.h | Facebook OAuth specialization
 O2Gft | o2gft.h | Google Fusion Tables OAuth specialization
@@ -51,7 +52,9 @@ Instantiate one of the authenticator classes, like O1Twitter, set your applicati
     connect(o1, SIGNAL(linkingSucceeded()), this, SLOT(onLinkingSucceeded()));
     connect(o1, SIGNAL(openBrowser(QUrl)), this, SLOT(onOpenBrowser(QUrl)));
     connect(o1, SIGNAL(closeBrowser()), this, SLOT(onCloseBrowser()));
-    
+
+**Note:** For browserless Twitter authentication, you can use the OXTwitter specialized class which can do Twitter XAuth. You will need to additionally provide your Twitter login credentials (username & password) before calling *link()*.
+
 ### Handling Signals
 
 O2 is an asynchronous library. It will send signals at various stages of authentication and request processing.
