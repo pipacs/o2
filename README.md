@@ -23,6 +23,8 @@ O2ReplyServer | o2replyserver.h | HTTP server to process authentication response
 O2Requestor | o2requestor.h | Makes authenticated OAuth 2.0 requests (GET, POST or PUT), handles timeouts and token expiry
 O2Skydrive | o2skydrive.h | Skydrive OAuth specialization
 SimpleCrypt | simplecrypt.h | Simple encryption and decryption by Andre Somers
+O2AbstractStore | o2abstractstore.h | Base class for implemnting persistent stores
+O2SettingsStore | o2settingsstore.h | A QSettings based persistent store for writing OAuth tokens
 
 ## Installation
 
@@ -30,7 +32,7 @@ Clone the Github repository, then add all files to your Qt project.
 
 ## Basic Usage
 
-This example assumes a hypothetical Twitter client that will post tweets. Twitter is using OAuth 1.0. 
+This example assumes a hypothetical Twitter client that will post tweets. Twitter is using OAuth 1.0.
 
 ### Setup
 
@@ -62,25 +64,25 @@ O2 is an asynchronous library. It will send signals at various stages of authent
 To handle these signals, implement the following slots in your code:
 
     void onLinkedChanged() {
-        // Linking (login) state has changed. 
+        // Linking (login) state has changed.
         // Use o1->linked() to get the actual state
     }
-    
+
     void onLinkingFailed() {
         // Login has failed
     }
-    
+
     void onLinkingSucceeded() {
         // Login has succeeded
     }
-    
+
     void onOpenBrowser(const QUrl *url) {
         // Open a web browser or a web view with the given URL.
         // The user will interact with this browser window to
         // enter login name, password, and authorize your application
         // to access the Twitter account
     }
-    
+
     void onCloseBrowser() {
         // Close the browser window opened in openBrowser()
     }
@@ -90,15 +92,15 @@ To handle these signals, implement the following slots in your code:
 To log in (or, to be more accurate, to link your application to the OAuth service), call the link() method:
 
     o1->link();
-    
-This initiates the authentication sequence. Your signal handlers above will be called at various stages. Lastly, if linking succeeds, onLinkingSucceeded() will be called. 
+
+This initiates the authentication sequence. Your signal handlers above will be called at various stages. Lastly, if linking succeeds, onLinkingSucceeded() will be called.
 
 ### Logging Out
 
 To log out, call the unlink() method:
 
     o1->unlink();
-    
+
 Logging out always succeeds, and requires no user interaction.
 
 ### Sending Authenticated Requests
@@ -109,15 +111,15 @@ First we need a Qt network manager and an O1 requestor object:
 
     QNetworkAccessManager manager = new QNetworkAccessManager(this);
     O1Requestor requestor = new O1Requestor(manager, o1, this);
-    
+
 Then we create an HTTP request containing the image and the message, in the format specified by Twitter:
 
     QString imagePath("/tmp/image.jpg");
     QString message("My first tweet!");
-    
+
     QFileInfo fileInfo(imagePath);
     QFile file(imagePath);
-    
+
     QString boundary("7d44e178b0439");
     QByteArray data(QString("--" + boundary + "\r\n").toAscii());
     data += "Content-Disposition: form-data; name=\"media[]\"; filename=\"" + fileInfo.baseName() + "\"\r\n";
@@ -137,9 +139,26 @@ Then we create an HTTP request containing the image and the message, in the form
     request.setUrl(QUrl(uploadUrl));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=" + boundary);
     request.setHeader(QNetworkRequest::ContentLengthHeader, data.length());
-    
+
 Finally we authenticate and send the request using the O1 requestor object:
 
     QNetworkReply *reply = requestor->post(request, QList<O1RequestParameter>(), data);
 
 That's it. A tweet using the O2 library!
+
+### Storing OAuth Tokens
+
+O2 provides simple storage classes for writing OAuth tokens in a peristent location. Currently, a QSettings based backing store **O2SettingsStore** is provided in O2. O2SettingsStore keeps all token values in an encrypted form. You have to specify the encryption key to use while constructing the object:
+
+    O2SettingsStore settings = new O2SettingsStore("myencryptionkey");
+    // Set the store before starting OAuth, i.e before calling link()
+    o1->setStore(settings);
+    ...
+
+You can also create it with your customized QSettings object. O2SettingsStore will then use that QSettings object for storing the tokens:
+
+    O2SettingsStore settings = new O2SettingsStore(mySettingsObject, "myencryptionkey");
+
+Once set, O2SettingsStore takes ownership of the QSettings object.
+
+**Note:** If you do not specify a storage object to use, O2 will create one by default (which QSettings based), and use it. In such a case, a default encryption key is used for encrypting the data.

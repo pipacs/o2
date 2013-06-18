@@ -12,7 +12,7 @@
 #include <QPair>
 
 #include "o2reply.h"
-#include "simplecrypt.h"
+#include "o2abstractstore.h"
 
 class O2ReplyServer;
 
@@ -94,6 +94,9 @@ public:
     /// Get token expiration time (seconds from Epoch).
     int expires();
 
+    /// Sets the storage object to use for storing the OAuth tokens on a peristent medium
+    void setStore(O2AbstractStore *store);
+
 public slots:
     /// Authenticate.
     Q_INVOKABLE virtual void link();
@@ -172,10 +175,10 @@ protected:
     QUrl refreshTokenUrl_;
     QNetworkAccessManager *manager_;
     O2ReplyServer *replyServer_;
-    SimpleCrypt crypt_;
     O2ReplyList timedReplies_;
     quint16 localPort_;
     GrantFlow grantFlow_;
+    O2AbstractStore *store_;
 };
 
 #endif // O2_H
