@@ -23,6 +23,8 @@ O2ReplyServer | o2replyserver.h | HTTP server to process authentication response
 O2Requestor | o2requestor.h | Makes authenticated OAuth 2.0 requests (GET, POST or PUT), handles timeouts and token expiry
 O2Skydrive | o2skydrive.h | Skydrive OAuth specialization
 SimpleCrypt | simplecrypt.h | Simple encryption and decryption by Andre Somers
+O2AbstractStore | o2abstractstore.h | Base class for implemnting persistent stores
+O2SettingsStore | o2settingsstore.h | A QSettings based persistent store for writing OAuth tokens
 
 ## Installation
 
@@ -146,18 +148,14 @@ That's it. A tweet using the O2 library!
 
 ### Storing OAuth Tokens
 
-O2 provides simple storage classes for writing various OAuth tokens in a peristent location. Currently, a QSettings based backing store is provided in O2. You can specify the store to use by setting it on O1/O2 in the following way:
+O2 provides simple storage classes for writing OAuth tokens in a peristent location. Currently, a QSettings based backing store **O2SettingsStore** is provided in O2. O2SettingsStore keeps all token values in an encrypted form. You have to specify the encryption key to use while constructing the object:
 
-    O2SettingsStore settings = new O2SettingsStore();
+    O2SettingsStore settings = new O2SettingsStore("myencryptionkey");
     // Set the store before starting OAuth, i.e before calling link()
     o1->setStore(settings);
     ...
 
-O2SettingsStore keeps all token values in an encrypted form. You have to specify the encryption key to use while constructing the object:
-
-    O2SettingsStore settings = new O2SettingsStore("myencryptionkey");
-
-You can also create with it with your customized QSettings object. O2SettingsStore will then use that QSettings object for storing the tokens:
+You can also create it with your customized QSettings object. O2SettingsStore will then use that QSettings object for storing the tokens:
 
     O2SettingsStore settings = new O2SettingsStore(mySettingsObject, "myencryptionkey");
 
