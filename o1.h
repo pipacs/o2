@@ -10,7 +10,7 @@
 #include <QUrl>
 #include <QNetworkReply>
 
-#include "simplecrypt.h"
+#include "o2abstractstore.h"
 
 class O2ReplyServer;
 
@@ -80,6 +80,9 @@ public:
 
     /// Destructor.
     virtual ~O1();
+
+    /// Sets the storage object to use for storing the OAuth tokens on a peristent medium
+    void setStore(O2AbstractStore *store);
 
     /// Parse a URL-encoded response string.
     static QMap<QString, QString> parseResponse(const QByteArray &response);
@@ -179,8 +182,8 @@ protected:
     QUrl accessTokenUrl_;
     QNetworkAccessManager *manager_;
     O2ReplyServer *replyServer_;
-    SimpleCrypt crypt_;
     quint16 localPort_;
+    O2AbstractStore *store_;
 };
 
 #endif // O1_H
