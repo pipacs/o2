@@ -159,7 +159,7 @@ We create an HTTP request containing the image and the message, in the format sp
 
     QNetworkRequest request;
     // Using Twitter's REST API ver 1.1
-    static const char *uploadUrl = "https://upload.twitter.com/1/statuses/update_with_media.json";
+    static const char *uploadUrl = "https://api.twitter.com/1.1/statuses/update_with_media.json";
     request.setUrl(QUrl(uploadUrl));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=" + boundary);
     request.setHeader(QNetworkRequest::ContentLengthHeader, data.length());
