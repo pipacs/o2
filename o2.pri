@@ -12,7 +12,8 @@ SOURCES += \
     $$PWD/simplecrypt.cpp \
     $$PWD/o2skydrive.cpp \
     $$PWD/oxtwitter.cpp \
-    $$PWD/o2settingsstore.cpp
+    $$PWD/o2settingsstore.cpp \
+    $$PWD/o2volatilestore.cpp \
 
 HEADERS += \
     $$PWD/o1.h \
@@ -31,4 +32,5 @@ HEADERS += \
     $$PWD/o2globals.h \
     $$PWD/oxtwitter.h \
     $$PWD/o2abstractstore.h \
-    $$PWD/o2settingsstore.h
+    $$PWD/o2settingsstore.h \
+    $$PWD/o2volatilestore.h \
