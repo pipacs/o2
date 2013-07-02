@@ -195,7 +195,6 @@ This class stores key-value pairs in the applications memory. This store can be 
 Helpful during testing the complete OAuth flow, as the tokens are only stored in memory and each restart of the testing application clears this data.
 
   O2VolatileStore memstore = new O2VolatileStore();
-
   // Set the store before starting OAuth, i.e before calling link()
   o1->setStore(memstore);
   ...
