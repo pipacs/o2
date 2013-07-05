@@ -184,3 +184,9 @@ You can also create it with your customized QSettings object. O2SettingsStore wi
 Once set, O2SettingsStore takes ownership of the QSettings object.
 
 **Note:** If you do not specify a storage object to use, O2 will create one by default (which QSettings based), and use it. In such a case, a default encryption key is used for encrypting the data.
+
+### Extra OAuth Tokens
+Some OAuth service providers provide additional information in the access token response. Eg: Twitter returns 2 additional tokens in it's access token response - *screen_name* and *user_id*.
+
+O2 provides all such tokens via the property - *extraTokens*. You can query this property after a successful OAuth exchange, i.e after the *linkingSucceeded()* signal has been emitted.
+

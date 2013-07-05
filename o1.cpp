@@ -11,6 +11,7 @@
 
 #include "o1.h"
 #include "o2replyserver.h"
+#include "o2globals.h"
 #include "o2settingsstore.h"
 
 #define trace() if (1) qDebug()
@@ -120,11 +121,11 @@ void O1::setAccessTokenUrl(const QUrl &value) {
     emit accessTokenUrlChanged();
 }
 
-StrStrMap O1::extraTokens() const {
+QVariantMap O1::extraTokens() const {
     return extraTokens_;
 }
 
-void O1::setExtraTokens(QMap<QString, QString> extraTokens) {
+void O1::setExtraTokens(QVariantMap extraTokens) {
     extraTokens_ = extraTokens;
 }
 
@@ -365,9 +366,13 @@ void O1::onTokenExchangeFinished() {
     if (response.contains(O2_OAUTH_TOKEN) && response.contains(O2_OAUTH_TOKEN_SECRET)) {
         setToken(response.take(O2_OAUTH_TOKEN));
         setTokenSecret(response.take(O2_OAUTH_TOKEN_SECRET));
+        // Set extra tokens if any
         if (!response.isEmpty()) {
-            // Set extra tokens if any
-            setExtraTokens(response);
+            QVariantMap extraTokens;
+            foreach (QString key, response.keys()) {
+               extraTokens.insert(key, response.value(key));
+            }
+            setExtraTokens(extraTokens);
         }
         emit linkedChanged();
         emit linkingSucceeded();

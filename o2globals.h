@@ -1,12 +1,6 @@
 #ifndef O2GLOBALS_H
 #define O2GLOBALS_H
 
-#include <QMap>
-#include <QString>
-
-// typedef for use in property declarations
-typedef QMap<QString, QString> StrStrMap;
-
 // Common constants
 const char O2_ENCRYPTION_KEY[] = "12345678";
 const char O2_CALLBACK_URL[] = "http://127.0.0.1:%1/";

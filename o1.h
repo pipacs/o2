@@ -11,7 +11,6 @@
 #include <QNetworkReply>
 
 #include "o2abstractstore.h"
-#include "o2globals.h"
 
 class O2ReplyServer;
 
@@ -42,8 +41,8 @@ public:
     QString tokenSecret();
 
     /// Extra tokens available after a successful OAuth exchange
-    Q_PROPERTY(StrStrMap extraTokens READ extraTokens)
-    StrStrMap extraTokens() const;
+    Q_PROPERTY(QMap extraTokens READ extraTokens)
+    QVariantMap extraTokens() const;
 
     /// Client application ID.
     /// O1 instances with the same (client ID, client secret) share the same "linked", "token" and "tokenSecret" properties.
@@ -174,7 +173,7 @@ protected:
     virtual void exchangeToken();
 
     /// Set extra tokens found in OAuth response
-    void setExtraTokens(QMap<QString, QString> extraTokens);
+    void setExtraTokens(QVariantMap extraTokens);
 
 protected:
     QString clientId_;
@@ -192,7 +191,7 @@ protected:
     O2ReplyServer *replyServer_;
     quint16 localPort_;
     O2AbstractStore *store_;
-    QMap<QString, QString> extraTokens_;
+    QVariantMap extraTokens_;
 };
 
 #endif // O1_H

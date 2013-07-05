@@ -17,6 +17,7 @@
 
 #include "o2.h"
 #include "o2replyserver.h"
+#include "o2globals.h"
 #include "o2settingsstore.h"
 
 #define trace() if (1) qDebug()
@@ -120,11 +121,11 @@ void O2::setLocalPort(int value) {
     emit localPortChanged();
 }
 
-StrStrMap O2::extraTokens() const {
+QVariantMap O2::extraTokens() const {
     return extraTokens_;
 }
 
-void O2::setExtraTokens(QMap<QString, QString> extraTokens) {
+void O2::setExtraTokens(QVariantMap extraTokens) {
     extraTokens_ = extraTokens;
 }
 
@@ -230,24 +231,24 @@ void O2::onTokenReplyFinished() {
         QByteArray replyData = tokenReply->readAll();
         QScriptEngine engine;
         QScriptValueIterator it(engine.evaluate("(" + QString(replyData) + ")"));
-        StrStrMap tokens;
+        QVariantMap tokens;
 
         while (it.hasNext()) {
             it.next();
-            tokens.insert(it.name(), it.value().toString());
+            tokens.insert(it.name(), it.value().toVariant());
         }
         // Check for mandatory tokens
         if (tokens.contains(O2_OAUTH2_ACCESS_TOKEN)) {
-            setToken(tokens.take(O2_OAUTH2_ACCESS_TOKEN));
+            setToken(tokens.take(O2_OAUTH2_ACCESS_TOKEN).toString());
             bool ok = false;
             int expiresIn = tokens.take(O2_OAUTH2_EXPIRES_IN).toInt(&ok);
             if (ok) {
                 trace() << "Token expires in" << expiresIn << "seconds";
                 setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
             }
-            setRefreshToken(tokens.take(O2_OAUTH2_REFRESH_TOKEN));
+            setRefreshToken(tokens.take(O2_OAUTH2_REFRESH_TOKEN).toString());
+            // Set extra tokens if any
             if (!tokens.isEmpty()) {
-                // Set extra tokens if any
                 setExtraTokens(tokens);
             }
             timedReplies_.remove(tokenReply);

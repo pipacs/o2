@@ -13,7 +13,6 @@
 
 #include "o2reply.h"
 #include "o2abstractstore.h"
-#include "o2globals.h"
 
 class O2ReplyServer;
 
@@ -35,8 +34,8 @@ public:
     bool linked();
 
     /// Extra tokens available after a successful OAuth exchange
-    Q_PROPERTY(StrStrMap extraTokens READ extraTokens)
-    StrStrMap extraTokens() const;
+    Q_PROPERTY(QMap extraTokens READ extraTokens)
+    QVariantMap extraTokens() const;
 
     /// Authentication token.
     Q_PROPERTY(QString token READ token WRITE setToken NOTIFY tokenChanged)
@@ -170,7 +169,7 @@ protected:
     void setExpires(int v);
 
     /// Set extra tokens found in OAuth response
-    void setExtraTokens(QMap<QString, QString> extraTokens);
+    void setExtraTokens(QVariantMap extraTokens);
 
 protected:
     QString clientId_;
@@ -187,7 +186,7 @@ protected:
     quint16 localPort_;
     GrantFlow grantFlow_;
     O2AbstractStore *store_;
-    QMap<QString, QString> extraTokens_;
+    QVariantMap extraTokens_;
 };
 
 #endif // O2_H
