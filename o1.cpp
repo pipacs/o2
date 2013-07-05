@@ -121,6 +121,14 @@ void O1::setAccessTokenUrl(const QUrl &value) {
     emit accessTokenUrlChanged();
 }
 
+QVariantMap O1::extraTokens() const {
+    return extraTokens_;
+}
+
+void O1::setExtraTokens(QVariantMap extraTokens) {
+    extraTokens_ = extraTokens;
+}
+
 void O1::unlink() {
     trace() << "O1::unlink";
     if (linked()) {
@@ -356,10 +364,16 @@ void O1::onTokenExchangeFinished() {
     QByteArray data = reply->readAll();
     QMap<QString, QString> response = parseResponse(data);
     if (response.contains(O2_OAUTH_TOKEN) && response.contains(O2_OAUTH_TOKEN_SECRET)) {
-        QString token = response.value(O2_OAUTH_TOKEN);
-        QString secret = response.value(O2_OAUTH_TOKEN_SECRET);
-        setToken(token);
-        setTokenSecret(secret);
+        setToken(response.take(O2_OAUTH_TOKEN));
+        setTokenSecret(response.take(O2_OAUTH_TOKEN_SECRET));
+        // Set extra tokens if any
+        if (!response.isEmpty()) {
+            QVariantMap extraTokens;
+            foreach (QString key, response.keys()) {
+               extraTokens.insert(key, response.value(key));
+            }
+            setExtraTokens(extraTokens);
+        }
         emit linkedChanged();
         emit linkingSucceeded();
     } else {

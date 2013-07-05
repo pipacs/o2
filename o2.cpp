@@ -7,6 +7,7 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QScriptEngine>
+#include <QScriptValueIterator>
 #include <QDateTime>
 #include <QCryptographicHash>
 #include <QTimer>
@@ -120,6 +121,14 @@ void O2::setLocalPort(int value) {
     emit localPortChanged();
 }
 
+QVariantMap O2::extraTokens() const {
+    return extraTokens_;
+}
+
+void O2::setExtraTokens(QVariantMap extraTokens) {
+    extraTokens_ = extraTokens;
+}
+
 void O2::link() {
     trace() << "O2::link";
     if (linked()) {
@@ -220,20 +229,38 @@ void O2::onTokenReplyFinished() {
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     if (tokenReply->error() == QNetworkReply::NoError) {
         QByteArray replyData = tokenReply->readAll();
-        QScriptValue value;
         QScriptEngine engine;
-        value = engine.evaluate("(" + QString(replyData) + ")");
-        setToken(value.property(O2_OAUTH2_ACCESS_TOKEN).toString());
-        int expiresIn = value.property(O2_OAUTH2_EXPIRES_IN).toInteger();
-        if (expiresIn > 0) {
-            trace() << "Token expires in" << expiresIn << "seconds";
-            setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
+        QScriptValueIterator it(engine.evaluate("(" + QString(replyData) + ")"));
+        QVariantMap tokens;
+
+        while (it.hasNext()) {
+            it.next();
+            tokens.insert(it.name(), it.value().toVariant());
         }
-        setRefreshToken(value.property(O2_OAUTH2_REFRESH_TOKEN).toString());
-        timedReplies_.remove(tokenReply);
-        emit linkedChanged();
-        emit tokenChanged();
-        emit linkingSucceeded();
+        // Check for mandatory tokens
+        if (tokens.contains(O2_OAUTH2_ACCESS_TOKEN)) {
+            setToken(tokens.take(O2_OAUTH2_ACCESS_TOKEN).toString());
+            bool ok = false;
+            int expiresIn = tokens.take(O2_OAUTH2_EXPIRES_IN).toInt(&ok);
+            if (ok) {
+                trace() << "Token expires in" << expiresIn << "seconds";
+                setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
+            }
+            setRefreshToken(tokens.take(O2_OAUTH2_REFRESH_TOKEN).toString());
+            // Set extra tokens if any
+            if (!tokens.isEmpty()) {
+                setExtraTokens(tokens);
+            }
+            timedReplies_.remove(tokenReply);
+            emit linkedChanged();
+            emit tokenChanged();
+            emit linkingSucceeded();
+        } else {
+            qWarning() << "O2::onTokenReplyFinished: oauth_token missing from response" << replyData;
+            emit linkedChanged();
+            emit tokenChanged();
+            emit linkingFailed();
+        }
     }
     tokenReply->deleteLater();
 }
