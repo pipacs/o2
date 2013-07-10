@@ -40,6 +40,10 @@ public:
     /// Authentication token secret.
     QString tokenSecret();
 
+    /// Extra tokens available after a successful OAuth exchange
+    Q_PROPERTY(QMap extraTokens READ extraTokens)
+    QVariantMap extraTokens() const;
+
     /// Client application ID.
     /// O1 instances with the same (client ID, client secret) share the same "linked", "token" and "tokenSecret" properties.
     Q_PROPERTY(QString clientId READ clientId WRITE setClientId NOTIFY clientIdChanged)
@@ -168,6 +172,9 @@ protected:
     /// Exchange token for authorizaton token.
     virtual void exchangeToken();
 
+    /// Set extra tokens found in OAuth response
+    void setExtraTokens(QVariantMap extraTokens);
+
 protected:
     QString clientId_;
     QString clientSecret_;
@@ -184,6 +191,7 @@ protected:
     O2ReplyServer *replyServer_;
     quint16 localPort_;
     O2AbstractStore *store_;
+    QVariantMap extraTokens_;
 };
 
 #endif // O1_H
