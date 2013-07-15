@@ -1,10 +1,3 @@
-#include <QDebug>
-#include <QDateTime>
-#include <QMap>
-#include <QString>
-#include <QStringList>
-#include <QDesktopServices>
-
 #include "o2gft.h"
 
 static const char *GftScope = "https://www.googleapis.com/auth/fusiontables";

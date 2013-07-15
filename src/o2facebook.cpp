@@ -3,7 +3,6 @@
 #include <QMap>
 #include <QString>
 #include <QStringList>
-#include <QDesktopServices>
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
 #endif
