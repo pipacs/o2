@@ -17,6 +17,9 @@ public:
 
 signals:
     void extraTokensReady(const QVariantMap &extraTokens);
+    void linkingFailed();
+    void linkingSucceeded();
+    void statusPosted();
 
 public slots:
     void doOAuth();
@@ -25,7 +28,6 @@ public slots:
 
 private slots:
     void onLinkedChanged();
-    void onLinkingFailed();
     void onLinkingSucceeded();
     void onOpenBrowser(const QUrl &url);
     void onCloseBrowser();

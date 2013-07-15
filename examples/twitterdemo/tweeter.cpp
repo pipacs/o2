@@ -29,7 +29,7 @@ Tweeter::Tweeter(QObject *parent) :
     connect(o1Twitter_, SIGNAL(linkedChanged()),
             this, SLOT(onLinkedChanged()));
     connect(o1Twitter_, SIGNAL(linkingFailed()),
-            this, SLOT(onLinkingFailed()));
+            this, SIGNAL(linkingFailed()));
     connect(o1Twitter_, SIGNAL(linkingSucceeded()),
             this, SLOT(onLinkingSucceeded()));
     connect(o1Twitter_, SIGNAL(openBrowser(QUrl)),
@@ -40,7 +40,7 @@ Tweeter::Tweeter(QObject *parent) :
     connect(oxTwitter_, SIGNAL(linkedChanged()),
             this, SLOT(onLinkedChanged()));
     connect(oxTwitter_, SIGNAL(linkingFailed()),
-            this, SLOT(onLinkingFailed()));
+            this, SIGNAL(linkingFailed()));
     connect(oxTwitter_, SIGNAL(linkingSucceeded()),
             this, SLOT(onLinkingSucceeded()));
     connect(oxTwitter_, SIGNAL(openBrowser(QUrl)),
@@ -64,6 +64,12 @@ void Tweeter::doXAuth(const QString &username, const QString &password) {
 }
 
 void Tweeter::postStatusUpdate(const QString &message) {
+    if (!o1Twitter_->linked()) {
+        qWarning() << "Application is not linked to Twitter!";
+        emit statusPosted();
+        return;
+    }
+
     qDebug() << "Status update message:" << message.toLatin1().constData();
 
     QNetworkAccessManager* manager = new QNetworkAccessManager(this);
@@ -99,10 +105,6 @@ void Tweeter::onLinkedChanged() {
     qDebug() << "Link changed!";
 }
 
-void Tweeter::onLinkingFailed() {
-    qWarning() << "Linking failed!";
-}
-
 void Tweeter::onLinkingSucceeded() {
     O1Twitter* o1t = qobject_cast<OXTwitter *>(sender());
 
@@ -120,6 +122,7 @@ void Tweeter::onLinkingSucceeded() {
             qDebug() << "\t" << key << ":" << extraTokens.value(key).toString();
         }
     }
+    emit linkingSucceeded();
 }
 
 void Tweeter::tweetReplyDone()
@@ -128,7 +131,8 @@ void Tweeter::tweetReplyDone()
     if (reply->error() != QNetworkReply::NoError) {
         qDebug() << "ERROR:" << reply->errorString();
         qDebug() << "content:" << reply->readAll();
-        return;
+    } else {
+        qDebug() << "Tweet posted sucessfully!";
     }
-    qDebug() << "Tweet posted sucessfully!";
+    emit statusPosted();
 }
