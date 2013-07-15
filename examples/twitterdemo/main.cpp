@@ -27,6 +27,9 @@ class Helper : public QObject
 {
     Q_OBJECT
 
+public:
+    Helper() : QObject(), tweeter_(this), waitForMsg_(false), msg_(QString()) {}
+
 public slots:
 
     void processArgs() {
@@ -88,10 +91,7 @@ public slots:
         if (waitForMsg_) {
             postStatusUpdate(msg_);
         } else {
-            // Give some time for the data to be written. Ideally, QSettings
-            // should call sync() while being destroyed, but this doesn't
-            // seem to be working
-            QTimer::singleShot(2000, qApp, SLOT(quit()));
+            qApp->quit();
         }
     }
 
@@ -113,7 +113,8 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    QTimer::singleShot(0, new Helper(), SLOT(processArgs()));
+    Helper helper;
+    QTimer::singleShot(0, &helper, SLOT(processArgs()));
 
     return a.exec();
 }
