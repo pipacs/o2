@@ -21,9 +21,6 @@ public slots:
     void onIncomingConnection();
     void onBytesReady();
     QMap<QString, QString> parseQueryParams(QByteArray *data);
-
-public:
-    QTcpSocket *socket;
 };
 
 #endif // O2REPLYSERVER_H
