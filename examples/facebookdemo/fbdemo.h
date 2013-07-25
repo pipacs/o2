@@ -18,7 +18,7 @@ signals:
     void linkingSucceeded();
 
 public slots:
-    void doOAuth();
+    void doOAuth(O2::GrantFlow grantFlowType);
 
 private slots:
     void onLinkedChanged();

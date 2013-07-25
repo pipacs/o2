@@ -13,6 +13,16 @@ const char FB_TOKEN_URL[] = "https://graph.facebook.com/oauth/access_token";
 
 const int localPort = 8888;
 
+static QString grantTypeToName(O2::GrantFlow grantFlowType) {
+    switch (grantFlowType) {
+    case O2::GrantFlowAuthorizationCode:
+        return "Authorization Code";
+    case O2::GrantFlowImplicit:
+        return "Implicit Grant";
+    }
+    return QString();
+}
+
 FBDemo::FBDemo(QObject *parent) :
     QObject(parent) {
     o2Facebook_ = new O2Facebook(this);
@@ -22,7 +32,6 @@ FBDemo::FBDemo(QObject *parent) :
     o2Facebook_->setLocalPort(localPort);
     o2Facebook_->setRequestUrl(FB_REQUEST_URL);
     o2Facebook_->setTokenUrl(FB_TOKEN_URL);
-//    o2Facebook_->setGrantFlow(O2::GrantFlowImplicit);
 
     // Create a store object for writing the received tokens
     O2SettingsStore *store = new O2SettingsStore(O2_ENCRYPTION_KEY);
@@ -41,8 +50,10 @@ FBDemo::FBDemo(QObject *parent) :
             this, SLOT(onCloseBrowser()));
 }
 
-void FBDemo::doOAuth() {
-    qDebug() << "Starting OAuth 2...";
+void FBDemo::doOAuth(O2::GrantFlow grantFlowType) {
+    qDebug() << "Starting OAuth 2 with grant flow type"
+             << grantTypeToName(grantFlowType) << "...";
+    o2Facebook_->setGrantFlow(grantFlowType);
     o2Facebook_->link();
 }
 
