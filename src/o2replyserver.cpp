@@ -24,11 +24,16 @@ O2ReplyServer::~O2ReplyServer() {
 }
 
 void O2ReplyServer::onIncomingConnection() {
-    socket = nextPendingConnection();
+    QTcpSocket* socket = nextPendingConnection();
     connect(socket, SIGNAL(readyRead()), this, SLOT(onBytesReady()), Qt::UniqueConnection);
+    connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
 }
 
 void O2ReplyServer::onBytesReady() {
+    QTcpSocket *socket = qobject_cast<QTcpSocket *>(sender());
+    if (!socket) {
+        return;
+    }
     QByteArray reply;
     QByteArray content;
     content.append("<HTML></HTML>");
