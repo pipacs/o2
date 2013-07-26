@@ -1,4 +1,9 @@
 #include <QDesktopServices>
+#if QT_VERSION >= 0x050000
+#include <QtWebKitWidgets>
+#else
+#include <QtWebKit>
+#endif
 #include <QDebug>
 
 #include "fbdemo.h"
@@ -12,16 +17,6 @@ const char FB_REQUEST_URL[] = "https://www.facebook.com/dialog/oauth";
 const char FB_TOKEN_URL[] = "https://graph.facebook.com/oauth/access_token";
 
 const int localPort = 8888;
-
-static QString grantTypeToName(O2::GrantFlow grantFlowType) {
-    switch (grantFlowType) {
-    case O2::GrantFlowAuthorizationCode:
-        return "Authorization Code";
-    case O2::GrantFlowImplicit:
-        return "Implicit Grant";
-    }
-    return QString();
-}
 
 FBDemo::FBDemo(QObject *parent) :
     QObject(parent) {
@@ -52,8 +47,14 @@ FBDemo::FBDemo(QObject *parent) :
 
 void FBDemo::doOAuth(O2::GrantFlow grantFlowType) {
     qDebug() << "Starting OAuth 2 with grant flow type"
-             << grantTypeToName(grantFlowType) << "...";
+             << GRANTFLOW_STR(grantFlowType) << "...";
     o2Facebook_->setGrantFlow(grantFlowType);
+
+    if (grantFlowType == O2::GrantFlowImplicit) {
+        O2UserAgent *ua = new O2UserAgent(o2Facebook_->localPort());
+        ua->setWebView(new QWebView());
+        o2Facebook_->setUserAgent(ua);
+    }
     o2Facebook_->link();
 }
 
@@ -82,4 +83,8 @@ void FBDemo::onLinkingSucceeded() {
         }
     }
     emit linkingSucceeded();
+}
+
+void FBDemo::onUrlChanged(const QUrl &url) {
+    qDebug() << "Url changed to" << url.toString();
 }
