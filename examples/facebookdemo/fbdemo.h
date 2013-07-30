@@ -25,7 +25,6 @@ private slots:
     void onLinkingSucceeded();
     void onOpenBrowser(const QUrl &url);
     void onCloseBrowser();
-    void onUrlChanged(const QUrl &url);
 
 private:
     O2Facebook *o2Facebook_;

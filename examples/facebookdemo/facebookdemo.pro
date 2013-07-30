@@ -1,9 +1,7 @@
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4) {
-    QT += widgets webkitwidgets
-} else {
-    QT += webkit
+    QT += widgets
 }
 
 include(../../src/src.pri)
@@ -16,4 +14,3 @@ SOURCES += main.cpp \
 
 HEADERS += \
     fbdemo.h
-
