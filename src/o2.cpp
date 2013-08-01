@@ -132,7 +132,7 @@ void O2::setExtraTokens(QVariantMap extraTokens) {
 void O2::link() {
     trace() << "O2::link";
     if (linked()) {
-        trace() << "Linked already";
+        trace() << " Linked already";
         emit linkingSucceeded();
         return;
     }
