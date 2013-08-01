@@ -1,5 +1,4 @@
 #include <QDebug>
-#include <QDateTime>
 #include <QMap>
 #include <QString>
 #include <QStringList>
@@ -14,7 +13,7 @@ static const char *FbEndpoint = "https://graph.facebook.com/oauth/authorize?disp
 static const char *FbTokenUrl = "https://graph.facebook.com/oauth/access_token";
 static const quint16 FbLocalPort = 1965;
 
-#define SECONDS_IN_2_HOURS (2 * 60 * 60)
+const char FB_EXPIRES_KEY[] = "expires";
 
 O2Facebook::O2Facebook(QObject *parent): O2(parent) {
     setRequestUrl(FbEndpoint);
@@ -76,10 +75,9 @@ void O2Facebook::onTokenReplyFinished() {
         }
 
         // Interpret reply
-        setToken(reply.contains(O2_OAUTH2_ACCESS_TOKEN)? reply.value(O2_OAUTH2_ACCESS_TOKEN): "");
-        // FIXME: I have no idea how to interpret Facebook's "expires" value. So let's use a default of 2 hours
-        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + SECONDS_IN_2_HOURS);
-        setRefreshToken(reply.contains(O2_OAUTH2_REFRESH_TOKEN)? reply.value(O2_OAUTH2_REFRESH_TOKEN): "");
+        setToken(reply.value(O2_OAUTH2_ACCESS_TOKEN, ""));
+        setExpires(reply.value(FB_EXPIRES_KEY).toInt());
+        setRefreshToken(reply.value(O2_OAUTH2_REFRESH_TOKEN, ""));
 
         timedReplies_.remove(tokenReply);
         emit linkedChanged();
