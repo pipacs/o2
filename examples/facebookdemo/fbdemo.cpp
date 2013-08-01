@@ -1,3 +1,6 @@
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include <QDesktopServices>
 #include <QMetaEnum>
 #include <QDebug>
@@ -11,6 +14,7 @@ const char FB_APP_SECRET[] = "3d35b063872579cf7213e09e76b65ceb";
 
 const char FB_REQUEST_URL[] = "https://www.facebook.com/dialog/oauth";
 const char FB_TOKEN_URL[] = "https://graph.facebook.com/oauth/access_token";
+const char FB_DEBUG_TOKEN[] = "https://graph.facebook.com/me?fields=id&access_token=%1";
 
 const int localPort = 8888;
 
@@ -55,6 +59,22 @@ void FBDemo::doOAuth(O2::GrantFlow grantFlowType) {
     o2Facebook_->link();
 }
 
+void FBDemo::validateToken() {
+    if (!o2Facebook_->linked()) {
+        qWarning() << "ERROR: Application is not linked!";
+        emit linkingFailed();
+        return;
+    }
+    QString accessToken = o2Facebook_->token();
+    QString debugUrlStr = QString(FB_DEBUG_TOKEN).arg(accessToken);
+
+    QNetworkRequest request = QNetworkRequest(QUrl(debugUrlStr));
+    QNetworkAccessManager *mgr = new QNetworkAccessManager(this);
+    QNetworkReply *reply = mgr->get(request);
+    connect(reply, SIGNAL(finished()), this, SLOT(onFinished()));
+    qDebug() << "Validating user token. Please wait...";
+}
+
 void FBDemo::onOpenBrowser(const QUrl &url) {
     QDesktopServices::openUrl(url);
 }
@@ -80,4 +100,33 @@ void FBDemo::onLinkingSucceeded() {
         }
     }
     emit linkingSucceeded();
+}
+
+void FBDemo::onFinished() {
+    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    if (!reply) {
+        qWarning() << "NULL reply!";
+        emit linkingFailed();
+        return;
+    }
+
+    reply->deleteLater();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "Reply error:" << reply->error();
+        qWarning() << "Reason:" << reply->errorString();
+        emit linkingFailed();
+        return;
+    }
+
+    QByteArray replyData = reply->readAll();
+    bool valid = !replyData.contains("error");
+
+    if (valid) {
+        qDebug() << "Token is valid";
+        emit linkingSucceeded();
+    } else {
+        qDebug() << "Token is invalid";
+        emit linkingFailed();
+    }
 }

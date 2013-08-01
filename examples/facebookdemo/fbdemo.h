@@ -19,12 +19,14 @@ signals:
 
 public slots:
     void doOAuth(O2::GrantFlow grantFlowType);
+    void validateToken();
 
 private slots:
     void onLinkedChanged();
     void onLinkingSucceeded();
     void onOpenBrowser(const QUrl &url);
     void onCloseBrowser();
+    void onFinished();
 
 private:
     O2Facebook *o2Facebook_;
