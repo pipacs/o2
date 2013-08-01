@@ -6,6 +6,7 @@
 #include "tweeter.h"
 #include "o2globals.h"
 #include "o1requestor.h"
+#include "o2settingsstore.h"
 
 const char O2_CONSUMER_KEY[] = "2vHeyIxjywIadjEhvbDpg";
 const char O2_CONSUMER_SECRET[] = "Xfwe195Kp3ZpcCKgkYs7RKfugTm8EfpLkQvsKfX2vvs";
@@ -14,16 +15,18 @@ const int localPort = 8888;
 
 Tweeter::Tweeter(QObject *parent) :
     QObject(parent) {
-    o1Twitter_ = new O1Twitter(this);
-    oxTwitter_ = new OXTwitter(this);
+}
 
+void Tweeter::doOAuth() {
+    o1Twitter_ = new O1Twitter(this);
     o1Twitter_->setClientId(O2_CONSUMER_KEY);
     o1Twitter_->setClientSecret(O2_CONSUMER_SECRET);
     o1Twitter_->setLocalPort(localPort);
 
-    oxTwitter_->setClientId(O2_CONSUMER_KEY);
-    oxTwitter_->setClientSecret(O2_CONSUMER_SECRET);
-    oxTwitter_->setLocalPort(localPort);
+    // Create a store object for writing the received tokens
+    O2SettingsStore *store = new O2SettingsStore(O2_ENCRYPTION_KEY);
+    store->setGroupKey("twitter");
+    o1Twitter_->setStore(store);
 
     // Connect signals
     connect(o1Twitter_, SIGNAL(linkedChanged()),
@@ -37,6 +40,24 @@ Tweeter::Tweeter(QObject *parent) :
     connect(o1Twitter_, SIGNAL(closeBrowser()),
             this, SLOT(onCloseBrowser()));
 
+    qDebug() << "Starting OAuth...";
+    o1Twitter_->link();
+}
+
+void Tweeter::doXAuth(const QString &username, const QString &password) {
+    oxTwitter_ = new OXTwitter(this);
+    oxTwitter_->setClientId(O2_CONSUMER_KEY);
+    oxTwitter_->setClientSecret(O2_CONSUMER_SECRET);
+    oxTwitter_->setLocalPort(localPort);
+
+    oxTwitter_->setUsername(username);
+    oxTwitter_->setPassword(password);
+
+    // Create a store object for writing the received tokens
+    O2SettingsStore *store = new O2SettingsStore(O2_ENCRYPTION_KEY);
+    store->setGroupKey("twitter");
+    oxTwitter_->setStore(store);
+
     connect(oxTwitter_, SIGNAL(linkedChanged()),
             this, SLOT(onLinkedChanged()));
     connect(oxTwitter_, SIGNAL(linkingFailed()),
@@ -48,16 +69,6 @@ Tweeter::Tweeter(QObject *parent) :
     connect(oxTwitter_, SIGNAL(closeBrowser()),
             this, SLOT(onCloseBrowser()));
 
-}
-
-void Tweeter::doOAuth() {
-    qDebug() << "Starting OAuth...";
-    o1Twitter_->link();
-}
-
-void Tweeter::doXAuth(const QString &username, const QString &password) {
-    oxTwitter_->setUsername(username);
-    oxTwitter_->setPassword(password);
     qDebug() << "Starting XAuth...";
     qDebug() << "Username:" << username << "Password:" << password;
     oxTwitter_->link();
@@ -100,17 +111,12 @@ void Tweeter::onOpenBrowser(const QUrl &url) {
 void Tweeter::onCloseBrowser() {
 }
 
-
 void Tweeter::onLinkedChanged() {
     qDebug() << "Link changed!";
 }
 
 void Tweeter::onLinkingSucceeded() {
-    O1Twitter* o1t = qobject_cast<OXTwitter *>(sender());
-
-    if(!o1t) {
-        o1t = qobject_cast<O1Twitter* >(sender());
-    }
+    O1Twitter* o1t = qobject_cast<O1Twitter *>(sender());
 
     QVariantMap extraTokens = o1t->extraTokens();
 
