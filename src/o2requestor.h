@@ -21,7 +21,7 @@ public:
     ~O2Requestor();
 
 public slots:
-    /// Make a GET request.
+    /// Make a GET request. The token is not appended here, so make sure that the Request is a valid one!
     /// @return Request ID or -1 if there are too many requests in the queue.
     int get(const QNetworkRequest &req);
 
