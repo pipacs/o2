@@ -47,7 +47,10 @@ void O2ReplyServer::onBytesReady() {
     QMap<QString, QString> queryParams = parseQueryParams(&data);
     socket->disconnectFromHost();
     close();
-    emit verificationReceived(queryParams);
+    
+    if (!queryParams.empty()) {
+        emit verificationReceived(queryParams);
+    }
 }
 
 QMap<QString, QString> O2ReplyServer::parseQueryParams(QByteArray *data) {
