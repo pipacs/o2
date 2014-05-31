@@ -24,13 +24,13 @@ set( o2_SRCS
     o2abstractstore.h
 )
 
-if(WITH_TWITTER OR WITH_DROPBOX)
+if(WITH_TWITTER OR WITH_DROPBOX OR WITH_FLICKR)
     set( o2_SRCS
         ${o2_SRCS}
         o1.cpp
         o1requestor.cpp
     )
-endif(WITH_TWITTER OR WITH_DROPBOX)
+endif(WITH_TWITTER OR WITH_DROPBOX OR WITH_FLICKR)
 
 if(WITH_TWITTER)
     set( o2_SRCS
@@ -74,13 +74,6 @@ if(WITH_FLICKR)
         o1flickr.h
     )
 endif(WITH_FLICKR)
-
-if(WITH_IMGUR)
-    set( o2_SRCS
-        ${o2_SRCS}
-        o2imgur.cpp
-    )
-endif(WITH_IMGUR)
 
 add_definitions(${QT4_DEFINITIONS})
 add_library( o2 ${o2_SRCS} )
