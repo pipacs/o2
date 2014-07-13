@@ -71,6 +71,11 @@ public:
     QUrl accessTokenUrl();
     void setAccessTokenUrl(const QUrl &value);
 
+    /// Signature method
+    Q_PROPERTY(QString signatureMethod READ signatureMethod WRITE setSignatureMethod NOTIFY signatureMethodChanged)
+    QString signatureMethod();
+    void setSignatureMethod(const QString &value);
+
     /// TCP port number to use in local redirections.
     /// The OAuth "redirect_uri" will be set to "http://localhost:<localPort>/".
     /// If localPort is set to 0 (default), O1 will replace it with a free one.
@@ -96,6 +101,10 @@ public:
 
     /// Create unique bytes to prevent replay attacks.
     static QByteArray nonce();
+
+
+    /// Generate signature string depending on signature method type
+    QByteArray generateSignature(const QList<O1RequestParameter> headers, const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation);
 
     /// Calculate the HMAC-SHA1 signature of a request.
     /// @param  oauthParams     OAuth parameters.
@@ -145,6 +154,7 @@ signals:
     void authorizeUrlChanged();
     void accessTokenUrlChanged();
     void localPortChanged();
+    void signatureMethodChanged();
 
 protected slots:
     /// Handle verification received from the reply server.
@@ -184,6 +194,7 @@ protected:
     QString requestToken_;
     QString requestTokenSecret_;
     QString verifier_;
+    QString signatureMethod_;
     QUrl requestTokenUrl_;
     QUrl authorizeUrl_;
     QUrl accessTokenUrl_;

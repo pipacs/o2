@@ -41,6 +41,11 @@ QNetworkReply *O1Requestor::post(const QNetworkRequest &req, const QList<O1Reque
     return addTimer(manager_->post(request, data));
 }
 
+QNetworkReply *O1Requestor::post(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QHttpMultiPart * multiPart) {
+    QNetworkRequest request = setup(req, signingParameters, QNetworkAccessManager::PostOperation);
+    return addTimer(manager_->post(request, multiPart));
+}
+
 QNetworkReply *O1Requestor::put(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, const QByteArray &data) {
     QNetworkRequest request = setup(req, signingParameters, QNetworkAccessManager::PutOperation);
     return addTimer(manager_->put(request, data));
@@ -57,13 +62,12 @@ QNetworkRequest O1Requestor::setup(const QNetworkRequest &req, const QList<O1Req
     oauthParams.append(O1RequestParameter(O2_OAUTH_CONSUMER_KEY, authenticator_->clientId().toLatin1()));
     oauthParams.append(O1RequestParameter(O2_OAUTH_VERSION, "1.0"));
     oauthParams.append(O1RequestParameter(O2_OAUTH_TOKEN, authenticator_->token().toLatin1()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, O2_SIGNATURE_TYPE_HMAC_SHA1));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, authenticator_->signatureMethod().toLatin1()));
     oauthParams.append(O1RequestParameter(O2_OAUTH_NONCE, O1::nonce()));
     oauthParams.append(O1RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
 
     // Add signature parameter
-    QByteArray signature = authenticator_->sign(oauthParams, signingParameters, req.url(), operation, authenticator_->clientSecret(), authenticator_->tokenSecret());
-    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE, signature));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE, authenticator_->generateSignature(oauthParams, req, signingParameters, operation)));
 
     // Return a copy of the original request with authorization header set
     QNetworkRequest request(req);

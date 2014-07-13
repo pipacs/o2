@@ -19,6 +19,7 @@
 
 O1::O1(QObject *parent) :
     QObject(parent) {
+    setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
     localPort_ = 0;
@@ -119,6 +120,16 @@ QUrl O1::accessTokenUrl() {
 void O1::setAccessTokenUrl(const QUrl &value) {
     accessTokenUrl_ = value;
     emit accessTokenUrlChanged();
+}
+
+QString O1::signatureMethod()
+{
+    return signatureMethod_;
+}
+
+void O1::setSignatureMethod(const QString &value)
+{
+    signatureMethod_ = value;
 }
 
 QVariantMap O1::extraTokens() const {
@@ -234,6 +245,25 @@ QByteArray O1::buildAuthorizationHeader(const QList<O1RequestParameter> &oauthPa
     return ret;
 }
 
+QByteArray O1::generateSignature(const QList<O1RequestParameter> headers,
+                                 const QNetworkRequest &req,
+                                 const QList<O1RequestParameter> &signingParameters,
+                                 QNetworkAccessManager::Operation operation)
+{
+    QByteArray signature;
+
+    if(signatureMethod() == O2_SIGNATURE_TYPE_HMAC_SHA1)
+    {
+        signature = sign(headers, signingParameters, req.url(), operation, clientSecret(), tokenSecret());
+    }
+    else if(signatureMethod() == O2_SIGNATURE_TYPE_PLAINTEXT)
+    {
+        signature = clientSecret().toLatin1() + "&" + tokenSecret().toLatin1();
+    }
+
+    return signature;
+}
+
 void O1::link() {
     trace() << "O1::link";
     if (linked()) {
@@ -245,23 +275,24 @@ void O1::link() {
     // Start reply server
     replyServer_->listen(QHostAddress::Any, localPort());
 
+    // Create request
+    QNetworkRequest request(requestTokenUrl());
+
     // Create initial token request
     QList<O1RequestParameter> headers;
     headers.append(O1RequestParameter(O2_OAUTH_CALLBACK, QString(O2_CALLBACK_URL).arg(replyServer_->serverPort()).toLatin1()));
     headers.append(O1RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
     headers.append(O1RequestParameter(O2_OAUTH_NONCE, nonce()));
-    headers.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, O2_SIGNATURE_TYPE_HMAC_SHA1));
     headers.append(O1RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
     headers.append(O1RequestParameter(O2_OAUTH_VERSION, "1.0"));
-    QByteArray signature = sign(headers, QList<O1RequestParameter>(), requestTokenUrl(), QNetworkAccessManager::PostOperation, clientSecret(), "");
-    headers.append(O1RequestParameter(O2_OAUTH_SIGNATURE, signature));
+    headers.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
+    headers.append(O1RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(headers, request, QList<O1RequestParameter>(), QNetworkAccessManager::PostOperation)));
 
     // Clear request token
     requestToken_.clear();
     requestTokenSecret_.clear();
 
     // Post request
-    QNetworkRequest request(requestTokenUrl());
     request.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER, buildAuthorizationHeader(headers));
     request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
     QNetworkReply *reply = manager_->post(request, QByteArray());
@@ -326,20 +357,19 @@ void O1::onVerificationReceived(QMap<QString, QString> params) {
 void O1::exchangeToken() {
     // Create token exchange request
 
+    QNetworkRequest request(accessTokenUrl());
+
     QList<O1RequestParameter> oauthParams;
-    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, O2_SIGNATURE_TYPE_HMAC_SHA1));
     oauthParams.append(O1RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
     oauthParams.append(O1RequestParameter(O2_OAUTH_VERSION, "1.0"));
     oauthParams.append(O1RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
     oauthParams.append(O1RequestParameter(O2_OAUTH_NONCE, nonce()));
     oauthParams.append(O1RequestParameter(O2_OAUTH_TOKEN, requestToken_.toLatin1()));
     oauthParams.append(O1RequestParameter(O2_OAUTH_VERFIER, verifier_.toLatin1()));
-
-    QByteArray signature = sign(oauthParams, QList<O1RequestParameter>(), accessTokenUrl(), QNetworkAccessManager::PostOperation, clientSecret(), requestTokenSecret_);
-    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE, signature));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
+    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(oauthParams, request, QList<O1RequestParameter>(), QNetworkAccessManager::PostOperation)));
 
     // Post request
-    QNetworkRequest request(accessTokenUrl());
     request.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER, buildAuthorizationHeader(oauthParams));
     request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
     QNetworkReply *reply = manager_->post(request, QByteArray());

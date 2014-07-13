@@ -32,6 +32,13 @@ public slots:
     /// @return Reply.
     QNetworkReply *post(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, const QByteArray &data);
 
+    /// Make a POST request.
+    /// @param  req                 Network request.
+    /// @param  signingParameters   Extra (non-OAuth) parameters participating in signing.
+    /// @param  multiPart           HTTPMultiPart.
+    /// @return Reply.
+    QNetworkReply *post(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QHttpMultiPart *multiPart);
+
     /// Make a PUT request.
     /// @param  req                 Network request.
     /// @param  signingParameters   Extra (non-OAuth) parameters participating in signing.

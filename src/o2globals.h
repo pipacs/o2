@@ -41,8 +41,11 @@ const char O2_OAUTH2_ACCESS_TOKEN[] = "access_token";
 const char O2_OAUTH2_REFRESH_TOKEN[] = "refresh_token";
 const char O2_OAUTH2_EXPIRES_IN[] = "expires_in";
 
-// Parameter values
+// OAuth signature types
 const char O2_SIGNATURE_TYPE_HMAC_SHA1[] = "HMAC-SHA1";
+const char O2_SIGNATURE_TYPE_PLAINTEXT[] = "PLAINTEXT";
+
+// Parameter values
 const char O2_AUTHORIZATION_CODE[] = "authorization_code";
 
 // Standard HTTP headers
