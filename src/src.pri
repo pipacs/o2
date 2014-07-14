@@ -1,4 +1,5 @@
-QT += network script
+QT *= network script
+
 INCLUDEPATH += $$PWD
 SOURCES += \
     $$PWD/o1.cpp \
@@ -31,4 +32,5 @@ HEADERS += \
     $$PWD/o2globals.h \
     $$PWD/oxtwitter.h \
     $$PWD/o2abstractstore.h \
-    $$PWD/o2settingsstore.h
+    $$PWD/o2settingsstore.h \
+    $$PWD/o1freshbooks.h
