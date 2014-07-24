@@ -8,6 +8,9 @@
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
 #endif
+#if QT_VERSION >= 0x050100
+#include <QMessageAuthenticationCode>
+#endif
 
 #include "o1.h"
 #include "o2replyserver.h"
@@ -150,6 +153,7 @@ void O1::unlink() {
     emit linkingSucceeded();
 }
 
+#if QT_VERSION < 0x050100
 /// Calculate the HMAC variant of SHA1 hash.
 /// @author     http://qt-project.org/wiki/HMAC-SHA1.
 /// @copyright  Creative Commons Attribution-ShareAlike 2.5 Generic.
@@ -171,6 +175,7 @@ static QByteArray hmacSha1(QByteArray key, QByteArray baseString) {
     QByteArray hashed = QCryptographicHash::hash(total, QCryptographicHash::Sha1);
     return hashed.toBase64();
 }
+#endif
 
 /// Get HTTP operation name.
 static QString getOperationName(QNetworkAccessManager::Operation op) {
@@ -223,7 +228,11 @@ QByteArray O1::getRequestBase(const QList<O1RequestParameter> &oauthParams, cons
 QByteArray O1::sign(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret) {
     QByteArray baseString = getRequestBase(oauthParams, otherParams, url, op);
     QByteArray secret = QUrl::toPercentEncoding(consumerSecret) + "&" + QUrl::toPercentEncoding(tokenSecret);
+#if QT_VERSION >= 0x050100
+    return QMessageAuthenticationCode::hash(baseString, secret, QCryptographicHash::Sha1).toBase64();
+#else
     return hmacSha1(secret, baseString);
+#endif
 }
 
 QByteArray O1::buildAuthorizationHeader(const QList<O1RequestParameter> &oauthParams) {
