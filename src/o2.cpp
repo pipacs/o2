@@ -28,6 +28,7 @@ O2::O2(QObject *parent): QObject(parent) {
     replyServer_ = new O2ReplyServer(this);
     grantFlow_ = GrantFlowAuthorizationCode;
     localPort_ = 0;
+    localhostPolicy_ = QString(O2_CALLBACK_URL);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)),
             this, SLOT(onVerificationReceived(QMap<QString,QString>)));
@@ -141,7 +142,7 @@ void O2::link() {
     replyServer_->listen(QHostAddress::Any, localPort_);
 
     // Save redirect URI, as we have to reuse it when requesting the access token
-    redirectUri_ = QString(O2_CALLBACK_URL).arg(replyServer_->serverPort());
+    redirectUri_ = localhostPolicy_.arg(replyServer_->serverPort());
 
     // Assemble intial authentication URL
     QList<QPair<QString, QString> > parameters;
@@ -383,4 +384,14 @@ void O2::onRefreshError(QNetworkReply::NetworkError error) {
     emit linkingFailed();
     emit linkedChanged();
     emit refreshFinished(error);
+}
+
+QString O2::localhostPolicy() const
+{
+    return localhostPolicy_;
+}
+
+void O2::setLocalhostPolicy(const QString& value)
+{
+    localhostPolicy_ = value;
 }
