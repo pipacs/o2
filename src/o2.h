@@ -81,8 +81,8 @@ public:
     int localPort();
     void setLocalPort(int value);
 
-    // Localhost policy. By default it's value is http://127.0.0.1:%1/, however some services may
-    // require the use of http://localhost:%1/ or any other value.
+    /// Localhost policy. By default it's value is http://127.0.0.1:%1/, however some services may
+    /// require the use of http://localhost:%1/ or any other value.
     Q_PROPERTY(QString localhostPolicy READ localhostPolicy WRITE setLocalhostPolicy)
     QString localhostPolicy() const;
     void setLocalhostPolicy(const QString &value);
