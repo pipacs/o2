@@ -75,6 +75,13 @@ if(WITH_FLICKR)
     )
 endif(WITH_FLICKR)
 
+if(WITH_HUBIC)
+    set( o2_SRCS
+        ${o2_SRCS}
+        o2hubic.cpp
+    )
+endif(WITH_HUBIC)
+
 add_definitions(${QT4_DEFINITIONS})
 add_library( o2 ${o2_SRCS} )
 
