@@ -6,13 +6,18 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
-set(QT_USE_QTNETWORK true)
-set(QT_USE_QTSCRIPT true)
-
-find_package(Qt4 REQUIRED)
+if(WITH_QT5)
+    find_package(Qt5 COMPONENTS Core Network Script REQUIRED)
+else(WITH_QT5)
+    set(QT_USE_QTNETWORK true)
+    set(QT_USE_QTSCRIPT true)
+    find_package(Qt4 REQUIRED)
+endif(WITH_QT5)
 #find_package(QJson REQUIRED)
 
-include( ${QT_USE_FILE} )
+if (NOT WITH_QT5)
+    include( ${QT_USE_FILE} )
+endif(NOT WITH_QT5)
 
 set( o2_SRCS
     o2.cpp
@@ -82,7 +87,14 @@ if(WITH_HUBIC)
     )
 endif(WITH_HUBIC)
 
-add_definitions(${QT4_DEFINITIONS})
+if(NOT WITH_QT5)
+    add_definitions(${QT4_DEFINITIONS})
+endif(NOT WITH_QT5)
+
 add_library( o2 ${o2_SRCS} )
 
-target_link_libraries( o2 ${QT_LIBRARIES} )
+if(WITH_QT5)
+    target_link_libraries( o2 Qt5::Core Qt5::Network Qt5::Script)
+else(WITH_QT5)
+    target_link_libraries( o2 ${QT_LIBRARIES} )
+endif(WITH_QT5)
