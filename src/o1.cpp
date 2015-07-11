@@ -328,6 +328,9 @@ void O1::onTokenRequestFinished() {
     QMap<QString, QString> response = parseResponse(data);
     requestToken_ = response.value(O2_OAUTH_TOKEN, "");
     requestTokenSecret_ = response.value(O2_OAUTH_TOKEN_SECRET, "");
+    setToken(requestToken_);
+    setTokenSecret(requestTokenSecret_);
+
     // Checking for "oauth_callback_confirmed" is present and set to true
     QString oAuthCbConfirmed = response.value(O2_OAUTH_CALLBACK_CONFIRMED, "false");
     if (requestToken_.isEmpty() || requestTokenSecret_.isEmpty() || (oAuthCbConfirmed == "false")) {
