@@ -22,7 +22,7 @@ class O2: public QObject {
     Q_ENUMS(GrantFlow)
 
 public:
-    enum GrantFlow {GrantFlowAuthorizationCode, GrantFlowImplicit};
+    enum GrantFlow {GrantFlowAuthorizationCode, GrantFlowImplicit, GrantFlowResourceOwnerPasswordCredentials};
 
     /// Authorization flow: Authorization Code (default, see http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.1) or Implicit (see http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.2)
     Q_PROPERTY(GrantFlow grantFlow READ grantFlow WRITE setGrantFlow NOTIFY grantFlowChanged)
@@ -53,6 +53,18 @@ public:
     Q_PROPERTY(QString clientSecret READ clientSecret WRITE setClientSecret NOTIFY clientSecretChanged)
     QString clientSecret();
     void setClientSecret(const QString &value);
+
+    /// Resource owner username.
+    /// O2 instances with the same (username, password) share the same "linked" and "token" properties.
+    Q_PROPERTY(QString username READ username WRITE setUsername NOTIFY usernameChanged)
+    QString username();
+    void setUsername(const QString &value);
+
+    /// Resource owner password.
+    /// O2 instances with the same (username, password) share the same "linked" and "token" properties.
+    Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
+    QString password();
+    void setPassword(const QString &value);
 
     /// Scope of authentication.
     Q_PROPERTY(QString scope READ scope WRITE setScope NOTIFY scopeChanged)
@@ -144,6 +156,8 @@ signals:
     void tokenUrlChanged();
     void refreshTokenUrlChanged();
     void localPortChanged();
+    void usernameChanged();
+    void passwordChanged();
 
 protected slots:
     /// Handle verification response.
@@ -180,6 +194,8 @@ protected:
 protected:
     QString clientId_;
     QString clientSecret_;
+    QString username_;
+    QString password_;
     QString scope_;
     QString code_;
     QString redirectUri_;
