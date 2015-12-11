@@ -77,6 +77,24 @@ void O2::setClientSecret(const QString &value) {
     emit clientSecretChanged();
 }
 
+QString O2::username() {
+    return username_;
+}
+
+void O2::setUsername(const QString &value) {
+    username_ = value;
+    emit usernameChanged();
+}
+
+QString O2::password() {
+    return password_;
+}
+
+void O2::setPassword(const QString &value) {
+    password_ = value;
+    emit passwordChanged();
+}
+
 QString O2::scope() {
     return scope_;
 }
@@ -132,38 +150,64 @@ void O2::setExtraTokens(QVariantMap extraTokens) {
 
 void O2::link() {
     trace() << "O2::link";
+
+
     if (linked()) {
         trace() << " Linked already";
         emit linkingSucceeded();
         return;
     }
 
-    // Start listening to authentication replies
-    replyServer_->listen(QHostAddress::Any, localPort_);
+    if(grantFlow_ == GrantFlowAuthorizationCode){
 
-    // Save redirect URI, as we have to reuse it when requesting the access token
-    redirectUri_ = localhostPolicy_.arg(replyServer_->serverPort());
+        // Start listening to authentication replies
+        replyServer_->listen(QHostAddress::Any, localPort_);
 
-    // Assemble intial authentication URL
-    QList<QPair<QString, QString> > parameters;
-    parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode) ? QString(O2_OAUTH2_CODE) : QString(O2_OAUTH2_TOKEN)));
-    parameters.append(qMakePair(QString(O2_OAUTH2_CLIENT_ID), clientId_));
-    parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
-    // parameters.append(qMakePair(QString(OAUTH2_REDIRECT_URI), QString(QUrl::toPercentEncoding(redirectUri_))));
-    parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_));
+        // Save redirect URI, as we have to reuse it when requesting the access token
+        redirectUri_ = localhostPolicy_.arg(replyServer_->serverPort());
 
-    // Show authentication URL with a web browser
-    QUrl url(requestUrl_);
-#if QT_VERSION < 0x050000
-    url.setQueryItems(parameters);
-#else
-    QUrlQuery query(url);
-    query.setQueryItems(parameters);
-    url.setQuery(query);
-#endif
+        // Assemble intial authentication URL
+        QList<QPair<QString, QString> > parameters;
+        parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode) ? QString(O2_OAUTH2_CODE) : QString(O2_OAUTH2_TOKEN)));
+        parameters.append(qMakePair(QString(O2_OAUTH2_CLIENT_ID), clientId_));
+        parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
+        // parameters.append(qMakePair(QString(OAUTH2_REDIRECT_URI), QString(QUrl::toPercentEncoding(redirectUri_))));
+        parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_));
 
-    trace() << "Emit openBrowser" << url.toString();
-    emit openBrowser(url);
+        // Show authentication URL with a web browser
+        QUrl url(requestUrl_);
+    #if QT_VERSION < 0x050000
+        url.setQueryItems(parameters);
+    #else
+        QUrlQuery query(url);
+        query.setQueryItems(parameters);
+        url.setQuery(query);
+    #endif
+
+        trace() << "Emit openBrowser" << url.toString();
+        emit openBrowser(url);
+
+    }else if(grantFlow_ == GrantFlowResourceOwnerPasswordCredentials){
+
+        QUrl url(tokenUrl_);
+
+        QUrlQuery params;
+        params.addQueryItem(O2_OAUTH2_CLIENT_ID,clientId_);
+        params.addQueryItem(O2_OAUTH2_CLIENT_SECRET,clientSecret_);
+        params.addQueryItem(O2_OAUTH2_USERNAME,username_);
+        params.addQueryItem(O2_OAUTH2_PASSWORD,password_);
+        params.addQueryItem(O2_OAUTH2_GRANT_TYPE,"password");
+
+        QNetworkRequest tokenRequest(url);
+        tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+        QNetworkReply *tokenReply = manager_->post(tokenRequest, params.toString(QUrl::FullyEncoded).toUtf8());
+
+        qDebug() << params.toString(QUrl::FullyEncoded).toUtf8();
+
+        connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
+        connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+
+    }
 }
 
 void O2::unlink() {
@@ -346,6 +390,8 @@ void O2::refresh() {
     parameters.insert(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
     parameters.insert(O2_OAUTH2_REFRESH_TOKEN, refreshToken());
     parameters.insert(O2_OAUTH2_GRANT_TYPE, O2_OAUTH2_REFRESH_TOKEN);
+    parameters.insert("password", "password");
+    parameters.insert("name", "student");
     QByteArray data = buildRequestBody(parameters);
     QNetworkReply *refreshReply = manager_->post(refreshRequest, data);
     timedReplies_.add(refreshReply);
