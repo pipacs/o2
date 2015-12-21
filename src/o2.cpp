@@ -390,8 +390,7 @@ void O2::refresh() {
     parameters.insert(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
     parameters.insert(O2_OAUTH2_REFRESH_TOKEN, refreshToken());
     parameters.insert(O2_OAUTH2_GRANT_TYPE, O2_OAUTH2_REFRESH_TOKEN);
-    parameters.insert("password", "password");
-    parameters.insert("name", "student");
+
     QByteArray data = buildRequestBody(parameters);
     QNetworkReply *refreshReply = manager_->post(refreshRequest, data);
     timedReplies_.add(refreshReply);
