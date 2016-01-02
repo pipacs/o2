@@ -6,13 +6,18 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
-#include <QScriptEngine>
-#include <QScriptValueIterator>
 #include <QDateTime>
 #include <QCryptographicHash>
 #include <QTimer>
+#include <QVariantMap>
+
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
+#include <QJsonDocument>
+#include <QJsonObject>
+#else
+#include <QScriptEngine>
+#include <QScriptValueIterator>
 #endif
 
 #include "o2.h"
@@ -22,6 +27,37 @@
 
 #define trace() if (1) qDebug()
 // define trace() if (0) qDebug()
+
+static QVariantMap parseTokenResponse(const QByteArray &data)
+{
+#if QT_VERSION >= 0x050000
+    QJsonParseError err;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &err);
+    if (err.error != QJsonParseError::NoError) {
+        qWarning() << "Failed to parse token response due to err:" << err.errorString();
+        return QVariantMap();
+    }
+
+    if (!doc.isObject()) {
+        qWarning() << "Token response is not an object";
+        return QVariantMap();
+    }
+
+    return doc.object().toVariantMap();
+#else
+    QScriptEngine engine;
+    QScriptValue value = engine.evaluate("(" + QString(data) + ")");
+    QScriptValueIterator it(value);
+    QVariantMap map;
+
+    while (it.hasNext()) {
+        it.next();
+        map.insert(it.name(), it.value().toVariant());
+    }
+
+    return map;
+#endif
+}
 
 O2::O2(QObject *parent): QObject(parent) {
     manager_ = new QNetworkAccessManager(this);
@@ -275,14 +311,8 @@ void O2::onTokenReplyFinished() {
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     if (tokenReply->error() == QNetworkReply::NoError) {
         QByteArray replyData = tokenReply->readAll();
-        QScriptEngine engine;
-        QScriptValueIterator it(engine.evaluate("(" + QString(replyData) + ")"));
-        QVariantMap tokens;
+        QVariantMap tokens = parseTokenResponse(replyData);
 
-        while (it.hasNext()) {
-            it.next();
-            tokens.insert(it.name(), it.value().toVariant());
-        }
         // Check for mandatory tokens
         if (tokens.contains(O2_OAUTH2_ACCESS_TOKEN)) {
             setToken(tokens.take(O2_OAUTH2_ACCESS_TOKEN).toString());
@@ -403,12 +433,10 @@ void O2::onRefreshFinished() {
     trace() << "O2::onRefreshFinished: Error" << (int)refreshReply->error() << refreshReply->errorString();
     if (refreshReply->error() == QNetworkReply::NoError) {
         QByteArray reply = refreshReply->readAll();
-        QScriptValue value;
-        QScriptEngine engine;
-        value = engine.evaluate("(" + QString(reply) + ")");
-        setToken(value.property(O2_OAUTH2_ACCESS_TOKEN).toString());
-        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + value.property(O2_OAUTH2_EXPIRES_IN).toInteger());
-        setRefreshToken(value.property(O2_OAUTH2_REFRESH_TOKEN).toString());
+        QVariantMap tokens = parseTokenResponse(reply);
+        setToken(tokens.value(O2_OAUTH2_ACCESS_TOKEN).toString());
+        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + tokens.value(O2_OAUTH2_EXPIRES_IN).toInt());
+        setRefreshToken(tokens.value(O2_OAUTH2_REFRESH_TOKEN).toString());
         timedReplies_.remove(refreshReply);
         emit linkingSucceeded();
         emit tokenChanged();
