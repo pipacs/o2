@@ -99,6 +99,21 @@ public:
     QString localhostPolicy() const;
     void setLocalhostPolicy(const QString &value);
 
+    /// Api Key secret.
+    Q_PROPERTY(QString apiKey READ apiKey WRITE setApiKey)
+    QString apiKey();
+    void setApiKey(const QString &value);
+
+    /// Page content on local host after successful oauth - in case you do not want to close the browser, but display something
+    Q_PROPERTY(QByteArray replyContent READ replyContent WRITE setReplyContent)
+    QByteArray replyContent();
+    void setReplyContent(const QByteArray &value);
+
+    /// E.g. SurveyMonkey fails on Mac due to Ssl Error. Ignoring the error circumvents the problem
+    Q_PROPERTY(bool ignoreSslErrors READ ignoreSslErrors WRITE setIgnoreSslErrors)
+    bool ignoreSslErrors();
+    void setIgnoreSslErrors(bool ignoreSslErrors);
+
 public:
     /// Constructor.
     /// @param  parent  Parent object.
@@ -200,6 +215,7 @@ protected:
     QString code_;
     QString redirectUri_;
     QString localhostPolicy_;
+    QString apiKey_;
     QUrl requestUrl_;
     QUrl tokenUrl_;
     QUrl refreshTokenUrl_;

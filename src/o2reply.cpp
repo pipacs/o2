@@ -21,6 +21,8 @@ O2ReplyList::~O2ReplyList() {
 }
 
 void O2ReplyList::add(QNetworkReply *reply) {
+    if (reply && ignoreSslErrors())
+            reply->ignoreSslErrors();
     add(new O2Reply(reply));
 }
 
@@ -43,4 +45,14 @@ O2Reply *O2ReplyList::find(QNetworkReply *reply) {
         }
     }
     return 0;
+}
+
+bool O2ReplyList::ignoreSslErrors()
+{
+    return ignoreSslErrors_;
+}
+
+void O2ReplyList::setIgnoreSslErrors(bool ignoreSslErrors)
+{
+    ignoreSslErrors_ = ignoreSslErrors;
 }

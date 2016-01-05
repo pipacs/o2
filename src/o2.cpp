@@ -209,6 +209,7 @@ void O2::link() {
         parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
         // parameters.append(qMakePair(QString(OAUTH2_REDIRECT_URI), QString(QUrl::toPercentEncoding(redirectUri_))));
         parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_));
+        parameters.append(qMakePair(QString(O2_OAUTH2_API_KEY), apiKey_));
 
         // Show authentication URL with a web browser
         QUrl url(requestUrl_);
@@ -268,6 +269,8 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
     emit closeBrowser();
     if (response.contains("error")) {
         trace() << " Verification failed";
+        store_->setValue("error", response.value("error"));
+        store_->setValue("error_description", response.value("error_description"));
         emit linkingFailed();
         return;
     }
@@ -277,7 +280,8 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
         setCode(response.value(QString(O2_OAUTH2_CODE)));
 
         // Exchange access code for access/refresh tokens
-        QNetworkRequest tokenRequest(tokenUrl_);
+        QNetworkRequest tokenRequest(tokenUrl_.toString() +
+              (apiKey_.isEmpty() ? "" : ("?" + QString(O2_OAUTH2_API_KEY) + "=" + apiKey_)));
         tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
         QMap<QString, QString> parameters;
         parameters.insert(O2_OAUTH2_CODE, code());
@@ -333,6 +337,8 @@ void O2::onTokenReplyFinished() {
             emit linkingSucceeded();
         } else {
             qWarning() << "O2::onTokenReplyFinished: oauth_token missing from response" << replyData;
+            store_->setValue("error", "oauth_token missing from response");
+            store_->setValue("error_description", "oauth_token missing from response");
             emit linkedChanged();
             emit tokenChanged();
             emit linkingFailed();
@@ -348,6 +354,8 @@ void O2::onTokenReplyError(QNetworkReply::NetworkError error) {
     setToken(QString());
     setRefreshToken(QString());
     timedReplies_.remove(tokenReply);
+    store_->setValue("error", QString::number(error));
+    store_->setValue("error_description", tokenReply->errorString());
     emit linkedChanged();
     emit tokenChanged();
     emit linkingFailed();
@@ -453,6 +461,8 @@ void O2::onRefreshError(QNetworkReply::NetworkError error) {
     setToken(QString());
     setRefreshToken(QString());
     timedReplies_.remove(refreshReply);
+    store_->setValue("error", QString::number(error));
+    store_->setValue("error_description", QString("Error %1, resetting tokens").arg(error));
     emit tokenChanged();
     emit linkingFailed();
     emit linkedChanged();
@@ -467,4 +477,34 @@ QString O2::localhostPolicy() const
 void O2::setLocalhostPolicy(const QString& value)
 {
     localhostPolicy_ = value;
+}
+
+QString O2::apiKey()
+{
+    return apiKey_;
+}
+
+void O2::setApiKey(const QString& value)
+{
+    apiKey_ = value;
+}
+
+QByteArray O2::replyContent()
+{
+    return replyServer_->replyContent();
+}
+
+void O2::setReplyContent(const QByteArray& value)
+{
+    replyServer_->setReplyContent(value);
+}
+
+bool O2::ignoreSslErrors()
+{
+    return timedReplies_.ignoreSslErrors();
+}
+
+void O2::setIgnoreSslErrors(bool ignoreSslErrors)
+{
+    timedReplies_.setIgnoreSslErrors(ignoreSslErrors);
 }
