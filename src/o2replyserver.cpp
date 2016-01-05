@@ -18,6 +18,7 @@
 
 O2ReplyServer::O2ReplyServer(QObject *parent): QTcpServer(parent) {
     connect(this, SIGNAL(newConnection()), this, SLOT(onIncomingConnection()));
+        replyContent_ = "<HTML></HTML>";
 }
 
 O2ReplyServer::~O2ReplyServer() {
@@ -35,12 +36,10 @@ void O2ReplyServer::onBytesReady() {
         return;
     }
     QByteArray reply;
-    QByteArray content;
-    content.append("<HTML></HTML>");
     reply.append("HTTP/1.0 200 OK \r\n");
     reply.append("Content-Type: text/html; charset=\"utf-8\"\r\n");
-    reply.append(QString("Content-Length: %1\r\n\r\n").arg(content.size()));
-    reply.append(content);
+    reply.append(QString("Content-Length: %1\r\n\r\n").arg(replyContent_.size()));
+    reply.append(replyContent_);
     socket->write(reply);
 
     QByteArray data = socket->readAll();
@@ -76,4 +75,14 @@ QMap<QString, QString> O2ReplyServer::parseQueryParams(QByteArray *data) {
         queryParams.insert(key, value);
     }
     return queryParams;
+}
+
+QByteArray O2ReplyServer::replyContent()
+{
+    return replyContent_;
+}
+
+void O2ReplyServer::setReplyContent(const QByteArray& value)
+{
+    replyContent_ = value;
 }
