@@ -268,6 +268,8 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
     emit closeBrowser();
     if (response.contains("error")) {
         trace() << " Verification failed";
+        store_->setValue("error", response.value("error"));
+        store_->setValue("error_description", response.value("error_description"));
         emit linkingFailed();
         return;
     }
@@ -333,6 +335,8 @@ void O2::onTokenReplyFinished() {
             emit linkingSucceeded();
         } else {
             qWarning() << "O2::onTokenReplyFinished: oauth_token missing from response" << replyData;
+            store_->setValue("error", "oauth_token missing from response");
+            store_->setValue("error_description", "oauth_token missing from response");
             emit linkedChanged();
             emit tokenChanged();
             emit linkingFailed();
@@ -348,6 +352,8 @@ void O2::onTokenReplyError(QNetworkReply::NetworkError error) {
     setToken(QString());
     setRefreshToken(QString());
     timedReplies_.remove(tokenReply);
+    store_->setValue("error", QString::number(error));
+    store_->setValue("error_description", tokenReply->errorString());
     emit linkedChanged();
     emit tokenChanged();
     emit linkingFailed();
@@ -453,6 +459,8 @@ void O2::onRefreshError(QNetworkReply::NetworkError error) {
     setToken(QString());
     setRefreshToken(QString());
     timedReplies_.remove(refreshReply);
+    store_->setValue("error", QString::number(error));
+    store_->setValue("error_description", QString("Error %1, resetting tokens").arg(error));
     emit tokenChanged();
     emit linkingFailed();
     emit linkedChanged();
