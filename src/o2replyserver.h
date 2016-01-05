@@ -19,6 +19,10 @@ public:
     QByteArray replyContent();
     void setReplyContent(const QByteArray &value);
 
+        Q_PROPERTY(QByteArray replyContentType READ replyContentType WRITE setReplyContentType)
+    QByteArray replyContentType();
+    void setReplyContentType(const QByteArray &value);
+
 signals:
     void verificationReceived(QMap<QString, QString>);
 
@@ -28,7 +32,7 @@ public slots:
     QMap<QString, QString> parseQueryParams(QByteArray *data);
 
 protected:
-    QByteArray replyContent_;
+    QByteArray replyContent_, replyContentType_;
 };
 
 #endif // O2REPLYSERVER_H
