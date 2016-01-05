@@ -499,6 +499,16 @@ void O2::setReplyContent(const QByteArray& value)
     replyServer_->setReplyContent(value);
 }
 
+QByteArray O2::replyContentType()
+{
+    return replyServer_->replyContentType();
+}
+
+void O2::setReplyContentType(const QByteArray& value)
+{
+    replyServer_->setReplyContentType(value);
+}
+
 bool O2::ignoreSslErrors()
 {
     return timedReplies_.ignoreSslErrors();

@@ -109,6 +109,10 @@ public:
     QByteArray replyContent();
     void setReplyContent(const QByteArray &value);
 
+    Q_PROPERTY(QByteArray replyContentType READ replyContentType WRITE setReplyContentType)
+    QByteArray replyContentType();
+    void setReplyContentType(const QByteArray &value);
+
     /// E.g. SurveyMonkey fails on Mac due to Ssl Error. Ignoring the error circumvents the problem
     Q_PROPERTY(bool ignoreSslErrors READ ignoreSslErrors WRITE setIgnoreSslErrors)
     bool ignoreSslErrors();
