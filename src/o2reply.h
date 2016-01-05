@@ -29,6 +29,7 @@ public:
 /// List of O2Replies.
 class O2ReplyList {
 public:
+    O2ReplyList() { ignoreSslErrors_ = false; }
     /// Destructor.
     /// Deletes all O2Reply instances in the list.
     virtual ~O2ReplyList();
@@ -46,8 +47,12 @@ public:
     /// @return Matching O2Reply or NULL.
     O2Reply *find(QNetworkReply *reply);
 
+    bool ignoreSslErrors();
+    void setIgnoreSslErrors(bool ignoreSslErrors);
+
 protected:
     QList<O2Reply *> replies_;
+    bool ignoreSslErrors_;
 };
 
 #endif // O2TIMEDREPLYLIST_H
