@@ -2,7 +2,12 @@
 
 This library encapsulates the OAuth 1.0 and 2.0 client authentication flows, and the sending of authenticated HTTP requests.
 
-The primary target is Qt Quick applications on mobile devices.
+The primary target is Qt Quick applications on embedded devices.
+
+Notes to contributors:
+
+   * Please follow the coding style of the existing source
+   * Code contributions are released under Simplified BSD License, as specified in LICENSE. Do not contribute if this license does not suit your code
 
 ## Contents
 
