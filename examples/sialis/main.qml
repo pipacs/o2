@@ -56,6 +56,7 @@ ApplicationWindow {
     }
 
     ListView {
+        // Tweets go here...
         anchors.fill: parent
     }
 
