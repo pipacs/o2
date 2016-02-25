@@ -35,7 +35,7 @@ ApplicationWindow {
             id: statusLabel
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            text: o1Twitter.linked? "Logged in": "Not logged in"
+            text: o1Twitter.linked? ("Logged in as " + o1Twitter.extraTokens["screen_name"]): "Not logged in"
         }
 
         Button {

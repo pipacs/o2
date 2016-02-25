@@ -9,6 +9,7 @@
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkReply>
+#include <QVariantMap>
 
 #include "o2abstractstore.h"
 
@@ -40,9 +41,9 @@ public:
     /// Authentication token secret.
     QString tokenSecret();
 
-    /// Extra tokens available after a successful OAuth exchange
-    Q_PROPERTY(QMap extraTokens READ extraTokens)
-    QVariantMap extraTokens() const;
+    /// Provider-specific extra tokens, available after a successful OAuth exchange
+    Q_PROPERTY(QVariantMap extraTokens READ extraTokens NOTIFY extraTokensChanged)
+    QVariantMap extraTokens();
 
     /// Client application ID.
     /// O1 instances with the same (client ID, client secret) share the same "linked", "token" and "tokenSecret" properties.
@@ -154,6 +155,7 @@ signals:
     void accessTokenUrlChanged();
     void localPortChanged();
     void signatureMethodChanged();
+    void extraTokensChanged();
 
 protected slots:
     /// Handle verification received from the reply server.

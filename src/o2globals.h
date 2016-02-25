@@ -13,6 +13,7 @@ const char O2_KEY_CODE[] = "code.%1";
 const char O2_KEY_EXPIRES[] = "expires.%1";
 const char O2_KEY_REFRESH_TOKEN[] = "refreshtoken.%1";
 const char O2_KEY_LINKED[] = "linked.%1";
+const char O2_KEY_EXTRA_TOKENS[] = "extratokens.%1";
 
 // OAuth 1/1.1 Request Parameters
 const char O2_OAUTH_CALLBACK[] = "oauth_callback";

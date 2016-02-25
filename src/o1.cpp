@@ -4,10 +4,13 @@
 #include <QDateTime>
 #include <QByteArray>
 #include <QDebug>
+#include <QDataStream>
 #include <QStringList>
+
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
 #endif
+
 #if QT_VERSION >= 0x050100
 #include <QMessageAuthenticationCode>
 #endif
@@ -144,19 +147,31 @@ void O1::setSignatureMethod(const QString &value) {
     signatureMethod_ = value;
 }
 
-QVariantMap O1::extraTokens() const {
+QVariantMap O1::extraTokens() {
+    QString key = QString(O2_KEY_EXTRA_TOKENS).arg(clientId_);
+    QString value = store_->value(key);
+    QByteArray bytes = QByteArray::fromBase64(value.toLatin1());
+    QDataStream stream(&bytes, QIODevice::ReadOnly);
+    stream >> extraTokens_;
     return extraTokens_;
 }
 
 void O1::setExtraTokens(QVariantMap extraTokens) {
     extraTokens_ = extraTokens;
+    QByteArray bytes;
+    QDataStream stream(&bytes, QIODevice::WriteOnly);
+    stream << extraTokens;
+    QString key = QString(O2_KEY_EXTRA_TOKENS).arg(clientId_);
+    store_->setValue(key, bytes.toBase64());
+    emit extraTokensChanged();
 }
 
 void O1::unlink() {
     trace() << "O1::unlink";
+    setLinked(false);
     setToken("");
     setTokenSecret("");
-    setLinked(false);
+    setExtraTokens(QVariantMap());
     emit linkingSucceeded();
 }
 
