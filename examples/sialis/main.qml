@@ -25,6 +25,7 @@ ApplicationWindow {
         }
 
         onLinkedChanged: {
+            console.log("onLinkedChanged")
             loginButton.enabled = true
         }
     }
@@ -75,6 +76,11 @@ ApplicationWindow {
                 url: browser.url
                 experimental.preferences.minimumFontSize: 14
             }
+        }
+
+        onClosing: {
+            close.accepted = true
+            loginButton.enabled = true
         }
     }
 }

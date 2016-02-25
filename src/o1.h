@@ -31,7 +31,7 @@ class O1: public QObject {
 
 public:
     /// Are we authenticated?
-    Q_PROPERTY(bool linked READ linked NOTIFY linkedChanged)
+    Q_PROPERTY(bool linked READ linked WRITE setLinked NOTIFY linkedChanged)
     bool linked();
 
     /// Authentication token.
@@ -101,7 +101,6 @@ public:
 
     /// Create unique bytes to prevent replay attacks.
     static QByteArray nonce();
-
 
     /// Generate signature string depending on signature method type
     QByteArray generateSignature(const QList<O1RequestParameter> headers, const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation);
@@ -178,6 +177,9 @@ protected:
 
     /// Set authentication token secret.
     void setTokenSecret(const QString &v);
+
+    /// Set the linked state
+    void setLinked(bool v);
 
     /// Exchange token for authorizaton token.
     virtual void exchangeToken();

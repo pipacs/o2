@@ -43,12 +43,23 @@ void O1::setStore(O2AbstractStore *store) {
     // Delete the previously stored object
     store_->deleteLater();
     store_ = store;
-    // re-parent it to this class as we take ownership of it now
+
+    // Re-parent it to this class as we take ownership of it now
     store_->setParent(this);
 }
 
 bool O1::linked() {
-    return !token().isEmpty();
+    QString key = QString(O2_KEY_LINKED).arg(clientId_);
+    return !store_->value(key).isEmpty();
+}
+
+void O1::setLinked(bool v) {
+    bool oldValue = linked();
+    QString key = QString(O2_KEY_LINKED).arg(clientId_);
+    store_->setValue(key, v? "1": "");
+    if (oldValue != v) {
+        emit linkedChanged();
+    }
 }
 
 QString O1::tokenSecret() {
@@ -125,13 +136,11 @@ void O1::setAccessTokenUrl(const QUrl &value) {
     emit accessTokenUrlChanged();
 }
 
-QString O1::signatureMethod()
-{
+QString O1::signatureMethod() {
     return signatureMethod_;
 }
 
-void O1::setSignatureMethod(const QString &value)
-{
+void O1::setSignatureMethod(const QString &value) {
     signatureMethod_ = value;
 }
 
@@ -145,11 +154,9 @@ void O1::setExtraTokens(QVariantMap extraTokens) {
 
 void O1::unlink() {
     trace() << "O1::unlink";
-    if (linked()) {
-        setToken("");
-        setTokenSecret("");
-        emit linkedChanged();
-    }
+    setToken("");
+    setTokenSecret("");
+    setLinked(false);
     emit linkingSucceeded();
 }
 
@@ -254,22 +261,14 @@ QByteArray O1::buildAuthorizationHeader(const QList<O1RequestParameter> &oauthPa
     return ret;
 }
 
-QByteArray O1::generateSignature(const QList<O1RequestParameter> headers,
-                                 const QNetworkRequest &req,
-                                 const QList<O1RequestParameter> &signingParameters,
-                                 QNetworkAccessManager::Operation operation)
-{
+QByteArray O1::generateSignature(const QList<O1RequestParameter> headers, const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
     QByteArray signature;
 
-    if(signatureMethod() == O2_SIGNATURE_TYPE_HMAC_SHA1)
-    {
+    if (signatureMethod() == O2_SIGNATURE_TYPE_HMAC_SHA1) {
         signature = sign(headers, signingParameters, req.url(), operation, clientSecret(), tokenSecret());
-    }
-    else if(signatureMethod() == O2_SIGNATURE_TYPE_PLAINTEXT)
-    {
+    } else if (signatureMethod() == O2_SIGNATURE_TYPE_PLAINTEXT) {
         signature = clientSecret().toLatin1() + "&" + tokenSecret().toLatin1();
     }
-
     return signature;
 }
 
@@ -280,6 +279,10 @@ void O1::link() {
         emit linkingSucceeded();
         return;
     }
+
+    setLinked(false);
+    setToken("");
+    setTokenSecret("");
 
     // Start reply server
     replyServer_->listen(QHostAddress::Any, localPort());
@@ -320,6 +323,7 @@ void O1::onTokenRequestFinished() {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     reply->deleteLater();
     if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "O1::onTokenRequestFinished: " << reply->errorString();
         return;
     }
 
@@ -399,6 +403,7 @@ void O1::onTokenExchangeFinished() {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     reply->deleteLater();
     if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "O1::onTokenExchangeFinished: " << reply->errorString();
         return;
     }
 
@@ -416,7 +421,7 @@ void O1::onTokenExchangeFinished() {
             }
             setExtraTokens(extraTokens);
         }
-        emit linkedChanged();
+        setLinked(true);
         emit linkingSucceeded();
     } else {
         qWarning() << "O1::onTokenExchangeFinished: oauth_token or oauth_token_secret missing from response" << data;
