@@ -9,6 +9,8 @@ ApplicationWindow {
     visible: true
     title: "Sialis"
     minimumWidth: 300
+    minimumHeight: 200
+    height: 700
 
     O1Twitter {
         id: o1Twitter
@@ -25,7 +27,6 @@ ApplicationWindow {
         }
 
         onLinkedChanged: {
-            console.log("onLinkedChanged")
             loginButton.enabled = true
         }
     }
@@ -85,4 +86,3 @@ ApplicationWindow {
         }
     }
 }
-
