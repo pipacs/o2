@@ -1,7 +1,6 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.4
 import QtWebKit 3.0
-import QtWebKit.experimental 1.0
 import com.pipacs.o2 1.0
 
 ApplicationWindow {
@@ -39,7 +38,6 @@ ApplicationWindow {
 
     statusBar: StatusBar {
         Label {
-            id: statusLabel
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             text: o1Twitter.linked? ("Logged in as " + o1Twitter.extraTokens["screen_name"]): "Not logged in"
@@ -114,7 +112,6 @@ ApplicationWindow {
             WebView {
                 anchors.fill: parent
                 url: browser.url
-                experimental.preferences.minimumFontSize: 14
             }
         }
 
@@ -125,8 +122,7 @@ ApplicationWindow {
     }
 
     Timer {
-        id: timer
-        interval: 15000
+        interval: 30000
         repeat: true
         running: true
         triggeredOnStart: true
