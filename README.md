@@ -205,4 +205,13 @@ facebookdemo | Command line application authenticating with Facebook
 sails | QT Quick Twitter client
 twitter demo | Command line client for authenticating with Twitter and posting status updates
 
+## Change Log
+
+### 0.1.0
+
+* Persist the extra tokens, too
+* Add Qt Quick Twitter client example
+
+
+
 
