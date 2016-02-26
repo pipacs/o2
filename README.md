@@ -9,31 +9,31 @@ Notes to contributors:
    * Please follow the coding style of the existing source
    * Code contributions are released under Simplified BSD License, as specified in LICENSE. Do not contribute if this license does not suit your code
 
-## Contents
+## Classes
 
 Class | Header | Purpose
 :-- | :-- | :--
-O1 | o1.h | Generic OAuth 1.0 authentication
-O1RequestParameter | o1.h | An extra request parameter participating in request signing
+O1 | o1.h | Generic OAuth 1.0 authenticator
 O1Dropbox | o1dropbox.h | Dropbox OAuth specializations
 O1Flickr | o1flickr.h | Flickr OAuth specializations
 O1Requestor | o1requestor.h | Makes authenticated OAuth 1.0 requests: GET, POST or PUT, handles timeouts
+O1RequestParameter | o1.h | An extra request parameter participating in request signing
 O1Twitter | o1twitter.h | Twitter OAuth specializations
-OXTwitter | oxtwitter.h | Twitter XAuth specialization
-O2 | o2.h | Generic OAuth 2.0 authentication
-O2Facebook | o2facebook.h | Facebook OAuth specialization
+O2 | o2.h | Generic OAuth 2.0 authenticator
+O2AbstractStore | o2abstractstore.h | Base class for implemnting persistent stores
 O2Gft | o2gft.h | Google Fusion Tables OAuth specialization
+O2Facebook | o2facebook.h | Facebook OAuth specialization
 O2Reply | o2reply.h | A network request/reply that can time out
 O2ReplyServer | o2replyserver.h | HTTP server to process authentication responses
 O2Requestor | o2requestor.h | Makes authenticated OAuth 2.0 requests (GET, POST or PUT), handles timeouts and token expiry
-O2Skydrive | o2skydrive.h | Skydrive OAuth specialization
-SimpleCrypt | simplecrypt.h | Simple encryption and decryption by Andre Somers
-O2AbstractStore | o2abstractstore.h | Base class for implemnting persistent stores
 O2SettingsStore | o2settingsstore.h | A QSettings based persistent store for writing OAuth tokens
+O2Skydrive | o2skydrive.h | OneDrive OAuth specialization
+OXTwitter | oxtwitter.h | Twitter XAuth specialization
+SimpleCrypt | simplecrypt.h | Simple encryption and decryption by Andre Somers
 
 ## Installation
 
-Clone the Github repository, then add all files to your Qt project.
+Clone the Github repository, then add all files in *src* to your Qt project, by including *src/src.pri*.
 
 ## Basic Usage
 
@@ -94,7 +94,7 @@ To handle these signals, implement the following slots in your code:
 
 ### Logging In
 
-To log in (or, to be more accurate, to link your application to the OAuth service), call the link() method:
+To log in (e.g. to link your application to the OAuth service), call the link() method:
 
     o1->link();
 
@@ -114,18 +114,18 @@ Once linked, you can start sending authenticated requests to the service. We sta
 
 First we need a Qt network manager and an O1 requestor object:
 
-    QNetworkAccessManager* manager = new QNetworkAccessManager(this);
-    O1Requestor* requestor = new O1Requestor(manager, o1, this);
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    O1Requestor *requestor = new O1Requestor(manager, o1, this);
 
 Next, create parameters for posting the update:
 
     QByteArray paramName("status");
     QByteArray tweetText("My first tweet!");
 
-    QList<O1RequestParameter> reqParams = QList<O1RequestParameter>();
-    reqParams << O1RequestParameter(paramName, tweetText);
+    QList<O1RequestParameter> requestParams = QList<O1RequestParameter>();
+    requestParams << O1RequestParameter(paramName, tweetText);
 
-    QByteArray postData = O1::createQueryParams(reqParams);
+    QByteArray postData = O1::createQueryParams(requestParams);
 
     // Using Twitter's REST API ver 1.1
     QUrl url = QUrl("https://api.twitter.com/1.1/statuses/update.json");
@@ -135,7 +135,7 @@ Next, create parameters for posting the update:
 
 Finally we authenticate and send the request using the O1 requestor object:
 
-    QNetworkReply *reply = requestor->post(request, reqParams, postData);
+    QNetworkReply *reply = requestor->post(request, reqestParams, postData);
 
 Continuing with the example, we will now send a tweet containing an image as well as a message.
 
@@ -164,8 +164,7 @@ We create an HTTP request containing the image and the message, in the format sp
 
     QNetworkRequest request;
     // Using Twitter's REST API ver 1.1
-    static const char *uploadUrl = "https://api.twitter.com/1.1/statuses/update_with_media.json";
-    request.setUrl(QUrl(uploadUrl));
+    request.setUrl(QUrl("https://api.twitter.com/1.1/statuses/update_with_media.json"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=" + boundary);
     request.setHeader(QNetworkRequest::ContentLengthHeader, data.length());
 
@@ -191,7 +190,19 @@ Once set, O2SettingsStore takes ownership of the QSettings object.
 **Note:** If you do not specify a storage object to use, O2 will create one by default (which QSettings based), and use it. In such a case, a default encryption key is used for encrypting the data.
 
 ### Extra OAuth Tokens
+
 Some OAuth service providers provide additional information in the access token response. Eg: Twitter returns 2 additional tokens in it's access token response - *screen_name* and *user_id*.
 
 O2 provides all such tokens via the property - *extraTokens*. You can query this property after a successful OAuth exchange, i.e after the *linkingSucceeded()* signal has been emitted.
+
+## More Examples
+
+The *examples* folder contains complete example applications:
+
+Name | Description
+:-- | :--
+facebookdemo | Command line application authenticating with Facebook
+sails | QT Quick Twitter client
+twitter demo | Command line client for authenticating with Twitter and posting status updates
+
 
