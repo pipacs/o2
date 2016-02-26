@@ -2,7 +2,8 @@ TARGET = Sialis
 TEMPLATE = app
 QT += qml quick
 CONFIG += c++11
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    twitterapi.cpp
 RESOURCES += qml.qrc
 
 # "Bird" icon by snap2objects: http://www.snap2objects.com
@@ -16,3 +17,6 @@ include(deployment.pri)
 
 # Core O2
 include(../../src/src.pri)
+
+HEADERS += \
+    twitterapi.h
