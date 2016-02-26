@@ -3,7 +3,8 @@ TEMPLATE = app
 QT += qml quick
 CONFIG += c++11
 SOURCES += main.cpp \
-    twitterapi.cpp
+    twitterapi.cpp \
+    tweetmodel.cpp
 RESOURCES += qml.qrc
 
 # "Bird" icon by snap2objects: http://www.snap2objects.com
@@ -19,4 +20,5 @@ include(deployment.pri)
 include(../../src/src.pri)
 
 HEADERS += \
-    twitterapi.h
+    twitterapi.h \
+    tweetmodel.h

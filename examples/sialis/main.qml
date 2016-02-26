@@ -28,7 +28,13 @@ ApplicationWindow {
 
         onLinkedChanged: {
             loginButton.enabled = true
+            twitterApi.requestTweets()
         }
+    }
+
+    TwitterApi {
+        id: twitterApi
+        authenticator: o1Twitter
     }
 
     statusBar: StatusBar {
@@ -58,8 +64,40 @@ ApplicationWindow {
     }
 
     ListView {
-        // Tweets go here...
+        id: listView
         anchors.fill: parent
+        model: twitterApi.tweetModel
+        delegate: listDelegate
+        highlight: Rectangle {color: "#10000000"}
+        focus: true
+
+        Component {
+            id: listDelegate
+            Item {
+                width: parent.width
+                height: label.contentHeight + 10
+                Row {
+                    anchors.fill: parent
+                    Label {
+                        id: label
+                        anchors.centerIn: parent
+                        width: parent.width
+                        text: rawText
+                        wrapMode: Text.Wrap
+                    }
+                    Rectangle {
+                        width: parent.width
+                        height: 1
+                        color: "#10000000"
+                        border.color: "transparent"
+                    }
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: listView.currentIndex = index
+                }
+            }
+        }
     }
 
     ApplicationWindow {
@@ -84,5 +122,9 @@ ApplicationWindow {
             close.accepted = true
             loginButton.enabled = true
         }
+    }
+
+    Component.onCompleted: {
+        twitterApi.requestTweets()
     }
 }
