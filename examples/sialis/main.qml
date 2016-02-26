@@ -124,7 +124,12 @@ ApplicationWindow {
         }
     }
 
-    Component.onCompleted: {
-        twitterApi.requestTweets()
+    Timer {
+        id: timer
+        interval: 15000
+        repeat: true
+        running: true
+        triggeredOnStart: true
+        onTriggered: twitterApi.requestTweets()
     }
 }
