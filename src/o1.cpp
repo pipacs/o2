@@ -33,6 +33,33 @@ O1::O1(QObject *parent) :
             this, SLOT(onVerificationReceived(QMap<QString,QString>)));
 }
 
+QUrl O1::requestTokenUrl() {
+    return requestTokenUrl_;
+}
+
+void O1::setRequestTokenUrl(const QUrl &v) {
+    requestTokenUrl_ = v;
+    emit requestTokenUrlChanged();
+}
+
+QUrl O1::authorizeUrl() {
+    return authorizeUrl_;
+}
+
+void O1::setAuthorizeUrl(const QUrl &value) {
+    authorizeUrl_ = value;
+    emit authorizeUrlChanged();
+}
+
+QUrl O1::accessTokenUrl() {
+    return accessTokenUrl_;
+}
+
+void O1::setAccessTokenUrl(const QUrl &value) {
+    accessTokenUrl_ = value;
+    emit accessTokenUrlChanged();
+}
+
 QString O1::signatureMethod() {
     return signatureMethod_;
 }

@@ -24,9 +24,11 @@ public:
     bool linked();
 
     /// Authentication token.
+    Q_PROPERTY(QString token READ token NOTIFY tokenChanged)
     QString token();
 
     /// Authentication token secret.
+    Q_PROPERTY(QString tokenSecret READ tokenSecret NOTIFY tokenSecretChanged)
     QString tokenSecret();
 
     /// Provider-specific extra tokens, available after a successful authentication
@@ -44,21 +46,6 @@ public:
     Q_PROPERTY(QString clientSecret READ clientSecret WRITE setClientSecret NOTIFY clientSecretChanged)
     QString clientSecret();
     void setClientSecret(const QString &value);
-
-    /// Token request URL.
-    Q_PROPERTY(QUrl requestTokenUrl READ requestTokenUrl WRITE setRequestTokenUrl NOTIFY requestTokenUrlChanged)
-    QUrl requestTokenUrl();
-    void setRequestTokenUrl(const QUrl &value);
-
-    /// Authorization URL.
-    Q_PROPERTY(QUrl authorizeUrl READ authorizeUrl WRITE setAuthorizeUrl NOTIFY authorizeUrlChanged)
-    QUrl authorizeUrl();
-    void setAuthorizeUrl(const QUrl &value);
-
-    /// Access token URL.
-    Q_PROPERTY(QUrl accessTokenUrl READ accessTokenUrl WRITE setAccessTokenUrl NOTIFY accessTokenUrlChanged)
-    QUrl accessTokenUrl();
-    void setAccessTokenUrl(const QUrl &value);
 
     /// TCP port number to use in local redirections.
     /// The OAuth "redirect_uri" will be set to "http://localhost:<localPort>/".
@@ -95,10 +82,9 @@ signals:
     void linkedChanged();
     void clientIdChanged();
     void clientSecretChanged();
-    void requestTokenUrlChanged();
-    void authorizeUrlChanged();
-    void accessTokenUrlChanged();
     void localPortChanged();
+    void tokenChanged();
+    void tokenSecretChanged();
     void extraTokensChanged();
 
 protected:

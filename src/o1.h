@@ -30,6 +30,21 @@ public:
     QString signatureMethod();
     void setSignatureMethod(const QString &value);
 
+    /// Token request URL.
+    Q_PROPERTY(QUrl requestTokenUrl READ requestTokenUrl WRITE setRequestTokenUrl NOTIFY requestTokenUrlChanged)
+    QUrl requestTokenUrl();
+    void setRequestTokenUrl(const QUrl &value);
+
+    /// Authorization URL.
+    Q_PROPERTY(QUrl authorizeUrl READ authorizeUrl WRITE setAuthorizeUrl NOTIFY authorizeUrlChanged)
+    QUrl authorizeUrl();
+    void setAuthorizeUrl(const QUrl &value);
+
+    /// Access token URL.
+    Q_PROPERTY(QUrl accessTokenUrl READ accessTokenUrl WRITE setAccessTokenUrl NOTIFY accessTokenUrlChanged)
+    QUrl accessTokenUrl();
+    void setAccessTokenUrl(const QUrl &value);
+
     /// Constructor.
     explicit O1(QObject *parent = 0);
 
@@ -72,6 +87,9 @@ public slots:
     Q_INVOKABLE virtual void unlink();
 
 signals:
+    void requestTokenUrlChanged();
+    void authorizeUrlChanged();
+    void accessTokenUrlChanged();
     void signatureMethodChanged();
 
 protected slots:
@@ -94,6 +112,9 @@ protected:
     /// Exchange temporary token to authentication token
     void exchangeToken();
 
+    QUrl requestUrl_;
+    QUrl tokenUrl_;
+    QUrl refreshTokenUrl_;
     QString verifier_;
     QString signatureMethod_;
     QNetworkAccessManager *manager_;

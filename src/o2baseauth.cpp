@@ -46,6 +46,7 @@ QString O2BaseAuth::tokenSecret() {
 void O2BaseAuth::setTokenSecret(const QString &v) {
     QString key = QString(O2_KEY_TOKEN_SECRET).arg(clientId_);
     store_->setValue(key, v);
+    emit tokenSecretChanged();
 }
 
 QString O2BaseAuth::token() {
@@ -56,6 +57,7 @@ QString O2BaseAuth::token() {
 void O2BaseAuth::setToken(const QString &v) {
     QString key = QString(O2_KEY_TOKEN).arg(clientId_);
     store_->setValue(key, v);
+    emit tokenChanged();
 }
 
 QString O2BaseAuth::clientId() {
@@ -83,33 +85,6 @@ int O2BaseAuth::localPort() {
 void O2BaseAuth::setLocalPort(int value) {
     localPort_ = value;
     emit localPortChanged();
-}
-
-QUrl O2BaseAuth::requestTokenUrl() {
-    return requestTokenUrl_;
-}
-
-void O2BaseAuth::setRequestTokenUrl(const QUrl &v) {
-    requestTokenUrl_ = v;
-    emit requestTokenUrlChanged();
-}
-
-QUrl O2BaseAuth::authorizeUrl() {
-    return authorizeUrl_;
-}
-
-void O2BaseAuth::setAuthorizeUrl(const QUrl &value) {
-    authorizeUrl_ = value;
-    emit authorizeUrlChanged();
-}
-
-QUrl O2BaseAuth::accessTokenUrl() {
-    return accessTokenUrl_;
-}
-
-void O2BaseAuth::setAccessTokenUrl(const QUrl &value) {
-    accessTokenUrl_ = value;
-    emit accessTokenUrlChanged();
 }
 
 QVariantMap O2BaseAuth::extraTokens() {

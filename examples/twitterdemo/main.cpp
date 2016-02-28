@@ -23,31 +23,23 @@ const char USAGE[] = "\n"
                      "  %5\t\tStatus update message, enclosed in double quotes\n";
 
 
-class Helper : public QObject
-{
+class Helper : public QObject {
     Q_OBJECT
 
 public:
     Helper() : QObject(), tweeter_(this), waitForMsg_(false), msg_(QString()) {}
 
 public slots:
-
     void processArgs() {
-
         QStringList argList = qApp->arguments();
-
         QByteArray help = QString(USAGE).arg(OPT_OAUTH,
                                              OPT_XAUTH,
                                              OPT_USERNAME,
                                              OPT_PASSWORD,
                                              OPT_STATUS).toLatin1();
-
-        const char* helpText = help.constData();
-
-        connect(&tweeter_, SIGNAL(linkingFailed()),
-                this, SLOT(onLinkingFailed()));
-        connect(&tweeter_, SIGNAL(linkingSucceeded()),
-                this, SLOT(onLinkingSucceeded()));
+        const char *helpText = help.constData();
+        connect(&tweeter_, SIGNAL(linkingFailed()), this, SLOT(onLinkingFailed()));
+        connect(&tweeter_, SIGNAL(linkingSucceeded()), this, SLOT(onLinkingSucceeded()));
 
         if (argList.contains(OPT_OAUTH)) {
             if (argList.contains(OPT_STATUS)) {
@@ -96,10 +88,8 @@ public slots:
     }
 
 private slots:
-
     void postStatusUpdate(const QString& msg) {
-        connect(&tweeter_, SIGNAL(statusPosted()),
-                qApp, SLOT(quit()));
+        connect(&tweeter_, SIGNAL(statusPosted()), qApp, SLOT(quit()));
         tweeter_.postStatusUpdate(msg);
     }
 
@@ -109,8 +99,7 @@ private:
     QString msg_;
 };
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
     Helper helper;
