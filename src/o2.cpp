@@ -135,12 +135,18 @@ void O2::setRefreshTokenUrl(const QString &value) {
 void O2::link() {
     trace() << "O2::link";
 
-
     if (linked()) {
-        trace() << " Linked already";
+        trace() << "O2::link: Linked already";
         emit linkingSucceeded();
         return;
     }
+
+    setLinked(false);
+    setToken("");
+    setTokenSecret("");
+    setExtraTokens(QVariantMap());
+    setRefreshToken(QString());
+    setExpires(0);
 
     if (grantFlow_ == GrantFlowAuthorizationCode) {
         // Start listening to authentication replies
@@ -168,7 +174,7 @@ void O2::link() {
         url.setQuery(query);
 #endif
 
-        trace() << "Emit openBrowser" << url.toString();
+        trace() << "O2::link: Emit openBrowser" << url.toString();
         emit openBrowser(url);
     } else if (grantFlow_ == GrantFlowResourceOwnerPasswordCredentials) {
         QUrl url(tokenUrl_);
@@ -184,7 +190,7 @@ void O2::link() {
         tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
         QNetworkReply *tokenReply = manager_->post(tokenRequest, params.toString(QUrl::FullyEncoded).toUtf8());
 
-        trace() << params.toString(QUrl::FullyEncoded).toUtf8();
+        trace() << "O2::link: " << params.toString(QUrl::FullyEncoded).toUtf8();
 
         connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
         connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
@@ -203,13 +209,11 @@ void O2::unlink() {
 
 void O2::onVerificationReceived(const QMap<QString, QString> response) {
     trace() << "O2::onVerificationReceived";
-    trace() << "" << response;
+    trace() << "O2::onVerificationReceived: " << response;
 
     emit closeBrowser();
     if (response.contains("error")) {
-        trace() << " Verification failed";
-        store_->setValue("error", response.value("error"));
-        store_->setValue("error_description", response.value("error_description"));
+        qWarning() << "O2::onVerificationReceived: Verification failed: " << response;
         emit linkingFailed();
         return;
     }
@@ -262,7 +266,7 @@ void O2::onTokenReplyFinished() {
             bool ok = false;
             int expiresIn = tokens.take(O2_OAUTH2_EXPIRES_IN).toInt(&ok);
             if (ok) {
-                trace() << "Token expires in" << expiresIn << "seconds";
+                trace() << "O2::onTokenReplyFinished: Token expires in" << expiresIn << "seconds";
                 setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
             }
             setRefreshToken(tokens.take(O2_OAUTH2_REFRESH_TOKEN).toString());
@@ -272,8 +276,6 @@ void O2::onTokenReplyFinished() {
             emit linkingSucceeded();
         } else {
             qWarning() << "O2::onTokenReplyFinished: oauth_token missing from response" << replyData;
-            store_->setValue("error", "oauth_token missing from response");
-            store_->setValue("error_description", "oauth_token missing from response");
             emit linkingFailed();
         }
     }
@@ -282,13 +284,11 @@ void O2::onTokenReplyFinished() {
 
 void O2::onTokenReplyError(QNetworkReply::NetworkError error) {
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
-    trace() << "O2::onTokenReplyError" << error << tokenReply->errorString();
-    trace() << "" << tokenReply->readAll();
+    qWarning() << "O2::onTokenReplyError: " << error << ": " << tokenReply->errorString();
+    trace() << "O2::onTokenReplyError: " << tokenReply->readAll();
     setToken(QString());
     setRefreshToken(QString());
     timedReplies_.remove(tokenReply);
-    store_->setValue("error", QString::number(error));
-    store_->setValue("error_description", tokenReply->errorString());
     emit linkingFailed();
 }
 

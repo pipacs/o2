@@ -201,6 +201,7 @@ void O1::link() {
     setLinked(false);
     setToken("");
     setTokenSecret("");
+    setExtraTokens(QVariantMap());
 
     // Start reply server
     replyServer_->listen(QHostAddress::Any, localPort());

@@ -78,10 +78,8 @@ void O2Facebook::onTokenReplyFinished() {
         setToken(reply.value(O2_OAUTH2_ACCESS_TOKEN, ""));
         setExpires(reply.value(FB_EXPIRES_KEY).toInt());
         setRefreshToken(reply.value(O2_OAUTH2_REFRESH_TOKEN, ""));
-
         timedReplies_.remove(tokenReply);
-        emit linkedChanged();
-        emit tokenChanged();
+        setLinked(true);
         emit linkingSucceeded();
     }
 }

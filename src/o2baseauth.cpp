@@ -1,8 +1,12 @@
 #include <QDataStream>
+#include <QDebug>
 
 #include "o2baseauth.h"
 #include "o2globals.h"
 #include "o2settingsstore.h"
+
+#define trace() if (1) qDebug()
+// define trace() if (0) qDebug()
 
 O2BaseAuth::O2BaseAuth(QObject *parent): QObject(parent) {
     localPort_ = 0;
@@ -26,7 +30,9 @@ void O2BaseAuth::setStore(O2AbstractStore *store) {
 
 bool O2BaseAuth::linked() {
     QString key = QString(O2_KEY_LINKED).arg(clientId_);
-    return !store_->value(key).isEmpty();
+    bool result = !store_->value(key).isEmpty();
+    trace() << "O2BaseAuth::linked:" << (result? "Yes": "No");
+    return result;
 }
 
 void O2BaseAuth::setLinked(bool v) {

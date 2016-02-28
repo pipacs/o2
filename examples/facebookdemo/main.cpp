@@ -16,29 +16,20 @@ const char USAGE[] = "\n"
                      "  %2\t\tValidate Access Token\n";
 
 
-class Helper : public QObject
-{
+class Helper : public QObject {
     Q_OBJECT
 
 public:
     Helper() : QObject(), fbdemo_(this), waitForMsg_(false), msg_(QString()) {}
 
 public slots:
-
     void processArgs() {
-
         QStringList argList = qApp->arguments();
-
         QByteArray help = QString(USAGE).arg(OPT_OAUTH_CODE,
                                              OPT_VALIDATE_TOKEN).toLatin1();
-
         const char* helpText = help.constData();
-
-        connect(&fbdemo_, SIGNAL(linkingFailed()),
-                this, SLOT(onLinkingFailed()));
-        connect(&fbdemo_, SIGNAL(linkingSucceeded()),
-                this, SLOT(onLinkingSucceeded()));
-
+        connect(&fbdemo_, SIGNAL(linkingFailed()), this, SLOT(onLinkingFailed()));
+        connect(&fbdemo_, SIGNAL(linkingSucceeded()), this, SLOT(onLinkingSucceeded()));
         if (argList.contains(OPT_OAUTH_CODE)) {
             // Start OAuth
             fbdemo_.doOAuth(O2::GrantFlowAuthorizationCode);
@@ -70,13 +61,10 @@ private:
     QString msg_;
 };
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
-
     Helper helper;
     QTimer::singleShot(0, &helper, SLOT(processArgs()));
-
     return a.exec();
 }
 

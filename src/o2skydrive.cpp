@@ -20,11 +20,18 @@ O2Skydrive::O2Skydrive(QObject *parent): O2(parent) {
 }
 
 void O2Skydrive::link() {
-    trace() << "O2::link";
+    trace() << "O2Skydrive::link";
     if (linked()) {
-        trace() << "Linked already";
+        trace() << "O2kydrive::link: Linked already";
         return;
     }
+
+    setLinked(false);
+    setToken("");
+    setTokenSecret("");
+    setExtraTokens(QVariantMap());
+    setRefreshToken(QString());
+    setExpires(0);
 
     redirectUri_ = QString("https://login.live.com/oauth20_desktop.srf");
 
@@ -48,7 +55,7 @@ void O2Skydrive::link() {
 }
 
 void O2Skydrive::redirected(const QUrl &url) {
-    trace() << "O2::redirected" << url;
+    trace() << "O2Skydrive::redirected" << url;
 
     emit closeBrowser();
 
@@ -62,7 +69,7 @@ void O2Skydrive::redirected(const QUrl &url) {
         urlCode = query.queryItemValue(O2_OAUTH2_CODE);
 #endif
         if (urlCode.isEmpty()) {
-            trace() << " Code not received";
+            trace() << "O2Skydrive::redirected: Code not received";
             emit linkingFailed();
             return;
         }
@@ -97,7 +104,7 @@ void O2Skydrive::redirected(const QUrl &url) {
                 }
                 QString key = item.left(index);
                 QString value = item.mid(index + 1);
-                trace() << "" << key;
+                trace() << "O2Skydrive::redirected: Got" << key;
                 if (key == O2_OAUTH2_ACCESS_TOKEN) {
                     urlToken = value;
                 } else if (key == O2_OAUTH2_EXPIRES_IN) {
@@ -114,7 +121,7 @@ void O2Skydrive::redirected(const QUrl &url) {
         if (urlToken.isEmpty()) {
             emit linkingFailed();
         } else {
-            emit linkedChanged();
+            setLinked(true);
             emit linkingSucceeded();
         }
     }
