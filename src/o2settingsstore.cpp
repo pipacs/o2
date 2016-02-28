@@ -18,9 +18,6 @@ O2SettingsStore::O2SettingsStore(QSettings *settings, const QString &encryptionK
     settings_->setParent(this);
 }
 
-O2SettingsStore::~O2SettingsStore() {
-}
-
 QString O2SettingsStore::groupKey() const {
     return groupKey_;
 }

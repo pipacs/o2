@@ -3,6 +3,7 @@
 
 #include "o1.h"
 
+/// Twitter OAuth 1.0 client
 class O1Twitter: public O1 {
     Q_OBJECT
 

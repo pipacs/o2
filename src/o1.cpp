@@ -24,119 +24,13 @@
 // #define trace() if (0) qDebug()
 
 O1::O1(QObject *parent) :
-    QObject(parent) {
+    O2BaseAuth(parent) {
     setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
-    localPort_ = 0;
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)),
             this, SLOT(onVerificationReceived(QMap<QString,QString>)));
-    store_ = new O2SettingsStore(O2_ENCRYPTION_KEY, this);
-}
-
-O1::~O1() {
-}
-
-void O1::setStore(O2AbstractStore *store) {
-    if (!store) {
-        qWarning() << "Store object is null! Using default O2SettingsStore";
-        return;
-    }
-    // Delete the previously stored object
-    store_->deleteLater();
-    store_ = store;
-
-    // Re-parent it to this class as we take ownership of it now
-    store_->setParent(this);
-}
-
-bool O1::linked() {
-    QString key = QString(O2_KEY_LINKED).arg(clientId_);
-    return !store_->value(key).isEmpty();
-}
-
-void O1::setLinked(bool v) {
-    bool oldValue = linked();
-    QString key = QString(O2_KEY_LINKED).arg(clientId_);
-    store_->setValue(key, v? "1": "");
-    if (oldValue != v) {
-        emit linkedChanged();
-    }
-}
-
-QString O1::tokenSecret() {
-    QString key = QString(O2_KEY_TOKEN_SECRET).arg(clientId_);
-    return store_->value(key);
-}
-
-void O1::setTokenSecret(const QString &v) {
-    QString key = QString(O2_KEY_TOKEN_SECRET).arg(clientId_);
-    store_->setValue(key, v);
-}
-
-QString O1::token() {
-    QString key = QString(O2_KEY_TOKEN).arg(clientId_);
-    return store_->value(key);
-}
-
-void O1::setToken(const QString &v) {
-    QString key = QString(O2_KEY_TOKEN).arg(clientId_);
-    store_->setValue(key, v);
-}
-
-QString O1::clientId() {
-    return clientId_;
-}
-
-void O1::setClientId(const QString &value) {
-    clientId_ = value;
-    emit clientIdChanged();
-}
-
-QString O1::clientSecret() {
-    return clientSecret_;
-}
-
-void O1::setClientSecret(const QString &value) {
-    clientSecret_ = value;
-    emit clientSecretChanged();
-}
-
-int O1::localPort() {
-    return localPort_;
-}
-
-void O1::setLocalPort(int value) {
-    localPort_ = value;
-    emit localPortChanged();
-}
-
-QUrl O1::requestTokenUrl() {
-    return requestTokenUrl_;
-}
-
-void O1::setRequestTokenUrl(const QUrl &v) {
-    requestTokenUrl_ = v;
-    emit requestTokenUrlChanged();
-}
-
-QUrl O1::authorizeUrl() {
-    return authorizeUrl_;
-}
-
-void O1::setAuthorizeUrl(const QUrl &value) {
-    authorizeUrl_ = value;
-    emit authorizeUrlChanged();
-}
-
-QUrl O1::accessTokenUrl() {
-    return accessTokenUrl_;
-}
-
-void O1::setAccessTokenUrl(const QUrl &value) {
-    accessTokenUrl_ = value;
-    emit accessTokenUrlChanged();
 }
 
 QString O1::signatureMethod() {
@@ -144,26 +38,8 @@ QString O1::signatureMethod() {
 }
 
 void O1::setSignatureMethod(const QString &value) {
+    trace() << "O1::setSignatureMethod: " << value;
     signatureMethod_ = value;
-}
-
-QVariantMap O1::extraTokens() {
-    QString key = QString(O2_KEY_EXTRA_TOKENS).arg(clientId_);
-    QString value = store_->value(key);
-    QByteArray bytes = QByteArray::fromBase64(value.toLatin1());
-    QDataStream stream(&bytes, QIODevice::ReadOnly);
-    stream >> extraTokens_;
-    return extraTokens_;
-}
-
-void O1::setExtraTokens(QVariantMap extraTokens) {
-    extraTokens_ = extraTokens;
-    QByteArray bytes;
-    QDataStream stream(&bytes, QIODevice::WriteOnly);
-    stream << extraTokens;
-    QString key = QString(O2_KEY_EXTRA_TOKENS).arg(clientId_);
-    store_->setValue(key, bytes.toBase64());
-    emit extraTokensChanged();
 }
 
 void O1::unlink() {
@@ -386,10 +262,10 @@ void O1::onVerificationReceived(QMap<QString, QString> params) {
 }
 
 void O1::exchangeToken() {
+    trace() << "O1::exchangeToken";
+
     // Create token exchange request
-
     QNetworkRequest request(accessTokenUrl());
-
     QList<O1RequestParameter> oauthParams;
     oauthParams.append(O1RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
     oauthParams.append(O1RequestParameter(O2_OAUTH_VERSION, "1.0"));
@@ -415,6 +291,8 @@ void O1::onTokenExchangeError(QNetworkReply::NetworkError error) {
 }
 
 void O1::onTokenExchangeFinished() {
+    trace() << "O1::onTokenExchangeFinished";
+
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     reply->deleteLater();
     if (reply->error() != QNetworkReply::NoError) {

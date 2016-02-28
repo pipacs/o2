@@ -202,7 +202,7 @@ The *examples* folder contains complete example applications:
 Name | Description
 :-- | :--
 facebookdemo | Command line application authenticating with Facebook
-sails | QT Quick Twitter client
-twitter demo | Command line client for authenticating with Twitter and posting status updates
+sails | QT Quick Twitter client using OAuth 1
+twitterdemo | Command line client for authenticating with Twitter and posting status updates. Uses OAuth 1 or Twitter XAuth
 
 
