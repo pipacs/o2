@@ -17,7 +17,7 @@ public:
     /// XAuth Password
     Q_PROPERTY(QString password READ password WRITE setPassword NOTIFY passwordChanged)
     QString password();
-    void setPassword(const QString &username);
+    void setPassword(const QString &password);
 
 public slots:
     /// Authenticate.
