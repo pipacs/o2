@@ -192,7 +192,7 @@ void O2::link() {
         if (!apiKey_.isEmpty()) {
             parameters.append(O2RequestParameter(O2_OAUTH2_API_KEY, apiKey_.toUtf8()));
         }
-        QByteArray payload = O2BaseAuth::createQueryParams(parameters);
+        QByteArray payload = O2BaseAuth::createQueryParameters(parameters);
 
         QUrl url(tokenUrl_);
         QNetworkRequest tokenRequest(url);

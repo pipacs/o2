@@ -112,10 +112,10 @@ void O2BaseAuth::setExtraTokens(QVariantMap extraTokens) {
     emit extraTokensChanged();
 }
 
-QByteArray O2BaseAuth::createQueryParams(const QList<O2RequestParameter> &params) {
+QByteArray O2BaseAuth::createQueryParameters(const QList<O2RequestParameter> &parameters) {
     QByteArray ret;
     bool first = true;
-    foreach (O2RequestParameter h, params) {
+    foreach (O2RequestParameter h, parameters) {
         if (first) {
             first = false;
         } else {

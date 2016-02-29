@@ -115,7 +115,7 @@ static QString getOperationName(QNetworkAccessManager::Operation op) {
 
 /// Build a concatenated/percent-encoded string from a list of headers.
 QByteArray O1::encodeHeaders(const QList<O2RequestParameter> &headers) {
-    return QUrl::toPercentEncoding(createQueryParams(headers));
+    return QUrl::toPercentEncoding(createQueryParameters(headers));
 }
 
 /// Build a base string for signing.

@@ -68,7 +68,7 @@ public:
     void setStore(O2AbstractStore *store);
 
     /// Construct query string from list of headers
-    static QByteArray createQueryParams(const QList<O2RequestParameter> &params);
+    static QByteArray createQueryParameters(const QList<O2RequestParameter> &parameters);
 
 public slots:
     /// Authenticate.
