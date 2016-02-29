@@ -1,21 +1,21 @@
 #include <QDataStream>
 #include <QDebug>
 
-#include "o2baseauth.h"
-#include "o2globals.h"
-#include "o2settingsstore.h"
+#include "o0baseauth.h"
+#include "o0globals.h"
+#include "o0settingsstore.h"
 
 #define trace() if (1) qDebug()
 // define trace() if (0) qDebug()
 
 static const quint16 DefaultLocalPort = 1965;
 
-O2BaseAuth::O2BaseAuth(QObject *parent): QObject(parent) {
+O0BaseAuth::O0BaseAuth(QObject *parent): QObject(parent) {
     localPort_ = DefaultLocalPort;
-    store_ = new O2SettingsStore(O2_ENCRYPTION_KEY, this);
+    store_ = new O0SettingsStore(O2_ENCRYPTION_KEY, this);
 }
 
-void O2BaseAuth::setStore(O2AbstractStore *store) {
+void O0BaseAuth::setStore(O0AbstractStore *store) {
     if (store_) {
         store_->deleteLater();
     }
@@ -23,20 +23,20 @@ void O2BaseAuth::setStore(O2AbstractStore *store) {
         store_ = store;
         store_->setParent(this);
     } else {
-        store_ = new O2SettingsStore(O2_ENCRYPTION_KEY, this);
+        store_ = new O0SettingsStore(O2_ENCRYPTION_KEY, this);
         return;
     }
 }
 
-bool O2BaseAuth::linked() {
+bool O0BaseAuth::linked() {
     QString key = QString(O2_KEY_LINKED).arg(clientId_);
     bool result = !store_->value(key).isEmpty();
-    trace() << "O2BaseAuth::linked:" << (result? "Yes": "No");
+    trace() << "O0BaseAuth::linked:" << (result? "Yes": "No");
     return result;
 }
 
-void O2BaseAuth::setLinked(bool v) {
-    trace() << "O2BaseAuth::setLinked:" << (v? "true": "false");
+void O0BaseAuth::setLinked(bool v) {
+    trace() << "O0BaseAuth::setLinked:" << (v? "true": "false");
     bool oldValue = linked();
     QString key = QString(O2_KEY_LINKED).arg(clientId_);
     store_->setValue(key, v? "1": "");
@@ -45,57 +45,57 @@ void O2BaseAuth::setLinked(bool v) {
     }
 }
 
-QString O2BaseAuth::tokenSecret() {
+QString O0BaseAuth::tokenSecret() {
     QString key = QString(O2_KEY_TOKEN_SECRET).arg(clientId_);
     return store_->value(key);
 }
 
-void O2BaseAuth::setTokenSecret(const QString &v) {
+void O0BaseAuth::setTokenSecret(const QString &v) {
     QString key = QString(O2_KEY_TOKEN_SECRET).arg(clientId_);
     store_->setValue(key, v);
     emit tokenSecretChanged();
 }
 
-QString O2BaseAuth::token() {
+QString O0BaseAuth::token() {
     QString key = QString(O2_KEY_TOKEN).arg(clientId_);
     return store_->value(key);
 }
 
-void O2BaseAuth::setToken(const QString &v) {
+void O0BaseAuth::setToken(const QString &v) {
     QString key = QString(O2_KEY_TOKEN).arg(clientId_);
     store_->setValue(key, v);
     emit tokenChanged();
 }
 
-QString O2BaseAuth::clientId() {
+QString O0BaseAuth::clientId() {
     return clientId_;
 }
 
-void O2BaseAuth::setClientId(const QString &value) {
+void O0BaseAuth::setClientId(const QString &value) {
     clientId_ = value;
     emit clientIdChanged();
 }
 
-QString O2BaseAuth::clientSecret() {
+QString O0BaseAuth::clientSecret() {
     return clientSecret_;
 }
 
-void O2BaseAuth::setClientSecret(const QString &value) {
+void O0BaseAuth::setClientSecret(const QString &value) {
     clientSecret_ = value;
     emit clientSecretChanged();
 }
 
-int O2BaseAuth::localPort() {
+int O0BaseAuth::localPort() {
     return localPort_;
 }
 
-void O2BaseAuth::setLocalPort(int value) {
-    trace() << "O2BaseAuth::setLocalPort:" << value;
+void O0BaseAuth::setLocalPort(int value) {
+    trace() << "O0BaseAuth::setLocalPort:" << value;
     localPort_ = value;
     emit localPortChanged();
 }
 
-QVariantMap O2BaseAuth::extraTokens() {
+QVariantMap O0BaseAuth::extraTokens() {
     QString key = QString(O2_KEY_EXTRA_TOKENS).arg(clientId_);
     QString value = store_->value(key);
     QByteArray bytes = QByteArray::fromBase64(value.toLatin1());
@@ -104,7 +104,7 @@ QVariantMap O2BaseAuth::extraTokens() {
     return extraTokens_;
 }
 
-void O2BaseAuth::setExtraTokens(QVariantMap extraTokens) {
+void O0BaseAuth::setExtraTokens(QVariantMap extraTokens) {
     extraTokens_ = extraTokens;
     QByteArray bytes;
     QDataStream stream(&bytes, QIODevice::WriteOnly);
@@ -114,10 +114,10 @@ void O2BaseAuth::setExtraTokens(QVariantMap extraTokens) {
     emit extraTokensChanged();
 }
 
-QByteArray O2BaseAuth::createQueryParameters(const QList<O2RequestParameter> &parameters) {
+QByteArray O0BaseAuth::createQueryParameters(const QList<O0RequestParameter> &parameters) {
     QByteArray ret;
     bool first = true;
-    foreach (O2RequestParameter h, parameters) {
+    foreach (O0RequestParameter h, parameters) {
         if (first) {
             first = false;
         } else {

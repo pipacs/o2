@@ -2,7 +2,7 @@
 #include <QDebug>
 
 #include "oxtwitter.h"
-#include "o2globals.h"
+#include "o0globals.h"
 
 #define trace() if (1) qDebug()
 
@@ -45,21 +45,21 @@ void OXTwitter::link() {
     }
 
     // prepare XAuth parameters
-    xAuthParams_.append(O2RequestParameter(QByteArray(XAUTH_USERNAME), username_.toLatin1()));
-    xAuthParams_.append(O2RequestParameter(QByteArray(XAUTH_PASSWORD), password_.toLatin1()));
-    xAuthParams_.append(O2RequestParameter(QByteArray(XAUTH_MODE), QByteArray(XAUTH_MODE_VALUE)));
+    xAuthParams_.append(O0RequestParameter(QByteArray(XAUTH_USERNAME), username_.toLatin1()));
+    xAuthParams_.append(O0RequestParameter(QByteArray(XAUTH_PASSWORD), password_.toLatin1()));
+    xAuthParams_.append(O0RequestParameter(QByteArray(XAUTH_MODE), QByteArray(XAUTH_MODE_VALUE)));
 
-    QList<O2RequestParameter> oauthParams;
-    oauthParams.append(O2RequestParameter(O2_OAUTH_SIGNATURE_METHOD, O2_SIGNATURE_TYPE_HMAC_SHA1));
-    oauthParams.append(O2RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
-    oauthParams.append(O2RequestParameter(O2_OAUTH_VERSION, "1.0"));
-    oauthParams.append(O2RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
-    oauthParams.append(O2RequestParameter(O2_OAUTH_NONCE, nonce()));
-    oauthParams.append(O2RequestParameter(O2_OAUTH_TOKEN, QByteArray("")));
-    oauthParams.append(O2RequestParameter(O2_OAUTH_VERFIER, QByteArray("")));
+    QList<O0RequestParameter> oauthParams;
+    oauthParams.append(O0RequestParameter(O2_OAUTH_SIGNATURE_METHOD, O2_SIGNATURE_TYPE_HMAC_SHA1));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_VERSION, "1.0"));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_NONCE, nonce()));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_TOKEN, QByteArray("")));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_VERFIER, QByteArray("")));
 
     QByteArray signature = sign(oauthParams, xAuthParams_, accessTokenUrl(), QNetworkAccessManager::PostOperation, clientSecret(), "");
-    oauthParams.append(O2RequestParameter(O2_OAUTH_SIGNATURE, signature));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_SIGNATURE, signature));
 
     // Post request
     QNetworkRequest request(accessTokenUrl());

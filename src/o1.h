@@ -5,12 +5,12 @@
 #include <QUrl>
 #include <QNetworkReply>
 
-#include "o2baseauth.h"
+#include "o0baseauth.h"
 
 class O2ReplyServer;
 
 /// Simple OAuth 1.0 authenticator.
-class O1: public O2BaseAuth {
+class O1: public O0BaseAuth {
     Q_OBJECT
 
 public:
@@ -41,13 +41,13 @@ public:
     static QMap<QString, QString> parseResponse(const QByteArray &response);
 
     /// Build the value of the "Authorization:" header.
-    static QByteArray buildAuthorizationHeader(const QList<O2RequestParameter> &oauthParams);
+    static QByteArray buildAuthorizationHeader(const QList<O0RequestParameter> &oauthParams);
 
     /// Create unique bytes to prevent replay attacks.
     static QByteArray nonce();
 
     /// Generate signature string depending on signature method type
-    QByteArray generateSignature(const QList<O2RequestParameter> headers, const QNetworkRequest &req, const QList<O2RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation);
+    QByteArray generateSignature(const QList<O0RequestParameter> headers, const QNetworkRequest &req, const QList<O0RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation);
 
     /// Calculate the HMAC-SHA1 signature of a request.
     /// @param  oauthParams     OAuth parameters.
@@ -57,13 +57,13 @@ public:
     /// @param  consumerSecret  Consumer (application) secret.
     /// @param  tokenSecret     Authorization token secret (empty if not yet available).
     /// @return Signature that can be used as the value of the "oauth_signature" parameter.
-    static QByteArray sign(const QList<O2RequestParameter> &oauthParams, const QList<O2RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret);
+    static QByteArray sign(const QList<O0RequestParameter> &oauthParams, const QList<O0RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret);
 
     /// Build a base string for signing.
-    static QByteArray getRequestBase(const QList<O2RequestParameter> &oauthParams, const QList<O2RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op);
+    static QByteArray getRequestBase(const QList<O0RequestParameter> &oauthParams, const QList<O0RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op);
 
     /// Build a concatenated/percent-encoded string from a list of headers.
-    static QByteArray encodeHeaders(const QList<O2RequestParameter> &headers);
+    static QByteArray encodeHeaders(const QList<O0RequestParameter> &headers);
 
 public slots:
     /// Authenticate.

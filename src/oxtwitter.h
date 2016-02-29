@@ -28,7 +28,7 @@ signals:
     void passwordChanged();
 
 private:
-    QList<O2RequestParameter> xAuthParams_;
+    QList<O0RequestParameter> xAuthParams_;
     QString username_;
     QString password_;
 };

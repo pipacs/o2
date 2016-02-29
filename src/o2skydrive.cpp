@@ -8,7 +8,7 @@
 #endif
 
 #include "o2skydrive.h"
-#include "o2globals.h"
+#include "o0globals.h"
 
 #define trace() if (1) qDebug()
 // define trace() if (0) qDebug()

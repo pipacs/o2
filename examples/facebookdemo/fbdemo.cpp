@@ -6,8 +6,8 @@
 #include <QDebug>
 
 #include "fbdemo.h"
-#include "o2globals.h"
-#include "o2settingsstore.h"
+#include "o0globals.h"
+#include "o0settingsstore.h"
 
 const char FB_APP_KEY[] = "227896037359072";
 const char FB_APP_SECRET[] = "3d35b063872579cf7213e09e76b65ceb";
@@ -30,7 +30,7 @@ FBDemo::FBDemo(QObject *parent) :
     o2Facebook_->setRequestUrl(FB_REQUEST_URL);  // Use the desktop login UI
 
     // Create a store object for writing the received tokens
-    O2SettingsStore *store = new O2SettingsStore(O2_ENCRYPTION_KEY);
+    O0SettingsStore *store = new O0SettingsStore(O2_ENCRYPTION_KEY);
     store->setGroupKey("facebook");
     o2Facebook_->setStore(store);
 

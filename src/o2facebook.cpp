@@ -9,7 +9,7 @@
 #endif
 
 #include "o2facebook.h"
-#include "o2globals.h"
+#include "o0globals.h"
 
 static const char *FbEndpoint = "https://graph.facebook.com/oauth/authorize?display=touch";
 static const char *FbTokenUrl = "https://graph.facebook.com/oauth/access_token";

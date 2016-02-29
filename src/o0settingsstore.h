@@ -1,22 +1,22 @@
-#ifndef O2SETTINGSSTORE_H
-#define O2SETTINGSSTORE_H
+#ifndef O0SETTINGSSTORE_H
+#define O0SETTINGSSTORE_H
 
 #include <QSettings>
 #include <QString>
 
-#include "o2abstractstore.h"
-#include "o2simplecrypt.h"
+#include "o0abstractstore.h"
+#include "o0simplecrypt.h"
 
 /// Persistent storage for authentication tokens, using QSettings.
-class O2SettingsStore: public O2AbstractStore {
+class O0SettingsStore: public O0AbstractStore {
     Q_OBJECT
 
 public:
     /// Constructor
-    explicit O2SettingsStore(const QString &encryptionKey, QObject *parent = 0);
+    explicit O0SettingsStore(const QString &encryptionKey, QObject *parent = 0);
 
     /// Construct with an explicit QSettings instance
-    explicit O2SettingsStore(QSettings *settings, const QString &encryptionKey, QObject *parent = 0);
+    explicit O0SettingsStore(QSettings *settings, const QString &encryptionKey, QObject *parent = 0);
 
     /// Group key prefix
     Q_PROPERTY(QString groupKey READ groupKey WRITE setGroupKey NOTIFY groupKeyChanged)
@@ -36,7 +36,7 @@ signals:
 protected:
     QSettings* settings_;
     QString groupKey_;
-    O2SimpleCrypt crypt_;
+    O0SimpleCrypt crypt_;
 };
 
-#endif // O2SETTINGSSTORE_H
+#endif // O0SETTINGSSTORE_H

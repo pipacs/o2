@@ -12,9 +12,9 @@ SOURCES += \
     $$PWD/o2requestor.cpp \
     $$PWD/o2skydrive.cpp \
     $$PWD/oxtwitter.cpp \
-    $$PWD/o2settingsstore.cpp \
-    $$PWD/o2baseauth.cpp \
-    $$PWD/o2simplecrypt.cpp
+    $$PWD/o2simplecrypt.cpp \
+    $$PWD/o0baseauth.cpp \
+    $$PWD/o0settingsstore.cpp
 
 HEADERS += \
     $$PWD/o1.h \
@@ -29,10 +29,11 @@ HEADERS += \
     $$PWD/o2replyserver.h \
     $$PWD/o2requestor.h \
     $$PWD/o2skydrive.h \
-    $$PWD/o2globals.h \
     $$PWD/oxtwitter.h \
-    $$PWD/o2abstractstore.h \
-    $$PWD/o2settingsstore.h \
     $$PWD/o1freshbooks.h \
-    $$PWD/o2simplecrypt.h \
-    $$PWD/o2baseauth.h
+    $$PWD/o0baseauth.h \
+    $$PWD/o0globals.h \
+    $$PWD/o0simplecrypt.h \
+    $$PWD/o0requestparameter.h \
+    $$PWD/o0abstractstore.h \
+    $$PWD/o0settingsstore.h

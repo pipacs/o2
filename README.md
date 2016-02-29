@@ -13,23 +13,24 @@ Notes to contributors:
 
 Class | Header | Purpose
 :-- | :-- | :--
+O0AbstractStore | o0abstractstore.h | Base class of persistent stores
+O0BaseAuth | o0baseauth.h | Base class of OAuth authenticators
+O0SettingsStore | o2settingsstore.h | QSettings-based persistent store
+O0SimpleCrypt | o0simplecrypt.h | Simple encryption and decryption by Andre Somers
 O1 | o1.h | Generic OAuth 1.0 authenticator
-O1Dropbox | o1dropbox.h | Dropbox OAuth specializations
-O1Flickr | o1flickr.h | Flickr OAuth specializations
+O1Dropbox | o1dropbox.h | Dropbox OAuth specialization
+O1Flickr | o1flickr.h | Flickr OAuth specialization
 O1Requestor | o1requestor.h | Makes authenticated OAuth 1.0 requests: GET, POST or PUT, handles timeouts
 O1RequestParameter | o1.h | An extra request parameter participating in request signing
-O1Twitter | o1twitter.h | Twitter OAuth specializations
+O1Twitter | o1twitter.h | Twitter OAuth specialization
 O2 | o2.h | Generic OAuth 2.0 authenticator
-O2AbstractStore | o2abstractstore.h | Base class for implemnting persistent stores
 O2Gft | o2gft.h | Google Fusion Tables OAuth specialization
 O2Facebook | o2facebook.h | Facebook OAuth specialization
 O2Reply | o2reply.h | A network request/reply that can time out
 O2ReplyServer | o2replyserver.h | HTTP server to process authentication responses
 O2Requestor | o2requestor.h | Makes authenticated OAuth 2.0 requests (GET, POST or PUT), handles timeouts and token expiry
-O2SettingsStore | o2settingsstore.h | A QSettings based persistent store for writing OAuth tokens
 O2Skydrive | o2skydrive.h | OneDrive OAuth specialization
 OXTwitter | oxtwitter.h | Twitter XAuth specialization
-SimpleCrypt | simplecrypt.h | Simple encryption and decryption by Andre Somers
 
 ## Installation
 
@@ -176,14 +177,14 @@ That's it. Tweets using the O2 library!
 
 O2 provides simple storage classes for writing OAuth tokens in a peristent location. Currently, a QSettings based backing store **O2SettingsStore** is provided in O2. O2SettingsStore keeps all token values in an encrypted form. You have to specify the encryption key to use while constructing the object:
 
-    O2SettingsStore settings = new O2SettingsStore("myencryptionkey");
+    O0SettingsStore settings = new O0SettingsStore("myencryptionkey");
     // Set the store before starting OAuth, i.e before calling link()
     o1->setStore(settings);
     ...
 
 You can also create it with your customized QSettings object. O2SettingsStore will then use that QSettings object for storing the tokens:
 
-    O2SettingsStore settings = new O2SettingsStore(mySettingsObject, "myencryptionkey");
+    O0SettingsStore settings = new O0SettingsStore(mySettingsObject, "myencryptionkey");
 
 Once set, O2SettingsStore takes ownership of the QSettings object.
 

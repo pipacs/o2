@@ -24,7 +24,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include "o2simplecrypt.h"
+#include "o0simplecrypt.h"
 #include <QByteArray>
 #include <QtDebug>
 #include <QtGlobal>
@@ -32,7 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QCryptographicHash>
 #include <QDataStream>
 
-O2SimpleCrypt::O2SimpleCrypt():
+O0SimpleCrypt::O0SimpleCrypt():
     m_key(0),
     m_compressionMode(CompressionAuto),
     m_protectionMode(ProtectionChecksum),
@@ -41,7 +41,7 @@ O2SimpleCrypt::O2SimpleCrypt():
     qsrand(uint(QDateTime::currentMSecsSinceEpoch() & 0xFFFF));
 }
 
-O2SimpleCrypt::O2SimpleCrypt(quint64 key):
+O0SimpleCrypt::O0SimpleCrypt(quint64 key):
     m_key(key),
     m_compressionMode(CompressionAuto),
     m_protectionMode(ProtectionChecksum),
@@ -51,13 +51,13 @@ O2SimpleCrypt::O2SimpleCrypt(quint64 key):
     splitKey();
 }
 
-void O2SimpleCrypt::setKey(quint64 key)
+void O0SimpleCrypt::setKey(quint64 key)
 {
     m_key = key;
     splitKey();
 }
 
-void O2SimpleCrypt::splitKey()
+void O0SimpleCrypt::splitKey()
 {
     m_keyParts.clear();
     m_keyParts.resize(8);
@@ -70,13 +70,13 @@ void O2SimpleCrypt::splitKey()
     }
 }
 
-QByteArray O2SimpleCrypt::encryptToByteArray(const QString& plaintext)
+QByteArray O0SimpleCrypt::encryptToByteArray(const QString& plaintext)
 {
     QByteArray plaintextArray = plaintext.toUtf8();
     return encryptToByteArray(plaintextArray);
 }
 
-QByteArray O2SimpleCrypt::encryptToByteArray(QByteArray plaintext)
+QByteArray O0SimpleCrypt::encryptToByteArray(QByteArray plaintext)
 {
     if (m_keyParts.isEmpty()) {
         qWarning() << "No key set.";
@@ -136,7 +136,7 @@ QByteArray O2SimpleCrypt::encryptToByteArray(QByteArray plaintext)
     return resultArray;
 }
 
-QString O2SimpleCrypt::encryptToString(const QString& plaintext)
+QString O0SimpleCrypt::encryptToString(const QString& plaintext)
 {
     QByteArray plaintextArray = plaintext.toUtf8();
     QByteArray cypher = encryptToByteArray(plaintextArray);
@@ -144,14 +144,14 @@ QString O2SimpleCrypt::encryptToString(const QString& plaintext)
     return cypherString;
 }
 
-QString O2SimpleCrypt::encryptToString(QByteArray plaintext)
+QString O0SimpleCrypt::encryptToString(QByteArray plaintext)
 {
     QByteArray cypher = encryptToByteArray(plaintext);
     QString cypherString = QString::fromLatin1(cypher.toBase64());
     return cypherString;
 }
 
-QString O2SimpleCrypt::decryptToString(const QString &cyphertext)
+QString O0SimpleCrypt::decryptToString(const QString &cyphertext)
 {
     QByteArray cyphertextArray = QByteArray::fromBase64(cyphertext.toLatin1());
     QByteArray plaintextArray = decryptToByteArray(cyphertextArray);
@@ -160,7 +160,7 @@ QString O2SimpleCrypt::decryptToString(const QString &cyphertext)
     return plaintext;
 }
 
-QString O2SimpleCrypt::decryptToString(QByteArray cypher)
+QString O0SimpleCrypt::decryptToString(QByteArray cypher)
 {
     QByteArray ba = decryptToByteArray(cypher);
     QString plaintext = QString::fromUtf8(ba, ba.size());
@@ -168,7 +168,7 @@ QString O2SimpleCrypt::decryptToString(QByteArray cypher)
     return plaintext;
 }
 
-QByteArray O2SimpleCrypt::decryptToByteArray(const QString& cyphertext)
+QByteArray O0SimpleCrypt::decryptToByteArray(const QString& cyphertext)
 {
     QByteArray cyphertextArray = QByteArray::fromBase64(cyphertext.toLatin1());
     QByteArray ba = decryptToByteArray(cyphertextArray);
@@ -176,7 +176,7 @@ QByteArray O2SimpleCrypt::decryptToByteArray(const QString& cyphertext)
     return ba;
 }
 
-QByteArray O2SimpleCrypt::decryptToByteArray(QByteArray cypher)
+QByteArray O0SimpleCrypt::decryptToByteArray(QByteArray cypher)
 {
     if (m_keyParts.isEmpty()) {
         qWarning() << "No key set.";

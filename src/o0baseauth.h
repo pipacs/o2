@@ -1,5 +1,5 @@
-#ifndef OAUTHBASE_H
-#define OAUTHBASE_H
+#ifndef O0BASEAUTH_H
+#define O0BASEAUTH_H
 
 #include <QByteArray>
 #include <QObject>
@@ -8,25 +8,15 @@
 #include <QUrl>
 #include <QVariantMap>
 
-#include "o2abstractstore.h"
-#include "o2replyserver.h"
-
-/// Request parameter (name-value pair) participating in authentication.
-struct O2RequestParameter {
-    O2RequestParameter(const QByteArray &n, const QByteArray &v): name(n), value(v) {}
-    bool operator <(const O2RequestParameter &other) const {
-        return (name == other.name)? (value < other.value): (name < other.name);
-    }
-    QByteArray name;
-    QByteArray value;
-};
+#include "o0abstractstore.h"
+#include "o0requestparameter.h"
 
 /// Base class of OAuth 1 and 2 authenticators
-class O2BaseAuth : public QObject {
+class O0BaseAuth : public QObject {
     Q_OBJECT
 
 public:
-    explicit O2BaseAuth(QObject *parent = 0);
+    explicit O0BaseAuth(QObject *parent = 0);
 
 public:
     /// Are we authenticated?
@@ -65,10 +55,10 @@ public:
     void setLocalPort(int value);
 
     /// Sets the storage object to use for storing the OAuth tokens on a peristent medium
-    void setStore(O2AbstractStore *store);
+    void setStore(O0AbstractStore *store);
 
     /// Construct query string from list of headers
-    static QByteArray createQueryParameters(const QList<O2RequestParameter> &parameters);
+    static QByteArray createQueryParameters(const QList<O0RequestParameter> &parameters);
 
 public slots:
     /// Authenticate.
@@ -123,8 +113,8 @@ protected:
     QUrl authorizeUrl_;
     QUrl accessTokenUrl_;
     quint16 localPort_;
-    O2AbstractStore *store_;
+    O0AbstractStore *store_;
     QVariantMap extraTokens_;
 };
 
-#endif // OAUTHBASE_H
+#endif // O0BASEAUTH

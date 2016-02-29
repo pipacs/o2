@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   SimpleCrypt is prepared for the case that the encryption and decryption
   algorithm is changed in a later version, by prepending a version identifier to the cypertext.
   */
-class O2SimpleCrypt
+class O0SimpleCrypt
 {
 public:
     /**
@@ -94,13 +94,13 @@ public:
 
       Constructs a SimpleCrypt instance without a valid key set on it.
      */
-    O2SimpleCrypt();
+    O0SimpleCrypt();
     /**
       Constructor.
 
       Constructs a SimpleCrypt instance and initializes it with the given @arg key.
      */
-    explicit O2SimpleCrypt(quint64 key);
+    explicit O0SimpleCrypt(quint64 key);
 
     /**
       (Re-) initializes the key with the given @arg key.
@@ -220,6 +220,6 @@ private:
     IntegrityProtectionMode m_protectionMode;
     Error m_lastError;
 };
-Q_DECLARE_OPERATORS_FOR_FLAGS(O2SimpleCrypt::CryptoFlags)
+Q_DECLARE_OPERATORS_FOR_FLAGS(O0SimpleCrypt::CryptoFlags)
 
 #endif // SimpleCrypt_H

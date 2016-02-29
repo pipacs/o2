@@ -22,8 +22,8 @@
 
 #include "o2.h"
 #include "o2replyserver.h"
-#include "o2globals.h"
-#include "o2settingsstore.h"
+#include "o0globals.h"
+#include "o0settingsstore.h"
 
 #define trace() if (1) qDebug()
 // define trace() if (0) qDebug()
@@ -70,7 +70,7 @@ static void addQueryParametersToUrl(QUrl &url,  QList<QPair<QString, QString> > 
 #endif
 }
 
-O2::O2(QObject *parent): O2BaseAuth(parent) {
+O2::O2(QObject *parent): O0BaseAuth(parent) {
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
     grantFlow_ = GrantFlowAuthorizationCode;
@@ -179,15 +179,15 @@ void O2::link() {
         trace() << "O2::link: Emit openBrowser" << url.toString();
         emit openBrowser(url);
     } else if (grantFlow_ == GrantFlowResourceOwnerPasswordCredentials) {
-        QList<O2RequestParameter> parameters;
-        parameters.append(O2RequestParameter(O2_OAUTH2_CLIENT_ID, clientId_.toUtf8()));
-        parameters.append(O2RequestParameter(O2_OAUTH2_CLIENT_SECRET, clientSecret_.toUtf8()));
-        parameters.append(O2RequestParameter(O2_OAUTH2_USERNAME, username_.toUtf8()));
-        parameters.append(O2RequestParameter(O2_OAUTH2_PASSWORD, password_.toUtf8()));
-        parameters.append(O2RequestParameter(O2_OAUTH2_GRANT_TYPE, O2_OAUTH2_GRANT_TYPE_PASSWORD));
-        parameters.append(O2RequestParameter(O2_OAUTH2_SCOPE, scope_.toUtf8()));
-        parameters.append(O2RequestParameter(O2_OAUTH2_API_KEY, apiKey_.toUtf8()));
-        QByteArray payload = O2BaseAuth::createQueryParameters(parameters);
+        QList<O0RequestParameter> parameters;
+        parameters.append(O0RequestParameter(O2_OAUTH2_CLIENT_ID, clientId_.toUtf8()));
+        parameters.append(O0RequestParameter(O2_OAUTH2_CLIENT_SECRET, clientSecret_.toUtf8()));
+        parameters.append(O0RequestParameter(O2_OAUTH2_USERNAME, username_.toUtf8()));
+        parameters.append(O0RequestParameter(O2_OAUTH2_PASSWORD, password_.toUtf8()));
+        parameters.append(O0RequestParameter(O2_OAUTH2_GRANT_TYPE, O2_OAUTH2_GRANT_TYPE_PASSWORD));
+        parameters.append(O0RequestParameter(O2_OAUTH2_SCOPE, scope_.toUtf8()));
+        parameters.append(O0RequestParameter(O2_OAUTH2_API_KEY, apiKey_.toUtf8()));
+        QByteArray payload = O0BaseAuth::createQueryParameters(parameters);
 
         QUrl url(tokenUrl_);
         QNetworkRequest tokenRequest(url);

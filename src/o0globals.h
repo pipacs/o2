@@ -1,5 +1,5 @@
-#ifndef O2GLOBALS_H
-#define O2GLOBALS_H
+#ifndef O0GLOBALS_H
+#define O0GLOBALS_H
 
 // Common constants
 const char O2_ENCRYPTION_KEY[] = "12345678";
@@ -58,4 +58,4 @@ const char O2_AUTHORIZATION_CODE[] = "authorization_code";
 // Standard HTTP headers
 const char O2_HTTP_AUTHORIZATION_HEADER[] = "Authorization";
 
-#endif // O2GLOBALS_H
+#endif // O0GLOBALS_H

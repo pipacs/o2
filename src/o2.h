@@ -6,14 +6,14 @@
 #include <QNetworkReply>
 #include <QPair>
 
-#include "o2baseauth.h"
+#include "o0baseauth.h"
 #include "o2reply.h"
-#include "o2abstractstore.h"
+#include "o0abstractstore.h"
 
 class O2ReplyServer;
 
 /// Simple OAuth2 authenticator.
-class O2: public O2BaseAuth {
+class O2: public O0BaseAuth {
     Q_OBJECT
     Q_ENUMS(GrantFlow)
 

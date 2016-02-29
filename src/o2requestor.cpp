@@ -6,7 +6,7 @@
 
 #include "o2requestor.h"
 #include "o2.h"
-#include "o2globals.h"
+#include "o0globals.h"
 
 #define trace() if (1) qDebug()
 // define trace() if (0) qDebug()
