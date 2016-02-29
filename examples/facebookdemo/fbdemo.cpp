@@ -44,6 +44,7 @@ FBDemo::FBDemo(QObject *parent) :
 void FBDemo::doOAuth(O2::GrantFlow grantFlowType) {
     qDebug() << "Starting OAuth 2 with grant flow type" << GRANTFLOW_STR(grantFlowType) << "...";
     o2Facebook_->setGrantFlow(grantFlowType);
+    o2Facebook_->unlink();
     o2Facebook_->link();
 }
 
@@ -75,13 +76,16 @@ void FBDemo::onLinkedChanged() {
 }
 
 void FBDemo::onLinkingSucceeded() {
-    O2Facebook* o1t = qobject_cast<O2Facebook *>(sender());
+    O2Facebook *o1t = qobject_cast<O2Facebook *>(sender());
+    if (!o1t->linked()) {
+        return;
+    }
     QVariantMap extraTokens = o1t->extraTokens();
     if (!extraTokens.isEmpty()) {
         emit extraTokensReady(extraTokens);
         qDebug() << "Extra tokens in response:";
         foreach (QString key, extraTokens.keys()) {
-            qDebug() << "\t" << key << ":" << extraTokens.value(key).toString();
+            qDebug() << "\t" << key << ":" << (extraTokens.value(key).toString().left(3) + "...");
         }
     }
     emit linkingSucceeded();

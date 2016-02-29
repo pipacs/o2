@@ -10,9 +10,6 @@ class O2Facebook: public O2 {
 public:
     explicit O2Facebook(QObject *parent = 0);
 
-public slots:
-    Q_INVOKABLE void unlink();
-
 protected slots:
     void onVerificationReceived(QMap<QString, QString>);
     virtual void onTokenReplyFinished();

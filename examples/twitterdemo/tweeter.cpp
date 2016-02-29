@@ -117,7 +117,7 @@ void Tweeter::onLinkingSucceeded() {
         emit extraTokensReady(extraTokens);
         qDebug() << "Extra tokens in response:";
         foreach (QString key, extraTokens.keys()) {
-            qDebug() << "\t" << key << ":" << extraTokens.value(key).toString();
+            qDebug() << "\t" << key << ":" << (extraTokens.value(key).toString().left(3) + "...");
         }
     }
     emit linkingSucceeded();

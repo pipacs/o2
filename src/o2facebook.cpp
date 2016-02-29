@@ -1,7 +1,9 @@
 #include <QDebug>
 #include <QMap>
+#include <QNetworkReply>
 #include <QString>
 #include <QStringList>
+#include <QUrl>
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
 #endif
@@ -11,18 +13,20 @@
 
 static const char *FbEndpoint = "https://graph.facebook.com/oauth/authorize?display=touch";
 static const char *FbTokenUrl = "https://graph.facebook.com/oauth/access_token";
-static const quint16 FbLocalPort = 1965;
+static const char *FbExpiresKey = "expires";
 
-const char FB_EXPIRES_KEY[] = "expires";
+#define trace() if (1) qDebug()
+// #define trace() if (0) qDebug()
 
 O2Facebook::O2Facebook(QObject *parent): O2(parent) {
     setRequestUrl(FbEndpoint);
     setTokenUrl(FbTokenUrl);
-    setLocalPort(FbLocalPort);
 }
 
 void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
+    trace() << "O2Facebook::onVerificationReceived: Emitting closeBrowser()";
     emit closeBrowser();
+
     if (response.contains("error")) {
         qWarning() << "O2Facebook::onVerificationReceived: Verification failed";
         foreach (QString key, response.keys()) {
@@ -61,12 +65,13 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
 }
 
 void O2Facebook::onTokenReplyFinished() {
+    trace() << "O2Facebook::onTokenReplyFinished";
+
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     if (tokenReply->error() == QNetworkReply::NoError) {
-
         // Process reply
         QByteArray replyData = tokenReply->readAll();
-        QMap<QString, QString> reply;
+        QVariantMap reply;
         foreach (QString pair, QString(replyData).split("&")) {
             QStringList kv = pair.split("=");
             if (kv.length() == 2) {
@@ -75,16 +80,14 @@ void O2Facebook::onTokenReplyFinished() {
         }
 
         // Interpret reply
-        setToken(reply.value(O2_OAUTH2_ACCESS_TOKEN, ""));
-        setExpires(reply.value(FB_EXPIRES_KEY).toInt());
-        setRefreshToken(reply.value(O2_OAUTH2_REFRESH_TOKEN, ""));
+        setToken(reply.value(O2_OAUTH2_ACCESS_TOKEN, QString()).toString());
+        setExpires(reply.value(FbExpiresKey).toInt());
+        setRefreshToken(reply.value(O2_OAUTH2_REFRESH_TOKEN, QString()).toString());
+        setExtraTokens(reply);
         timedReplies_.remove(tokenReply);
         setLinked(true);
         emit linkingSucceeded();
+    } else {
+        qWarning() << "O2Facebook::onTokenReplyFinished:" << tokenReply->errorString();
     }
-}
-
-void O2Facebook::unlink() {
-    O2::unlink();
-    // FIXME: Delete relevant cookies, too
 }

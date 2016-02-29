@@ -60,7 +60,7 @@ static QVariantMap parseTokenResponse(const QByteArray &data) {
 }
 
 /// Add query parameters to a query
-static void addQueryParametersToUrl(QUrl url,  QList<QPair<QString, QString> > parameters) {
+static void addQueryParametersToUrl(QUrl &url,  QList<QPair<QString, QString> > parameters) {
 #if QT_VERSION < 0x050000
     url.setQueryItems(parameters);
 #else
@@ -170,11 +170,8 @@ void O2::link() {
         parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode)? QString(O2_OAUTH2_GRANT_TYPE_CODE): QString(O2_OAUTH2_GRANT_TYPE_TOKEN)));
         parameters.append(qMakePair(QString(O2_OAUTH2_CLIENT_ID), clientId_));
         parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
-        // parameters.append(qMakePair(QString(OAUTH2_REDIRECT_URI), QString(QUrl::toPercentEncoding(redirectUri_))));
         parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_));
-        if (!apiKey_.isEmpty()) {
-            parameters.append(qMakePair(QString(O2_OAUTH2_API_KEY), apiKey_));
-        }
+        parameters.append(qMakePair(QString(O2_OAUTH2_API_KEY), apiKey_));
 
         // Show authentication URL with a web browser
         QUrl url(requestUrl_);
@@ -189,9 +186,7 @@ void O2::link() {
         parameters.append(O2RequestParameter(O2_OAUTH2_PASSWORD, password_.toUtf8()));
         parameters.append(O2RequestParameter(O2_OAUTH2_GRANT_TYPE, O2_OAUTH2_GRANT_TYPE_PASSWORD));
         parameters.append(O2RequestParameter(O2_OAUTH2_SCOPE, scope_.toUtf8()));
-        if (!apiKey_.isEmpty()) {
-            parameters.append(O2RequestParameter(O2_OAUTH2_API_KEY, apiKey_.toUtf8()));
-        }
+        parameters.append(O2RequestParameter(O2_OAUTH2_API_KEY, apiKey_.toUtf8()));
         QByteArray payload = O2BaseAuth::createQueryParameters(parameters);
 
         QUrl url(tokenUrl_);
@@ -215,10 +210,10 @@ void O2::unlink() {
 }
 
 void O2::onVerificationReceived(const QMap<QString, QString> response) {
-    trace() << "O2::onVerificationReceived";
-    trace() << "O2::onVerificationReceived: " << response;
-
+    trace() << "O2::onVerificationReceived:" << response;
+    trace() << "O2::onVerificationReceived: Emitting closeBrowser()";
     emit closeBrowser();
+
     if (response.contains("error")) {
         qWarning() << "O2::onVerificationReceived: Verification failed: " << response;
         emit linkingFailed();

@@ -11,8 +11,7 @@ public:
         setRequestTokenUrl(QUrl("https://api.dropbox.com/1/oauth/request_token"));
         setAuthorizeUrl(QUrl("https://www.dropbox.com/1/oauth/authorize?display=mobile"));
         setAccessTokenUrl(QUrl("https://api.dropbox.com/1/oauth/access_token"));
-        setLocalPort(1965);
-    }
+     }
 };
 
 #endif // O1DROPBOX_H

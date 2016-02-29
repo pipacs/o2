@@ -8,17 +8,17 @@
 #define trace() if (1) qDebug()
 // define trace() if (0) qDebug()
 
+static const quint16 DefaultLocalPort = 1965;
+
 O2BaseAuth::O2BaseAuth(QObject *parent): QObject(parent) {
-    localPort_ = 0;
+    localPort_ = DefaultLocalPort;
     store_ = new O2SettingsStore(O2_ENCRYPTION_KEY, this);
 }
 
 void O2BaseAuth::setStore(O2AbstractStore *store) {
-    // Delete the previously stored object
     if (store_) {
         store_->deleteLater();
     }
-
     if (store) {
         store_ = store;
         store_->setParent(this);
@@ -36,6 +36,7 @@ bool O2BaseAuth::linked() {
 }
 
 void O2BaseAuth::setLinked(bool v) {
+    trace() << "O2BaseAuth::setLinked:" << (v? "true": "false");
     bool oldValue = linked();
     QString key = QString(O2_KEY_LINKED).arg(clientId_);
     store_->setValue(key, v? "1": "");
@@ -89,6 +90,7 @@ int O2BaseAuth::localPort() {
 }
 
 void O2BaseAuth::setLocalPort(int value) {
+    trace() << "O2BaseAuth::setLocalPort:" << value;
     localPort_ = value;
     emit localPortChanged();
 }
