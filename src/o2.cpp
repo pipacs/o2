@@ -28,18 +28,18 @@
 #define trace() if (1) qDebug()
 // define trace() if (0) qDebug()
 
-static QVariantMap parseTokenResponse(const QByteArray &data)
-{
+/// Parse JSON data into a QVariantMap
+static QVariantMap parseTokenResponse(const QByteArray &data) {
 #if QT_VERSION >= 0x050000
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(data, &err);
     if (err.error != QJsonParseError::NoError) {
-        qWarning() << "Failed to parse token response due to err:" << err.errorString();
+        qWarning() << "parseTokenResponse: Failed to parse token response due to err:" << err.errorString();
         return QVariantMap();
     }
 
     if (!doc.isObject()) {
-        qWarning() << "Token response is not an object";
+        qWarning() << "parseTokenResponse: Token response is not an object";
         return QVariantMap();
     }
 
@@ -59,14 +59,24 @@ static QVariantMap parseTokenResponse(const QByteArray &data)
 #endif
 }
 
+/// Add query parameters to a query
+static void addQueryParametersToUrl(QUrl url,  QList<QPair<QString, QString> > parameters) {
+#if QT_VERSION < 0x050000
+    url.setQueryItems(parameters);
+#else
+    QUrlQuery query(url);
+    query.setQueryItems(parameters);
+    url.setQuery(query);
+#endif
+}
+
 O2::O2(QObject *parent): O2BaseAuth(parent) {
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
     grantFlow_ = GrantFlowAuthorizationCode;
     localhostPolicy_ = QString(O2_CALLBACK_URL);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
-    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)),
-            this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
 }
 
 O2::GrantFlow O2::grantFlow() {
@@ -157,40 +167,37 @@ void O2::link() {
 
         // Assemble intial authentication URL
         QList<QPair<QString, QString> > parameters;
-        parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode) ? QString(O2_OAUTH2_CODE) : QString(O2_OAUTH2_TOKEN)));
+        parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode)? QString(O2_OAUTH2_GRANT_TYPE_CODE): QString(O2_OAUTH2_GRANT_TYPE_TOKEN)));
         parameters.append(qMakePair(QString(O2_OAUTH2_CLIENT_ID), clientId_));
         parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
         // parameters.append(qMakePair(QString(OAUTH2_REDIRECT_URI), QString(QUrl::toPercentEncoding(redirectUri_))));
         parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_));
-        parameters.append(qMakePair(QString(O2_OAUTH2_API_KEY), apiKey_));
+        if (!apiKey_.isEmpty()) {
+            parameters.append(qMakePair(QString(O2_OAUTH2_API_KEY), apiKey_));
+        }
 
         // Show authentication URL with a web browser
         QUrl url(requestUrl_);
-#if QT_VERSION < 0x050000
-        url.setQueryItems(parameters);
-#else
-        QUrlQuery query(url);
-        query.setQueryItems(parameters);
-        url.setQuery(query);
-#endif
-
+        addQueryParametersToUrl(url, parameters);
         trace() << "O2::link: Emit openBrowser" << url.toString();
         emit openBrowser(url);
     } else if (grantFlow_ == GrantFlowResourceOwnerPasswordCredentials) {
+        QList<O2RequestParameter> parameters;
+        parameters.append(O2RequestParameter(O2_OAUTH2_CLIENT_ID, clientId_.toUtf8()));
+        parameters.append(O2RequestParameter(O2_OAUTH2_CLIENT_SECRET, clientSecret_.toUtf8()));
+        parameters.append(O2RequestParameter(O2_OAUTH2_USERNAME, username_.toUtf8()));
+        parameters.append(O2RequestParameter(O2_OAUTH2_PASSWORD, password_.toUtf8()));
+        parameters.append(O2RequestParameter(O2_OAUTH2_GRANT_TYPE, O2_OAUTH2_GRANT_TYPE_PASSWORD));
+        parameters.append(O2RequestParameter(O2_OAUTH2_SCOPE, scope_.toUtf8()));
+        if (!apiKey_.isEmpty()) {
+            parameters.append(O2RequestParameter(O2_OAUTH2_API_KEY, apiKey_.toUtf8()));
+        }
+        QByteArray payload = O2BaseAuth::createQueryParams(parameters);
+
         QUrl url(tokenUrl_);
-
-        QUrlQuery params;
-        params.addQueryItem(O2_OAUTH2_CLIENT_ID, clientId_);
-        params.addQueryItem(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
-        params.addQueryItem(O2_OAUTH2_USERNAME, username_);
-        params.addQueryItem(O2_OAUTH2_PASSWORD, password_);
-        params.addQueryItem(O2_OAUTH2_GRANT_TYPE," password");
-
         QNetworkRequest tokenRequest(url);
         tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-        QNetworkReply *tokenReply = manager_->post(tokenRequest, params.toString(QUrl::FullyEncoded).toUtf8());
-
-        trace() << "O2::link: " << params.toString(QUrl::FullyEncoded).toUtf8();
+        QNetworkReply *tokenReply = manager_->post(tokenRequest, payload);
 
         connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
         connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
@@ -220,14 +227,14 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
 
     if (grantFlow_ == GrantFlowAuthorizationCode) {
         // Save access code
-        setCode(response.value(QString(O2_OAUTH2_CODE)));
+        setCode(response.value(QString(O2_OAUTH2_GRANT_TYPE_CODE)));
 
         // Exchange access code for access/refresh tokens
         QNetworkRequest tokenRequest(tokenUrl_.toString() +
               (apiKey_.isEmpty() ? "" : ("?" + QString(O2_OAUTH2_API_KEY) + "=" + apiKey_)));
         tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
         QMap<QString, QString> parameters;
-        parameters.insert(O2_OAUTH2_CODE, code());
+        parameters.insert(O2_OAUTH2_GRANT_TYPE_CODE, code());
         parameters.insert(O2_OAUTH2_CLIENT_ID, clientId_);
         parameters.insert(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
         parameters.insert(O2_OAUTH2_REDIRECT_URI, redirectUri_);

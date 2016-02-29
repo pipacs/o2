@@ -11,6 +11,16 @@
 #include "o2abstractstore.h"
 #include "o2replyserver.h"
 
+/// Request parameter (name-value pair) participating in authentication.
+struct O2RequestParameter {
+    O2RequestParameter(const QByteArray &n, const QByteArray &v): name(n), value(v) {}
+    bool operator <(const O2RequestParameter &other) const {
+        return (name == other.name)? (value < other.value): (name < other.name);
+    }
+    QByteArray name;
+    QByteArray value;
+};
+
 /// Base class of OAuth 1 and 2 authenticators
 class O2BaseAuth : public QObject {
     Q_OBJECT
@@ -56,6 +66,9 @@ public:
 
     /// Sets the storage object to use for storing the OAuth tokens on a peristent medium
     void setStore(O2AbstractStore *store);
+
+    /// Construct query string from list of headers
+    static QByteArray createQueryParams(const QList<O2RequestParameter> &params);
 
 public slots:
     /// Authenticate.

@@ -111,3 +111,17 @@ void O2BaseAuth::setExtraTokens(QVariantMap extraTokens) {
     store_->setValue(key, bytes.toBase64());
     emit extraTokensChanged();
 }
+
+QByteArray O2BaseAuth::createQueryParams(const QList<O2RequestParameter> &params) {
+    QByteArray ret;
+    bool first = true;
+    foreach (O2RequestParameter h, params) {
+        if (first) {
+            first = false;
+        } else {
+            ret.append("&");
+        }
+        ret.append(QUrl::toPercentEncoding(h.name) + "=" + QUrl::toPercentEncoding(h.value));
+    }
+    return ret;
+}

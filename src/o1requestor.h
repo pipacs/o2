@@ -23,32 +23,32 @@ public slots:
     /// @param  req                 Network request.
     /// @param  signingParameters   Extra (non-OAuth) parameters participating in signing.
     /// @return Reply.
-    QNetworkReply *get(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters);
+    QNetworkReply *get(const QNetworkRequest &req, const QList<O2RequestParameter> &signingParameters);
 
     /// Make a POST request.
     /// @param  req                 Network request.
     /// @param  signingParameters   Extra (non-OAuth) parameters participating in signing.
     /// @param  data                Request payload.
     /// @return Reply.
-    QNetworkReply *post(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, const QByteArray &data);
+    QNetworkReply *post(const QNetworkRequest &req, const QList<O2RequestParameter> &signingParameters, const QByteArray &data);
 
     /// Make a POST request.
     /// @param  req                 Network request.
     /// @param  signingParameters   Extra (non-OAuth) parameters participating in signing.
     /// @param  multiPart           HTTPMultiPart.
     /// @return Reply.
-    QNetworkReply *post(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QHttpMultiPart *multiPart);
+    QNetworkReply *post(const QNetworkRequest &req, const QList<O2RequestParameter> &signingParameters, QHttpMultiPart *multiPart);
 
     /// Make a PUT request.
     /// @param  req                 Network request.
     /// @param  signingParameters   Extra (non-OAuth) parameters participating in signing.
     /// @param  data                Request payload.
     /// @return Reply.
-    QNetworkReply *put(const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, const QByteArray &data);
+    QNetworkReply *put(const QNetworkRequest &req, const QList<O2RequestParameter> &signingParameters, const QByteArray &data);
 
 protected:
     /// Return new request based on the original, with the "Authentication:" header added.
-    QNetworkRequest setup(const QNetworkRequest &request, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation);
+    QNetworkRequest setup(const QNetworkRequest &request, const QList<O2RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation);
 
     /// Augment reply with a timer.
     QNetworkReply *addTimer(QNetworkReply *reply);

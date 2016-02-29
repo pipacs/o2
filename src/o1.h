@@ -9,17 +9,6 @@
 
 class O2ReplyServer;
 
-/// Request parameter (name-value pair) participating in authentication.
-struct O1RequestParameter {
-    O1RequestParameter(const QByteArray &n, const QByteArray &v): name(n), value(v) {
-    }
-    bool operator <(const O1RequestParameter &other) const {
-        return (name == other.name)? (value < other.value): (name < other.name);
-    }
-    QByteArray name;
-    QByteArray value;
-};
-
 /// Simple OAuth 1.0 authenticator.
 class O1: public O2BaseAuth {
     Q_OBJECT
@@ -52,13 +41,13 @@ public:
     static QMap<QString, QString> parseResponse(const QByteArray &response);
 
     /// Build the value of the "Authorization:" header.
-    static QByteArray buildAuthorizationHeader(const QList<O1RequestParameter> &oauthParams);
+    static QByteArray buildAuthorizationHeader(const QList<O2RequestParameter> &oauthParams);
 
     /// Create unique bytes to prevent replay attacks.
     static QByteArray nonce();
 
     /// Generate signature string depending on signature method type
-    QByteArray generateSignature(const QList<O1RequestParameter> headers, const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation);
+    QByteArray generateSignature(const QList<O2RequestParameter> headers, const QNetworkRequest &req, const QList<O2RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation);
 
     /// Calculate the HMAC-SHA1 signature of a request.
     /// @param  oauthParams     OAuth parameters.
@@ -68,16 +57,13 @@ public:
     /// @param  consumerSecret  Consumer (application) secret.
     /// @param  tokenSecret     Authorization token secret (empty if not yet available).
     /// @return Signature that can be used as the value of the "oauth_signature" parameter.
-    static QByteArray sign(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret);
+    static QByteArray sign(const QList<O2RequestParameter> &oauthParams, const QList<O2RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret);
 
     /// Build a base string for signing.
-    static QByteArray getRequestBase(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op);
+    static QByteArray getRequestBase(const QList<O2RequestParameter> &oauthParams, const QList<O2RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op);
 
     /// Build a concatenated/percent-encoded string from a list of headers.
-    static QByteArray encodeHeaders(const QList<O1RequestParameter> &headers);
-
-    /// Construct query string from list of headers
-    static QByteArray createQueryParams(const QList<O1RequestParameter> &params);
+    static QByteArray encodeHeaders(const QList<O2RequestParameter> &headers);
 
 public slots:
     /// Authenticate.

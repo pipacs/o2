@@ -53,7 +53,7 @@ public:
     QString localhostPolicy() const;
     void setLocalhostPolicy(const QString &value);
 
-    /// API Key secret.
+    /// API key.
     Q_PROPERTY(QString apiKey READ apiKey WRITE setApiKey)
     QString apiKey();
     void setApiKey(const QString &value);
@@ -107,7 +107,7 @@ public slots:
     Q_INVOKABLE virtual void unlink();
 
     /// Refresh token.
-    void refresh();
+    Q_INVOKABLE void refresh();
 
 signals:
     /// Emitted when a token refresh has been completed or failed.

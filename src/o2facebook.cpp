@@ -33,7 +33,7 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
     }
 
     // Save access code
-    setCode(response.value(O2_OAUTH2_CODE));
+    setCode(response.value(O2_OAUTH2_GRANT_TYPE_CODE));
 
     // Exchange access code for access/refresh tokens
     QUrl url(tokenUrl_);
@@ -48,7 +48,7 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
     query.addQueryItem(O2_OAUTH2_CLIENT_ID, clientId_);
     query.addQueryItem(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
     query.addQueryItem(O2_OAUTH2_SCOPE, scope_);
-    query.addQueryItem(O2_OAUTH2_CODE, code());
+    query.addQueryItem(O2_OAUTH2_GRANT_TYPE_CODE, code());
     query.addQueryItem(O2_OAUTH2_REDIRECT_URI, redirectUri_);
     url.setQuery(query);
 #endif

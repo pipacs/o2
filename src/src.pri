@@ -34,5 +34,5 @@ HEADERS += \
     $$PWD/o2abstractstore.h \
     $$PWD/o2settingsstore.h \
     $$PWD/o1freshbooks.h \
-    $$PWD/o2baseauth.h \
-    $$PWD/o2simplecrypt.h
+    $$PWD/o2simplecrypt.h \
+    $$PWD/o2baseauth.h

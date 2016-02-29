@@ -114,27 +114,12 @@ static QString getOperationName(QNetworkAccessManager::Operation op) {
 }
 
 /// Build a concatenated/percent-encoded string from a list of headers.
-QByteArray O1::encodeHeaders(const QList<O1RequestParameter> &headers) {
+QByteArray O1::encodeHeaders(const QList<O2RequestParameter> &headers) {
     return QUrl::toPercentEncoding(createQueryParams(headers));
 }
 
-/// Construct query string from list of headers
-QByteArray O1::createQueryParams(const QList<O1RequestParameter> &params) {
-    QByteArray ret;
-    bool first = true;
-    foreach (O1RequestParameter h, params) {
-        if (first) {
-            first = false;
-        } else {
-            ret.append("&");
-        }
-        ret.append(QUrl::toPercentEncoding(h.name) + "=" + QUrl::toPercentEncoding(h.value));
-    }
-    return ret;
-}
-
 /// Build a base string for signing.
-QByteArray O1::getRequestBase(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op) {
+QByteArray O1::getRequestBase(const QList<O2RequestParameter> &oauthParams, const QList<O2RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op) {
     QByteArray base;
 
     // Initialize base string with the operation name (e.g. "GET") and the base URL
@@ -142,7 +127,7 @@ QByteArray O1::getRequestBase(const QList<O1RequestParameter> &oauthParams, cons
     base.append(QUrl::toPercentEncoding(url.toString(QUrl::RemoveQuery)) + "&");
 
     // Append a sorted+encoded list of all request parameters to the base string
-    QList<O1RequestParameter> headers(oauthParams);
+    QList<O2RequestParameter> headers(oauthParams);
     headers.append(otherParams);
     qSort(headers);
     base.append(encodeHeaders(headers));
@@ -150,7 +135,7 @@ QByteArray O1::getRequestBase(const QList<O1RequestParameter> &oauthParams, cons
     return base;
 }
 
-QByteArray O1::sign(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret) {
+QByteArray O1::sign(const QList<O2RequestParameter> &oauthParams, const QList<O2RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret) {
     QByteArray baseString = getRequestBase(oauthParams, otherParams, url, op);
     QByteArray secret = QUrl::toPercentEncoding(consumerSecret) + "&" + QUrl::toPercentEncoding(tokenSecret);
 #if QT_VERSION >= 0x050100
@@ -160,12 +145,12 @@ QByteArray O1::sign(const QList<O1RequestParameter> &oauthParams, const QList<O1
 #endif
 }
 
-QByteArray O1::buildAuthorizationHeader(const QList<O1RequestParameter> &oauthParams) {
+QByteArray O1::buildAuthorizationHeader(const QList<O2RequestParameter> &oauthParams) {
     bool first = true;
     QByteArray ret("OAuth ");
-    QList<O1RequestParameter> headers(oauthParams);
+    QList<O2RequestParameter> headers(oauthParams);
     qSort(headers);
-    foreach (O1RequestParameter h, headers) {
+    foreach (O2RequestParameter h, headers) {
         if (first) {
             first = false;
         } else {
@@ -179,7 +164,7 @@ QByteArray O1::buildAuthorizationHeader(const QList<O1RequestParameter> &oauthPa
     return ret;
 }
 
-QByteArray O1::generateSignature(const QList<O1RequestParameter> headers, const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
+QByteArray O1::generateSignature(const QList<O2RequestParameter> headers, const QNetworkRequest &req, const QList<O2RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
     QByteArray signature;
 
     if (signatureMethod() == O2_SIGNATURE_TYPE_HMAC_SHA1) {
@@ -210,14 +195,14 @@ void O1::link() {
     QNetworkRequest request(requestTokenUrl());
 
     // Create initial token request
-    QList<O1RequestParameter> headers;
-    headers.append(O1RequestParameter(O2_OAUTH_CALLBACK, QString(O2_CALLBACK_URL).arg(replyServer_->serverPort()).toLatin1()));
-    headers.append(O1RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
-    headers.append(O1RequestParameter(O2_OAUTH_NONCE, nonce()));
-    headers.append(O1RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
-    headers.append(O1RequestParameter(O2_OAUTH_VERSION, "1.0"));
-    headers.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
-    headers.append(O1RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(headers, request, QList<O1RequestParameter>(), QNetworkAccessManager::PostOperation)));
+    QList<O2RequestParameter> headers;
+    headers.append(O2RequestParameter(O2_OAUTH_CALLBACK, QString(O2_CALLBACK_URL).arg(replyServer_->serverPort()).toLatin1()));
+    headers.append(O2RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
+    headers.append(O2RequestParameter(O2_OAUTH_NONCE, nonce()));
+    headers.append(O2RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
+    headers.append(O2RequestParameter(O2_OAUTH_VERSION, "1.0"));
+    headers.append(O2RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
+    headers.append(O2RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(headers, request, QList<O2RequestParameter>(), QNetworkAccessManager::PostOperation)));
 
     // Clear request token
     requestToken_.clear();
@@ -294,15 +279,15 @@ void O1::exchangeToken() {
 
     // Create token exchange request
     QNetworkRequest request(accessTokenUrl());
-    QList<O1RequestParameter> oauthParams;
-    oauthParams.append(O1RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_VERSION, "1.0"));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_NONCE, nonce()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_TOKEN, requestToken_.toLatin1()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_VERFIER, verifier_.toLatin1()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(oauthParams, request, QList<O1RequestParameter>(), QNetworkAccessManager::PostOperation)));
+    QList<O2RequestParameter> oauthParams;
+    oauthParams.append(O2RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
+    oauthParams.append(O2RequestParameter(O2_OAUTH_VERSION, "1.0"));
+    oauthParams.append(O2RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
+    oauthParams.append(O2RequestParameter(O2_OAUTH_NONCE, nonce()));
+    oauthParams.append(O2RequestParameter(O2_OAUTH_TOKEN, requestToken_.toLatin1()));
+    oauthParams.append(O2RequestParameter(O2_OAUTH_VERFIER, verifier_.toLatin1()));
+    oauthParams.append(O2RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
+    oauthParams.append(O2RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(oauthParams, request, QList<O2RequestParameter>(), QNetworkAccessManager::PostOperation)));
 
     // Post request
     request.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER, buildAuthorizationHeader(oauthParams));
