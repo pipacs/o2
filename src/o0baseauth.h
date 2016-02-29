@@ -11,7 +11,7 @@
 #include "o0abstractstore.h"
 #include "o0requestparameter.h"
 
-/// Base class of OAuth 1 and 2 authenticators
+/// Base class of OAuth authenticators
 class O0BaseAuth : public QObject {
     Q_OBJECT
 

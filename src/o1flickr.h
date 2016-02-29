@@ -3,6 +3,7 @@
 
 #include "o1.h"
 
+/// Flickr authenticator.
 class O1Flickr: public O1 {
     Q_OBJECT
 

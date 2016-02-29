@@ -14,7 +14,7 @@ public:
     explicit O2ReplyServer(QObject *parent = 0);
 
     /// Page content on local host after successful oauth - in case you do not want to close the browser, but display something
-        Q_PROPERTY(QByteArray replyContent READ replyContent WRITE setReplyContent)
+    Q_PROPERTY(QByteArray replyContent READ replyContent WRITE setReplyContent)
     QByteArray replyContent();
     void setReplyContent(const QByteArray &value);
 

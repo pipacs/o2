@@ -30,6 +30,7 @@ public:
 class O2ReplyList {
 public:
     O2ReplyList() { ignoreSslErrors_ = false; }
+
     /// Destructor.
     /// Deletes all O2Reply instances in the list.
     virtual ~O2ReplyList();

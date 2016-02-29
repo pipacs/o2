@@ -4,19 +4,18 @@
 #include <QObject>
 #include <QString>
 
-/// Storage for strings
+/// Storage for strings.
 class O0AbstractStore: public QObject {
     Q_OBJECT
 
 public:
-    /// Constructor
     explicit O0AbstractStore(QObject *parent = 0): QObject(parent) {
     }
 
-    /// Retrieve a string value by key
+    /// Retrieve a string value by key.
     virtual QString value(const QString &key, const QString &defaultValue = QString()) = 0;
 
-    /// Set a string value for a key
+    /// Set a string value for a key.
     virtual void setValue(const QString &key, const QString &value) = 0;
 };
 

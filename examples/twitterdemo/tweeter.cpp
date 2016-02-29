@@ -4,9 +4,9 @@
 #include <QDebug>
 
 #include "tweeter.h"
-#include "o2globals.h"
+#include "o0globals.h"
 #include "o1requestor.h"
-#include "o2settingsstore.h"
+#include "o0settingsstore.h"
 
 const char O2_CONSUMER_KEY[] = "2vHeyIxjywIadjEhvbDpg";
 const char O2_CONSUMER_SECRET[] = "Xfwe195Kp3ZpcCKgkYs7RKfugTm8EfpLkQvsKfX2vvs";
@@ -24,7 +24,7 @@ void Tweeter::doOAuth() {
     o1Twitter_->setLocalPort(localPort);
 
     // Create a store object for writing the received tokens
-    O2SettingsStore *store = new O2SettingsStore(O2_ENCRYPTION_KEY);
+    O0SettingsStore *store = new O0SettingsStore(O2_ENCRYPTION_KEY);
     store->setGroupKey("twitter");
     o1Twitter_->setStore(store);
 
@@ -50,7 +50,7 @@ void Tweeter::doXAuth(const QString &username, const QString &password) {
     oxTwitter_->setPassword(password);
 
     // Create a store object for writing the received tokens
-    O2SettingsStore *store = new O2SettingsStore(O2_ENCRYPTION_KEY);
+    O0SettingsStore *store = new O0SettingsStore(O2_ENCRYPTION_KEY);
     store->setGroupKey("twitter");
     oxTwitter_->setStore(store);
 
@@ -81,10 +81,10 @@ void Tweeter::postStatusUpdate(const QString &message) {
 
     QByteArray paramName("status");
 
-    QList<O1RequestParameter> reqParams = QList<O1RequestParameter>();
-    reqParams << O1RequestParameter(paramName, message.toLatin1());
+    QList<O0RequestParameter> reqParams = QList<O0RequestParameter>();
+    reqParams << O0RequestParameter(paramName, message.toLatin1());
 
-    QByteArray postData = O1::createQueryParams(reqParams);
+    QByteArray postData = O1::createQueryParameters(reqParams);
 
     QUrl url = QUrl("https://api.twitter.com/1.1/statuses/update.json");
 

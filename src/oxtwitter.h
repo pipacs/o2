@@ -3,12 +3,13 @@
 
 #include "o1twitter.h"
 
+/// Twitter authenticator using Twitter XAuth
 class OXTwitter: public O1Twitter {
     Q_OBJECT
 
 public:
     explicit OXTwitter(QObject *parent = 0);
-    /// Twitter XAuth login parameters
+
     /// XAuth Username
     Q_PROPERTY(QString username READ username WRITE setUsername NOTIFY usernameChanged)
     QString username();

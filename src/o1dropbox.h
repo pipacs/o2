@@ -3,6 +3,7 @@
 
 #include "o1.h"
 
+/// Dropbox authenticator
 class O1Dropbox: public O1 {
     Q_OBJECT
 

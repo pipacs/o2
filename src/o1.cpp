@@ -164,7 +164,6 @@ QByteArray O1::buildAuthorizationHeader(const QList<O0RequestParameter> &oauthPa
 
 QByteArray O1::generateSignature(const QList<O0RequestParameter> headers, const QNetworkRequest &req, const QList<O0RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
     QByteArray signature;
-
     if (signatureMethod() == O2_SIGNATURE_TYPE_HMAC_SHA1) {
         signature = sign(headers, signingParameters, req.url(), operation, clientSecret(), tokenSecret());
     } else if (signatureMethod() == O2_SIGNATURE_TYPE_PLAINTEXT) {
