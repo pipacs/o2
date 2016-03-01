@@ -20,16 +20,19 @@ O0SimpleCrypt | o0simplecrypt.h | Simple encryption and decryption by Andre Some
 O1 | o1.h | Generic OAuth 1.0 authenticator
 O1Dropbox | o1dropbox.h | Dropbox OAuth specialization
 O1Flickr | o1flickr.h | Flickr OAuth specialization
+O1Freshbooks | o1freshbooks.h | Freshbooks OAuth specialization
 O1Requestor | o1requestor.h | Makes authenticated OAuth 1.0 requests: GET, POST or PUT, handles timeouts
 O1RequestParameter | o1.h | An extra request parameter participating in request signing
 O1Twitter | o1twitter.h | Twitter OAuth specialization
 O2 | o2.h | Generic OAuth 2.0 authenticator
-O2Gft | o2gft.h | Google Fusion Tables OAuth specialization
 O2Facebook | o2facebook.h | Facebook OAuth specialization
+O2Gft | o2gft.h | Google Fusion Tables OAuth specialization
+O2Hubic | o2hubic.h | Hubic OAuth specialization
 O2Reply | o2reply.h | A network request/reply that can time out
 O2ReplyServer | o2replyserver.h | HTTP server to process authentication responses
 O2Requestor | o2requestor.h | Makes authenticated OAuth 2.0 requests (GET, POST or PUT), handles timeouts and token expiry
 O2Skydrive | o2skydrive.h | OneDrive OAuth specialization
+O2SurveyMonkey | o2surveymonkey.h | SurveyMonkey OAuth specialization
 OXTwitter | oxtwitter.h | Twitter XAuth specialization
 
 ## Installation
