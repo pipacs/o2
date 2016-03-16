@@ -6,5 +6,4 @@ endif(WITH_FACEBOOK)
 
 if(WITH_TWITTER)
     add_subdirectory(twitterdemo)
-    add_subdirectory(sialis)
 endif(WITH_TWITTER)

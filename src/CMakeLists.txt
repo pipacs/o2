@@ -24,9 +24,11 @@ set( o2_SRCS
     o2reply.cpp
     o2replyserver.cpp
     o2requestor.cpp
-    simplecrypt.cpp
-    o2settingsstore.cpp
-    o2abstractstore.h
+    o2simplecrypt.cpp
+    o0settingsstore.cpp
+    o0baseauth.cpp
+    o0abstractstore.h
+    o0globals.h
 )
 
 if(WITH_TWITTER OR WITH_DROPBOX OR WITH_FLICKR)
