@@ -1,5 +1,4 @@
 #include <QDebug>
-#include <QTimer>
 #include <QDateTime>
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
@@ -7,24 +6,21 @@
 #include "o1requestor.h"
 #include "o0globals.h"
 
-/// A timer connected to a network reply.
-class TimedReply: public QTimer {
-    Q_OBJECT
+O1TimedReply::O1TimedReply(QNetworkReply *parent, int pTimeout): QTimer(parent) {
+    setSingleShot(true);
+    setInterval(pTimeout);
+    connect(this, SIGNAL(timeout()), this, SLOT(onTimeout()));
+    connect(parent, SIGNAL(finished()), this, SLOT(onFinished()));
+}
 
-public:
-    explicit TimedReply(QNetworkReply *parent): QTimer(parent) {
-        setSingleShot(true);
-        setInterval(60 * 1000); // FIXME: Expose me
-        connect(this, SIGNAL(error(QNetworkReply::NetworkError)), parent, SIGNAL(error(QNetworkReply::NetworkError)));
-        connect(this, SIGNAL(timeout()), this, SLOT(onTimeout()));
-    }
+void O1TimedReply::onFinished() {
+    stop();
+    emit finished();
+}
 
-signals:
-    void error(QNetworkReply::NetworkError);
-
-public slots:
-    void onTimeout() {emit error(QNetworkReply::TimeoutError);}
-};
+void O1TimedReply::onTimeout() {
+    emit error(QNetworkReply::TimeoutError);
+}
 
 O1Requestor::O1Requestor(QNetworkAccessManager *manager, O1 *authenticator, QObject *parent): QObject(parent) {
     manager_ = manager;
@@ -52,7 +48,7 @@ QNetworkReply *O1Requestor::put(const QNetworkRequest &req, const QList<O0Reques
 }
 
 QNetworkReply *O1Requestor::addTimer(QNetworkReply *reply) {
-    (void)new TimedReply(reply);
+    (void)new O1TimedReply(reply);
     return reply;
 }
 
@@ -74,5 +70,3 @@ QNetworkRequest O1Requestor::setup(const QNetworkRequest &req, const QList<O0Req
     request.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER, O1::buildAuthorizationHeader(oauthParams));
     return request;
 }
-
-#include "o1requestor.moc"

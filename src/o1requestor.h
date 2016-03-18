@@ -4,12 +4,32 @@
 #include <QObject>
 #include <QNetworkRequest>
 #include <QByteArray>
+#include <QTimer>
 
 #include "o1.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
 class O1;
+
+/// A timer connected to a network reply.
+class O1TimedReply: public QTimer {
+    Q_OBJECT
+
+public:
+    explicit O1TimedReply(QNetworkReply *parent, int pTimeout=60*1000);
+
+signals:
+    /// Emitted when we have timed out waiting for the network reply.
+    void error(QNetworkReply::NetworkError);
+    /// Emitted when the network reply has responded.
+    void finished();
+
+private slots:
+    void onFinished();
+    void onTimeout();
+};
+
 
 /// Makes authenticated requests using OAuth 1.0.
 class O1Requestor: public QObject {
