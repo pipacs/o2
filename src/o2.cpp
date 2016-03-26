@@ -265,6 +265,8 @@ bool O2::linked() {
 void O2::onVerificationReceived(const QMap<QString, QString> response) {
     trace() << "O2::onVerificationReceived";
     trace() << "" << response;
+    if (response.isEmpty()) //Chrome (Firefox, IE and Safari do not) sends one of these
+        return; //after normal one, which ends up as an error "Missing required parameter(s): code" - so just skip it
 
     emit closeBrowser();
     if (response.contains("error")) {
