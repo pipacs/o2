@@ -4,23 +4,8 @@
 #include <QNetworkAccessManager>
 
 #include "o1requestor.h"
+#include "o1timedreply.h"
 #include "o0globals.h"
-
-O1TimedReply::O1TimedReply(QNetworkReply *parent, int pTimeout): QTimer(parent) {
-    setSingleShot(true);
-    setInterval(pTimeout);
-    connect(this, SIGNAL(timeout()), this, SLOT(onTimeout()));
-    connect(parent, SIGNAL(finished()), this, SLOT(onFinished()));
-}
-
-void O1TimedReply::onFinished() {
-    stop();
-    emit finished();
-}
-
-void O1TimedReply::onTimeout() {
-    emit error(QNetworkReply::TimeoutError);
-}
 
 O1Requestor::O1Requestor(QNetworkAccessManager *manager, O1 *authenticator, QObject *parent): QObject(parent) {
     manager_ = manager;
