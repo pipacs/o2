@@ -36,6 +36,7 @@ if(WITH_TWITTER OR WITH_DROPBOX OR WITH_FLICKR)
         ${o2_SRCS}
         o1.cpp
         o1requestor.cpp
+        o1timedreply.cpp
     )
 endif(WITH_TWITTER OR WITH_DROPBOX OR WITH_FLICKR)
 
