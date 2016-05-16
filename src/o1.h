@@ -24,6 +24,11 @@ public:
     QUrl requestTokenUrl();
     void setRequestTokenUrl(const QUrl &value);
 
+    /// Parameters to pass with request URL.
+    Q_PROPERTY(QList<O0RequestParameter> requestParameters READ requestParameters WRITE setRequestParameters);
+    QList<O0RequestParameter> requestParameters();
+    void setRequestParameters(const QList<O0RequestParameter> &value);
+
     /// Authorization URL.
     Q_PROPERTY(QUrl authorizeUrl READ authorizeUrl WRITE setAuthorizeUrl NOTIFY authorizeUrlChanged)
     QUrl authorizeUrl();
@@ -99,6 +104,7 @@ protected:
     void exchangeToken();
 
     QUrl requestUrl_;
+    QList<O0RequestParameter> requestParameters_;
     QUrl tokenUrl_;
     QUrl refreshTokenUrl_;
     QString verifier_;
