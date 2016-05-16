@@ -1,6 +1,10 @@
 #ifndef O0GLOBALS_H
 #define O0GLOBALS_H
 
+// For debugging
+//#define trace() if (1) qDebug()   // Uncomment for debug messages
+#define trace() if (0) qDebug()     // No debug messages
+
 // Common constants
 const char O2_ENCRYPTION_KEY[] = "12345678";
 const char O2_CALLBACK_URL[] = "http://127.0.0.1:%1/";
