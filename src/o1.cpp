@@ -20,9 +20,6 @@
 #include "o0globals.h"
 #include "o0settingsstore.h"
 
-#define trace() if (1) qDebug()
-// #define trace() if (0) qDebug()
-
 O1::O1(QObject *parent): O0BaseAuth(parent) {
     setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
     manager_ = new QNetworkAccessManager(this);
@@ -80,12 +77,12 @@ QString O1::signatureMethod() {
 }
 
 void O1::setSignatureMethod(const QString &value) {
-    trace() << "O1::setSignatureMethod: " << value;
+    qDebug() << "O1::setSignatureMethod: " << value;
     signatureMethod_ = value;
 }
 
 void O1::unlink() {
-    trace() << "O1::unlink";
+    qDebug() << "O1::unlink";
     setLinked(false);
     setToken("");
     setTokenSecret("");
@@ -190,9 +187,9 @@ QByteArray O1::generateSignature(const QList<O0RequestParameter> headers, const 
 }
 
 void O1::link() {
-    trace() << "O1::link";
+    qDebug() << "O1::link";
     if (linked()) {
-        trace() << "O1::link: Linked already";
+        qDebug() << "O1::link: Linked already";
         emit linkingSucceeded();
         return;
     }
@@ -247,7 +244,7 @@ void O1::onTokenRequestError(QNetworkReply::NetworkError error) {
 }
 
 void O1::onTokenRequestFinished() {
-    trace() << "O1::onTokenRequestFinished";
+    qDebug() << "O1::onTokenRequestFinished";
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     reply->deleteLater();
     if (reply->error() != QNetworkReply::NoError) {
@@ -286,7 +283,7 @@ void O1::onTokenRequestFinished() {
 }
 
 void O1::onVerificationReceived(QMap<QString, QString> params) {
-    trace() << "O1::onVerificationReceived";
+    qDebug() << "O1::onVerificationReceived";
     emit closeBrowser();
     verifier_ = params.value(O2_OAUTH_VERFIER, "");
     if (params.value(O2_OAUTH_TOKEN) == requestToken_) {
@@ -299,7 +296,7 @@ void O1::onVerificationReceived(QMap<QString, QString> params) {
 }
 
 void O1::exchangeToken() {
-    trace() << "O1::exchangeToken";
+    qDebug() << "O1::exchangeToken";
 
     // Create token exchange request
     QNetworkRequest request(accessTokenUrl());
@@ -328,7 +325,7 @@ void O1::onTokenExchangeError(QNetworkReply::NetworkError error) {
 }
 
 void O1::onTokenExchangeFinished() {
-    trace() << "O1::onTokenExchangeFinished";
+    qDebug() << "O1::onTokenExchangeFinished";
 
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     reply->deleteLater();
