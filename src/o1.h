@@ -29,6 +29,13 @@ public:
     QList<O0RequestParameter> requestParameters();
     void setRequestParameters(const QList<O0RequestParameter> &value);
 
+    /// Callback URL.
+    /// It should contain a `%1` place marker, to be replaced by `O0BaseAuth::localPort()`.
+    /// Defaults to `O2_CALLBACK_URL`.
+    Q_PROPERTY(QString callbackUrl READ callbackUrl WRITE setCallbackUrl)
+    QString callbackUrl();
+    void setCallbackUrl(const QString &value);
+
     /// Authorization URL.
     Q_PROPERTY(QUrl authorizeUrl READ authorizeUrl WRITE setAuthorizeUrl NOTIFY authorizeUrlChanged)
     QUrl authorizeUrl();
@@ -105,6 +112,7 @@ protected:
 
     QUrl requestUrl_;
     QList<O0RequestParameter> requestParameters_;
+    QString callbackUrl_;
     QUrl tokenUrl_;
     QUrl refreshTokenUrl_;
     QString verifier_;

@@ -29,6 +29,7 @@ O1::O1(QObject *parent): O0BaseAuth(parent) {
     replyServer_ = new O2ReplyServer(this);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+    setCallbackUrl(O2_CALLBACK_URL);
 }
 
 QUrl O1::requestTokenUrl() {
@@ -46,6 +47,14 @@ QList<O0RequestParameter> O1::requestParameters() {
 
 void O1::setRequestParameters(const QList<O0RequestParameter> &v) {
     requestParameters_ = v;
+}
+
+QString O1::callbackUrl() {
+    return callbackUrl_;
+}
+
+void O1::setCallbackUrl(const QString &v) {
+    callbackUrl_ = v;
 }
 
 QUrl O1::authorizeUrl() {
@@ -211,7 +220,7 @@ void O1::link() {
 
     // Create initial token request
     QList<O0RequestParameter> headers;
-    headers.append(O0RequestParameter(O2_OAUTH_CALLBACK, QString(O2_CALLBACK_URL).arg(replyServer_->serverPort()).toLatin1()));
+    headers.append(O0RequestParameter(O2_OAUTH_CALLBACK, callbackUrl().arg(replyServer_->serverPort()).toLatin1()));
     headers.append(O0RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
     headers.append(O0RequestParameter(O2_OAUTH_NONCE, nonce()));
     headers.append(O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
@@ -266,11 +275,11 @@ void O1::onTokenRequestFinished() {
     QUrl url(authorizeUrl());
 #if QT_VERSION < 0x050000
     url.addQueryItem(O2_OAUTH_TOKEN, requestToken_);
-    url.addQueryItem(O2_OAUTH_CALLBACK, QString(O2_CALLBACK_URL).arg(replyServer_->serverPort()).toLatin1());
+    url.addQueryItem(O2_OAUTH_CALLBACK, callbackUrl().arg(replyServer_->serverPort()).toLatin1());
 #else
     QUrlQuery query(url);
     query.addQueryItem(O2_OAUTH_TOKEN, requestToken_);
-    query.addQueryItem(O2_OAUTH_CALLBACK, QString(O2_CALLBACK_URL).arg(replyServer_->serverPort()).toLatin1());
+    query.addQueryItem(O2_OAUTH_CALLBACK, callbackUrl().arg(replyServer_->serverPort()).toLatin1());
     url.setQuery(query);
 #endif
     emit openBrowser(url);
