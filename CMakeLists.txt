@@ -4,6 +4,11 @@ project(o2)
 
 option(o2_WITH_QT5 "Use Qt5" ON)
 
+option(o2_SHOW_TRACE "Show debugging messages" OFF)
+if(NOT o2_SHOW_TRACE)
+  add_definitions(-DQT_NO_DEBUG_OUTPUT=1)
+endif()
+
 option(o2_WITH_TWITTER "Authenticate with Twitter" OFF)
 option(o2_WITH_DROPBOX "Authenticate with Dropbox" OFF)
 option(o2_WITH_GOOGLE "Authenticate with Google" OFF)
