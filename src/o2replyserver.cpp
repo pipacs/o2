@@ -13,9 +13,6 @@
 
 #include "o2replyserver.h"
 
-#define trace() if (1) qDebug()
-// #define trace() if (0) qDebug()
-
 O2ReplyServer::O2ReplyServer(QObject *parent): QTcpServer(parent) {
     connect(this, SIGNAL(newConnection()), this, SLOT(onIncomingConnection()));
     replyContent_ = "<HTML></HTML>";
@@ -28,7 +25,7 @@ void O2ReplyServer::onIncomingConnection() {
 }
 
 void O2ReplyServer::onBytesReady() {
-    trace() << "O2ReplyServer::onBytesReady";
+    qDebug() << "O2ReplyServer::onBytesReady";
     QTcpSocket *socket = qobject_cast<QTcpSocket *>(sender());
     if (!socket) {
         return;
@@ -48,7 +45,7 @@ void O2ReplyServer::onBytesReady() {
 }
 
 QMap<QString, QString> O2ReplyServer::parseQueryParams(QByteArray *data) {
-    trace() << "O2ReplyServer::parseQueryParams";
+    qDebug() << "O2ReplyServer::parseQueryParams";
 
     QString splitGetLine = QString(*data).split("\r\n").first();
     splitGetLine.remove("GET ");

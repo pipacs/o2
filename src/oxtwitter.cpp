@@ -4,8 +4,6 @@
 #include "oxtwitter.h"
 #include "o0globals.h"
 
-#define trace() if (1) qDebug()
-
 const char XAUTH_USERNAME[] = "x_auth_username";
 const char XAUTH_PASSWORD[] = "x_auth_password";
 const char XAUTH_MODE[] = "x_auth_mode";
@@ -33,9 +31,9 @@ void OXTwitter::setPassword(const QString &password) {
 }
 
 void OXTwitter::link() {
-    trace() << "OXTwitter::link";
+    qDebug() << "OXTwitter::link";
     if (linked()) {
-        trace() << "Linked already";
+        qDebug() << "Linked already";
         return;
     }
 

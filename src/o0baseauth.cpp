@@ -5,9 +5,6 @@
 #include "o0globals.h"
 #include "o0settingsstore.h"
 
-#define trace() if (1) qDebug()
-// define trace() if (0) qDebug()
-
 static const quint16 DefaultLocalPort = 1965;
 
 O0BaseAuth::O0BaseAuth(QObject *parent): QObject(parent) {
@@ -31,12 +28,12 @@ void O0BaseAuth::setStore(O0AbstractStore *store) {
 bool O0BaseAuth::linked() {
     QString key = QString(O2_KEY_LINKED).arg(clientId_);
     bool result = !store_->value(key).isEmpty();
-    trace() << "O0BaseAuth::linked:" << (result? "Yes": "No");
+    qDebug() << "O0BaseAuth::linked:" << (result? "Yes": "No");
     return result;
 }
 
 void O0BaseAuth::setLinked(bool v) {
-    trace() << "O0BaseAuth::setLinked:" << (v? "true": "false");
+    qDebug() << "O0BaseAuth::setLinked:" << (v? "true": "false");
     bool oldValue = linked();
     QString key = QString(O2_KEY_LINKED).arg(clientId_);
     store_->setValue(key, v? "1": "");
@@ -90,7 +87,7 @@ int O0BaseAuth::localPort() {
 }
 
 void O0BaseAuth::setLocalPort(int value) {
-    trace() << "O0BaseAuth::setLocalPort:" << value;
+    qDebug() << "O0BaseAuth::setLocalPort:" << value;
     localPort_ = value;
     emit localPortChanged();
 }

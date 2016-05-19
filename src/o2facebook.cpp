@@ -15,16 +15,13 @@ static const char *FbEndpoint = "https://graph.facebook.com/oauth/authorize?disp
 static const char *FbTokenUrl = "https://graph.facebook.com/oauth/access_token";
 static const char *FbExpiresKey = "expires";
 
-#define trace() if (1) qDebug()
-// #define trace() if (0) qDebug()
-
 O2Facebook::O2Facebook(QObject *parent): O2(parent) {
     setRequestUrl(FbEndpoint);
     setTokenUrl(FbTokenUrl);
 }
 
 void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
-    trace() << "O2Facebook::onVerificationReceived: Emitting closeBrowser()";
+    qDebug() << "O2Facebook::onVerificationReceived: Emitting closeBrowser()";
     emit closeBrowser();
 
     if (response.contains("error")) {
@@ -65,7 +62,7 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
 }
 
 void O2Facebook::onTokenReplyFinished() {
-    trace() << "O2Facebook::onTokenReplyFinished";
+    qDebug() << "O2Facebook::onTokenReplyFinished";
 
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     if (tokenReply->error() == QNetworkReply::NoError) {
