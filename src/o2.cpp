@@ -25,9 +25,6 @@
 #include "o0globals.h"
 #include "o0settingsstore.h"
 
-#define trace() if (1) qDebug()
-// define trace() if (0) qDebug()
-
 /// Parse JSON data into a QVariantMap
 static QVariantMap parseTokenResponse(const QByteArray &data) {
 #if QT_VERSION >= 0x050000

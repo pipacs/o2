@@ -15,9 +15,6 @@ static const char *FbEndpoint = "https://graph.facebook.com/oauth/authorize?disp
 static const char *FbTokenUrl = "https://graph.facebook.com/oauth/access_token";
 static const char *FbExpiresKey = "expires";
 
-#define trace() if (1) qDebug()
-// #define trace() if (0) qDebug()
-
 O2Facebook::O2Facebook(QObject *parent): O2(parent) {
     setRequestUrl(FbEndpoint);
     setTokenUrl(FbTokenUrl);

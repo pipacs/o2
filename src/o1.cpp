@@ -20,9 +20,6 @@
 #include "o0globals.h"
 #include "o0settingsstore.h"
 
-#define trace() if (1) qDebug()
-// #define trace() if (0) qDebug()
-
 O1::O1(QObject *parent): O0BaseAuth(parent) {
     setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
     manager_ = new QNetworkAccessManager(this);

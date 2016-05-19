@@ -10,9 +10,6 @@
 #include "o2skydrive.h"
 #include "o0globals.h"
 
-#define trace() if (1) qDebug()
-// define trace() if (0) qDebug()
-
 O2Skydrive::O2Skydrive(QObject *parent): O2(parent) {
     setRequestUrl("https://login.live.com/oauth20_authorize.srf");
     setTokenUrl("https://login.live.com/oauth20_token.srf");

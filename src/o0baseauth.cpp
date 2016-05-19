@@ -5,9 +5,6 @@
 #include "o0globals.h"
 #include "o0settingsstore.h"
 
-#define trace() if (1) qDebug()
-// define trace() if (0) qDebug()
-
 static const quint16 DefaultLocalPort = 1965;
 
 O0BaseAuth::O0BaseAuth(QObject *parent): QObject(parent) {

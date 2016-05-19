@@ -8,9 +8,6 @@
 #include "o2.h"
 #include "o0globals.h"
 
-#define trace() if (1) qDebug()
-// define trace() if (0) qDebug()
-
 O2Requestor::O2Requestor(QNetworkAccessManager *manager, O2 *authenticator, QObject *parent): QObject(parent), reply_(NULL), status_(Idle) {
     manager_ = manager;
     authenticator_ = authenticator;

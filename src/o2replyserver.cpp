@@ -12,9 +12,7 @@
 #endif
 
 #include "o2replyserver.h"
-
-#define trace() if (1) qDebug()
-// #define trace() if (0) qDebug()
+#include "o0globals.h"
 
 O2ReplyServer::O2ReplyServer(QObject *parent): QTcpServer(parent) {
     connect(this, SIGNAL(newConnection()), this, SLOT(onIncomingConnection()));
