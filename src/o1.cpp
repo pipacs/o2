@@ -40,6 +40,14 @@ void O1::setRequestTokenUrl(const QUrl &v) {
     emit requestTokenUrlChanged();
 }
 
+QList<O0RequestParameter> O1::requestParameters() {
+    return requestParameters_;
+}
+
+void O1::setRequestParameters(const QList<O0RequestParameter> &v) {
+    requestParameters_ = v;
+}
+
 QUrl O1::authorizeUrl() {
     return authorizeUrl_;
 }
@@ -188,8 +196,18 @@ void O1::link() {
     // Start reply server
     replyServer_->listen(QHostAddress::Any, localPort());
 
+    // Get any query parameters for the request
+    QUrlQuery requestData;
+    O0RequestParameter param("", "");
+    foreach(param, requestParameters())
+      requestData.addQueryItem(QString(param.name), QUrl::toPercentEncoding(QString(param.value)));
+
+    // Get the request url and add parameters
+    QUrl requestUrl = requestTokenUrl();
+    requestUrl.setQuery(requestData);
+
     // Create request
-    QNetworkRequest request(requestTokenUrl());
+    QNetworkRequest request(requestUrl);
 
     // Create initial token request
     QList<O0RequestParameter> headers;
@@ -199,7 +217,7 @@ void O1::link() {
     headers.append(O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
     headers.append(O0RequestParameter(O2_OAUTH_VERSION, "1.0"));
     headers.append(O0RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
-    headers.append(O0RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(headers, request, QList<O0RequestParameter>(), QNetworkAccessManager::PostOperation)));
+    headers.append(O0RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(headers, request, requestParameters(), QNetworkAccessManager::PostOperation)));
 
     // Clear request token
     requestToken_.clear();
