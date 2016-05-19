@@ -50,3 +50,8 @@ Hubic specialization
 # Dimitar
 
 SurveyMonkey specialization
+
+# David Brooks <https://github.com/dbrnz>
+
+CMake related fixes and improvements.
+

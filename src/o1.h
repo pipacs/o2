@@ -24,6 +24,11 @@ public:
     QUrl requestTokenUrl();
     void setRequestTokenUrl(const QUrl &value);
 
+    /// Parameters to pass with request URL.
+    Q_PROPERTY(QList<O0RequestParameter> requestParameters READ requestParameters WRITE setRequestParameters);
+    QList<O0RequestParameter> requestParameters();
+    void setRequestParameters(const QList<O0RequestParameter> &value);
+
     /// Callback URL.
     /// It should contain a `%1` place marker, to be replaced by `O0BaseAuth::localPort()`.
     /// Defaults to `O2_CALLBACK_URL`.
@@ -106,6 +111,7 @@ protected:
     void exchangeToken();
 
     QUrl requestUrl_;
+    QList<O0RequestParameter> requestParameters_;
     QString callbackUrl_;
     QUrl tokenUrl_;
     QUrl refreshTokenUrl_;
