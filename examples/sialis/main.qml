@@ -1,6 +1,6 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.4
-import QtWebKit 3.0
+import QtWebView 1.0
 import com.pipacs.o2 1.0
 
 ApplicationWindow {
