@@ -4,6 +4,7 @@ INCLUDEPATH += $$PWD
 SOURCES += \
     $$PWD/o1.cpp \
     $$PWD/o1requestor.cpp \
+    $$PWD/o1timedreply.cpp \
     $$PWD/o2.cpp \
     $$PWD/o2facebook.cpp \
     $$PWD/o2gft.cpp \
@@ -22,6 +23,7 @@ HEADERS += \
     $$PWD/o1flickr.h \
     $$PWD/o1requestor.h \
     $$PWD/o1twitter.h \
+    $$PWD/o1timedreply.h \
     $$PWD/o2.h \
     $$PWD/o2facebook.h \
     $$PWD/o2gft.h \
