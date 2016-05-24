@@ -1,6 +1,6 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.4
-import QtWebView 1.0
+import QtWebView 1.1
 import com.pipacs.o2 1.0
 
 ApplicationWindow {
@@ -107,12 +107,9 @@ ApplicationWindow {
 
         property url url: ""
 
-        ScrollView {
+        WebView {
             anchors.fill: parent
-            WebView {
-                anchors.fill: parent
-                url: browser.url
-            }
+            url: browser.url
         }
 
         onClosing: {
