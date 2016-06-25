@@ -24,6 +24,10 @@ endif()
 
 option(o2_BUILD_EXAMPLES "Build examples" OFF)
 
+if(WIN32)
+  add_definitions(-DO2_DLL_EXPORT)
+endif()
+
 add_subdirectory(src)
 
 if(o2_BUILD_EXAMPLES)

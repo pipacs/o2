@@ -1,10 +1,11 @@
 #ifndef O1DROPBOX_H
 #define O1DROPBOX_H
 
+#include "o0export.h"
 #include "o1.h"
 
 /// Dropbox authenticator
-class O1Dropbox: public O1 {
+class O0_EXPORT O1Dropbox: public O1 {
     Q_OBJECT
 
 public:

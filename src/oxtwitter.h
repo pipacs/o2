@@ -1,10 +1,11 @@
 #ifndef OXTWITTER_H
 #define OXTWITTER_H
 
+#include "o0export.h"
 #include "o1twitter.h"
 
 /// Twitter authenticator using Twitter XAuth
-class OXTwitter: public O1Twitter {
+class O0_EXPORT OXTwitter: public O1Twitter {
     Q_OBJECT
 
 public:

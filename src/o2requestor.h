@@ -8,12 +8,13 @@
 #include <QUrl>
 #include <QByteArray>
 
+#include "o0export.h"
 #include "o2reply.h"
 
 class O2;
 
 /// Makes authenticated requests.
-class O2Requestor: public QObject {
+class O0_EXPORT O2Requestor: public QObject {
     Q_OBJECT
 
 public:

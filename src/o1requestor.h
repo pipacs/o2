@@ -5,6 +5,7 @@
 #include <QNetworkRequest>
 #include <QByteArray>
 
+#include "o0export.h"
 #include "o1.h"
 
 class QNetworkAccessManager;
@@ -12,7 +13,7 @@ class QNetworkReply;
 class O1;
 
 /// Makes authenticated requests using OAuth 1.0.
-class O1Requestor: public QObject {
+class O0_EXPORT O1Requestor: public QObject {
     Q_OBJECT
 
 public:

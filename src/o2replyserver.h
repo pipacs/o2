@@ -6,8 +6,10 @@
 #include <QByteArray>
 #include <QString>
 
+#include "o0export.h"
+
 /// HTTP server to process authentication response.
-class O2ReplyServer: public QTcpServer {
+class O0_EXPORT O2ReplyServer: public QTcpServer {
     Q_OBJECT
 
 public:
