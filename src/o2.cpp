@@ -222,8 +222,10 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
         setCode(response.value(QString(O2_OAUTH2_GRANT_TYPE_CODE)));
 
         // Exchange access code for access/refresh tokens
-        QNetworkRequest tokenRequest(tokenUrl_.toString() +
-              (apiKey_.isEmpty() ? "" : ("?" + QString(O2_OAUTH2_API_KEY) + "=" + apiKey_)));
+        QString query;
+        if(!apiKey_.isEmpty())
+            query = QString("?" + QString(O2_OAUTH2_API_KEY) + "=" + apiKey_);
+        QNetworkRequest tokenRequest(QUrl(tokenUrl_.toString() + query));
         tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
         QMap<QString, QString> parameters;
         parameters.insert(O2_OAUTH2_GRANT_TYPE_CODE, code());
