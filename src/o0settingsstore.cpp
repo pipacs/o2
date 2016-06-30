@@ -27,7 +27,7 @@ void O0SettingsStore::setGroupKey(const QString &groupKey) {
         return;
     }
     groupKey_ = groupKey;
-    emit groupKeyChanged();
+    Q_EMIT groupKeyChanged();
 }
 
 QString O0SettingsStore::value(const QString &key, const QString &defaultValue) {

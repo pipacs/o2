@@ -77,20 +77,20 @@ public:
     /// Build a concatenated/percent-encoded string from a list of headers.
     static QByteArray encodeHeaders(const QList<O0RequestParameter> &headers);
 
-public slots:
+public Q_SLOTS:
     /// Authenticate.
     Q_INVOKABLE virtual void link();
 
     /// De-authenticate.
     Q_INVOKABLE virtual void unlink();
 
-signals:
+Q_SIGNALS:
     void requestTokenUrlChanged();
     void authorizeUrlChanged();
     void accessTokenUrlChanged();
     void signatureMethodChanged();
 
-protected slots:
+protected Q_SLOTS:
     /// Handle verification received from the reply server.
     virtual void onVerificationReceived(QMap<QString,QString> params);
 

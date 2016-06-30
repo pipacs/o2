@@ -99,7 +99,7 @@ public:
     /// Get token expiration time (seconds from Epoch).
     int expires();
 
-public slots:
+public Q_SLOTS:
     /// Authenticate.
     Q_INVOKABLE virtual void link();
 
@@ -109,7 +109,7 @@ public slots:
     /// Refresh token.
     Q_INVOKABLE void refresh();
 
-signals:
+Q_SIGNALS:
     /// Emitted when a token refresh has been completed or failed.
     void refreshFinished(QNetworkReply::NetworkError error);
 
@@ -122,7 +122,7 @@ signals:
     void refreshTokenUrlChanged();
     void tokenUrlChanged();
 
-protected slots:
+protected Q_SLOTS:
     /// Handle verification response.
     virtual void onVerificationReceived(QMap<QString, QString>);
 
