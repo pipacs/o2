@@ -18,10 +18,10 @@ public:
     QByteArray replyContent();
     void setReplyContent(const QByteArray &value);
 
-signals:
+Q_SIGNALS:
     void verificationReceived(QMap<QString, QString>);
 
-public slots:
+public Q_SLOTS:
     void onIncomingConnection();
     void onBytesReady();
     QMap<QString, QString> parseQueryParams(QByteArray *data);

@@ -29,7 +29,7 @@ public:
     /// Set a string value for a key
     void setValue(const QString &key, const QString &value);
 
-signals:
+Q_SIGNALS:
     // Property change signals
     void groupKeyChanged();
 

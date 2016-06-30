@@ -11,13 +11,13 @@ class O1TimedReply: public QTimer {
 public:
     explicit O1TimedReply(QNetworkReply *parent, int pTimeout=60*1000);
 
-signals:
+Q_SIGNALS:
     /// Emitted when we have timed out waiting for the network reply.
     void error(QNetworkReply::NetworkError);
     /// Emitted when the network reply has responded.
     void finished();
 
-private slots:
+private Q_SLOTS:
     void onFinished();
     void onTimeout();
 };

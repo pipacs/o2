@@ -60,14 +60,14 @@ public:
     /// Construct query string from list of headers
     static QByteArray createQueryParameters(const QList<O0RequestParameter> &parameters);
 
-public slots:
+public Q_SLOTS:
     /// Authenticate.
     Q_INVOKABLE virtual void link() = 0;
 
     /// De-authenticate.
     Q_INVOKABLE virtual void unlink() = 0;
 
-signals:
+Q_SIGNALS:
     /// Emitted when client needs to open a web browser window, with the given URL.
     void openBrowser(const QUrl &url);
 

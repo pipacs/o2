@@ -15,10 +15,10 @@ class O2Reply: public QTimer {
 public:
     O2Reply(QNetworkReply *reply, int timeOut = 60 * 1000, QObject *parent = 0);
 
-signals:
+Q_SIGNALS:
     void error(QNetworkReply::NetworkError);
 
-public slots:
+public Q_SLOTS:
     /// When time out occurs, the QNetworkReply's error() signal is triggered.
     void onTimeOut();
 

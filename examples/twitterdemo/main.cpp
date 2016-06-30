@@ -29,7 +29,7 @@ class Helper : public QObject {
 public:
     Helper() : QObject(), tweeter_(this), waitForMsg_(false), msg_(QString()) {}
 
-public slots:
+public Q_SLOTS:
     void processArgs() {
         QStringList argList = qApp->arguments();
         QByteArray help = QString(USAGE).arg(OPT_OAUTH,
@@ -87,7 +87,7 @@ public slots:
         }
     }
 
-private slots:
+private Q_SLOTS:
     void postStatusUpdate(const QString& msg) {
         connect(&tweeter_, SIGNAL(statusPosted()), qApp, SLOT(quit()));
         tweeter_.postStatusUpdate(msg);

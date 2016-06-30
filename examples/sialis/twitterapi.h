@@ -26,10 +26,10 @@ public:
     explicit TwitterApi(QObject *parent = 0);
     virtual ~TwitterApi();
 
-public slots:
+public Q_SLOTS:
     Q_INVOKABLE virtual void requestTweets();
 
-signals:
+Q_SIGNALS:
     void tweetModelChanged();
 
 protected:
@@ -37,7 +37,7 @@ protected:
     TweetModel *tweetModel_;
     QNetworkAccessManager *manager_;
 
-protected slots:
+protected Q_SLOTS:
     void tweetsReceived();
     void requestFailed(QNetworkReply::NetworkError error);
 };

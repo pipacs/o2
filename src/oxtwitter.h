@@ -20,11 +20,11 @@ public:
     QString password();
     void setPassword(const QString &password);
 
-public slots:
+public Q_SLOTS:
     /// Authenticate.
     Q_INVOKABLE virtual void link();
 
-signals:
+Q_SIGNALS:
     void usernameChanged();
     void passwordChanged();
 
