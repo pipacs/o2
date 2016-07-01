@@ -22,14 +22,14 @@ O2Facebook::O2Facebook(QObject *parent): O2(parent) {
 
 void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
     qDebug() << "O2Facebook::onVerificationReceived: Emitting closeBrowser()";
-    emit closeBrowser();
+    Q_EMIT closeBrowser();
 
     if (response.contains("error")) {
         qWarning() << "O2Facebook::onVerificationReceived: Verification failed";
         foreach (QString key, response.keys()) {
             qWarning() << "O2Facebook::onVerificationReceived:" << key << response.value(key);
         }
-        emit linkingFailed();
+        Q_EMIT linkingFailed();
         return;
     }
 
@@ -83,7 +83,7 @@ void O2Facebook::onTokenReplyFinished() {
         setExtraTokens(reply);
         timedReplies_.remove(tokenReply);
         setLinked(true);
-        emit linkingSucceeded();
+        Q_EMIT linkingSucceeded();
     } else {
         qWarning() << "O2Facebook::onTokenReplyFinished:" << tokenReply->errorString();
     }

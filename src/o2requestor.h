@@ -20,7 +20,7 @@ public:
     explicit O2Requestor(QNetworkAccessManager *manager, O2 *authenticator, QObject *parent = 0);
     ~O2Requestor();
 
-public slots:
+public Q_SLOTS:
     /// Make a GET request.
     /// @return Request ID or -1 if there are too many requests in the queue.
     int get(const QNetworkRequest &req);
@@ -33,14 +33,14 @@ public slots:
     /// @return Request ID or -1 if there are too many requests in the queue.
     int put(const QNetworkRequest &req, const QByteArray &data);
 
-signals:
+Q_SIGNALS:
     /// Emitted when a request has been completed or failed.
     void finished(int id, QNetworkReply::NetworkError error, QByteArray data);
 
     /// Emitted when an upload has progressed.
     void uploadProgress(int id, qint64 bytesSent, qint64 bytesTotal);
 
-protected slots:
+protected Q_SLOTS:
     /// Handle refresh completion.
     void onRefreshFinished(QNetworkReply::NetworkError error);
 
@@ -53,7 +53,7 @@ protected slots:
     /// Re-try request (after successful token refresh).
     void retry();
 
-    /// Finish the request, emit finished() signal.
+    /// Finish the request, Q_EMIT finished() signal.
     void finish();
 
     /// Handle upload progress.

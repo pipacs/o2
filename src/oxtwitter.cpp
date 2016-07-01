@@ -18,7 +18,7 @@ QString OXTwitter::username() {
 
 void OXTwitter::setUsername(const QString &username) {
     username_ = username;
-    emit usernameChanged();
+    Q_EMIT usernameChanged();
 }
 
 QString OXTwitter::password() {
@@ -27,7 +27,7 @@ QString OXTwitter::password() {
 
 void OXTwitter::setPassword(const QString &password) {
     password_ = password;
-    emit passwordChanged();
+    Q_EMIT passwordChanged();
 }
 
 void OXTwitter::link() {

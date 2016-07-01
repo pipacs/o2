@@ -12,9 +12,9 @@ O1TimedReply::O1TimedReply(QNetworkReply *parent, int pTimeout): QTimer(parent) 
 
 void O1TimedReply::onFinished() {
     stop();
-    emit finished();
+    Q_EMIT finished();
 }
 
 void O1TimedReply::onTimeout() {
-    emit error(QNetworkReply::TimeoutError);
+    Q_EMIT error(QNetworkReply::TimeoutError);
 }

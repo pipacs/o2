@@ -38,7 +38,7 @@ void O0BaseAuth::setLinked(bool v) {
     QString key = QString(O2_KEY_LINKED).arg(clientId_);
     store_->setValue(key, v? "1": "");
     if (oldValue != v) {
-        emit linkedChanged();
+        Q_EMIT linkedChanged();
     }
 }
 
@@ -50,7 +50,7 @@ QString O0BaseAuth::tokenSecret() {
 void O0BaseAuth::setTokenSecret(const QString &v) {
     QString key = QString(O2_KEY_TOKEN_SECRET).arg(clientId_);
     store_->setValue(key, v);
-    emit tokenSecretChanged();
+    Q_EMIT tokenSecretChanged();
 }
 
 QString O0BaseAuth::token() {
@@ -61,7 +61,7 @@ QString O0BaseAuth::token() {
 void O0BaseAuth::setToken(const QString &v) {
     QString key = QString(O2_KEY_TOKEN).arg(clientId_);
     store_->setValue(key, v);
-    emit tokenChanged();
+    Q_EMIT tokenChanged();
 }
 
 QString O0BaseAuth::clientId() {
@@ -70,7 +70,7 @@ QString O0BaseAuth::clientId() {
 
 void O0BaseAuth::setClientId(const QString &value) {
     clientId_ = value;
-    emit clientIdChanged();
+    Q_EMIT clientIdChanged();
 }
 
 QString O0BaseAuth::clientSecret() {
@@ -79,7 +79,7 @@ QString O0BaseAuth::clientSecret() {
 
 void O0BaseAuth::setClientSecret(const QString &value) {
     clientSecret_ = value;
-    emit clientSecretChanged();
+    Q_EMIT clientSecretChanged();
 }
 
 int O0BaseAuth::localPort() {
@@ -89,7 +89,7 @@ int O0BaseAuth::localPort() {
 void O0BaseAuth::setLocalPort(int value) {
     qDebug() << "O0BaseAuth::setLocalPort:" << value;
     localPort_ = value;
-    emit localPortChanged();
+    Q_EMIT localPortChanged();
 }
 
 QVariantMap O0BaseAuth::extraTokens() {
@@ -108,7 +108,7 @@ void O0BaseAuth::setExtraTokens(QVariantMap extraTokens) {
     stream << extraTokens;
     QString key = QString(O2_KEY_EXTRA_TOKENS).arg(clientId_);
     store_->setValue(key, bytes.toBase64());
-    emit extraTokensChanged();
+    Q_EMIT extraTokensChanged();
 }
 
 QByteArray O0BaseAuth::createQueryParameters(const QList<O0RequestParameter> &parameters) {

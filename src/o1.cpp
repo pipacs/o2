@@ -35,7 +35,7 @@ QUrl O1::requestTokenUrl() {
 
 void O1::setRequestTokenUrl(const QUrl &v) {
     requestTokenUrl_ = v;
-    emit requestTokenUrlChanged();
+    Q_EMIT requestTokenUrlChanged();
 }
 
 QList<O0RequestParameter> O1::requestParameters() {
@@ -60,7 +60,7 @@ QUrl O1::authorizeUrl() {
 
 void O1::setAuthorizeUrl(const QUrl &value) {
     authorizeUrl_ = value;
-    emit authorizeUrlChanged();
+    Q_EMIT authorizeUrlChanged();
 }
 
 QUrl O1::accessTokenUrl() {
@@ -69,7 +69,7 @@ QUrl O1::accessTokenUrl() {
 
 void O1::setAccessTokenUrl(const QUrl &value) {
     accessTokenUrl_ = value;
-    emit accessTokenUrlChanged();
+    Q_EMIT accessTokenUrlChanged();
 }
 
 QString O1::signatureMethod() {
@@ -87,7 +87,7 @@ void O1::unlink() {
     setToken("");
     setTokenSecret("");
     setExtraTokens(QVariantMap());
-    emit linkingSucceeded();
+    Q_EMIT linkingSucceeded();
 }
 
 #if QT_VERSION < 0x050100
@@ -190,7 +190,7 @@ void O1::link() {
     qDebug() << "O1::link";
     if (linked()) {
         qDebug() << "O1::link: Linked already";
-        emit linkingSucceeded();
+        Q_EMIT linkingSucceeded();
         return;
     }
 
@@ -240,7 +240,7 @@ void O1::link() {
 void O1::onTokenRequestError(QNetworkReply::NetworkError error) {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     qWarning() << "O1::onTokenRequestError:" << (int)error << reply->errorString() << reply->readAll();
-    emit linkingFailed();
+    Q_EMIT linkingFailed();
 }
 
 void O1::onTokenRequestFinished() {
@@ -264,7 +264,7 @@ void O1::onTokenRequestFinished() {
     QString oAuthCbConfirmed = response.value(O2_OAUTH_CALLBACK_CONFIRMED, "false");
     if (requestToken_.isEmpty() || requestTokenSecret_.isEmpty() || (oAuthCbConfirmed == "false")) {
         qWarning() << "O1::onTokenRequestFinished: No oauth_token, oauth_token_secret or oauth_callback_confirmed in response :" << data;
-        emit linkingFailed();
+        Q_EMIT linkingFailed();
         return;
     }
 
@@ -279,19 +279,19 @@ void O1::onTokenRequestFinished() {
     query.addQueryItem(O2_OAUTH_CALLBACK, callbackUrl().arg(replyServer_->serverPort()).toLatin1());
     url.setQuery(query);
 #endif
-    emit openBrowser(url);
+    Q_EMIT openBrowser(url);
 }
 
 void O1::onVerificationReceived(QMap<QString, QString> params) {
     qDebug() << "O1::onVerificationReceived";
-    emit closeBrowser();
+    Q_EMIT closeBrowser();
     verifier_ = params.value(O2_OAUTH_VERFIER, "");
     if (params.value(O2_OAUTH_TOKEN) == requestToken_) {
         // Exchange request token for access token
         exchangeToken();
     } else {
         qWarning() << "O1::onVerificationReceived: oauth_token missing or doesn't match";
-        emit linkingFailed();
+        Q_EMIT linkingFailed();
     }
 }
 
@@ -321,7 +321,7 @@ void O1::exchangeToken() {
 void O1::onTokenExchangeError(QNetworkReply::NetworkError error) {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     qWarning() << "O1::onTokenExchangeError:" << (int)error << reply->errorString() << reply->readAll();
-    emit linkingFailed();
+    Q_EMIT linkingFailed();
 }
 
 void O1::onTokenExchangeFinished() {
@@ -349,10 +349,10 @@ void O1::onTokenExchangeFinished() {
             setExtraTokens(extraTokens);
         }
         setLinked(true);
-        emit linkingSucceeded();
+        Q_EMIT linkingSucceeded();
     } else {
         qWarning() << "O1::onTokenExchangeFinished: oauth_token or oauth_token_secret missing from response" << data;
-        emit linkingFailed();
+        Q_EMIT linkingFailed();
     }
 }
 
