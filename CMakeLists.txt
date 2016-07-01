@@ -16,6 +16,7 @@ option(o2_WITH_FACEBOOK "Authenticate with Facebook" OFF)
 option(o2_WITH_SKYDRIVE "Authenticate with SkyDrive" OFF)
 option(o2_WITH_FLICKR "Authenticate with Flickr" OFF)
 option(o2_WITH_HUBIC "Authenticate with Hubic" OFF)
+option(o2_WITH_TOMBOY "Authenticate with Tomboy Notes server" ON)
 
 option(o2_WITH_OAUTH1 "Include OAuth1 authentication" OFF)
 if(o2_WITH_TWITTER OR o2_WITH_DROPBOX OR o2_WITH_FLICKR)
