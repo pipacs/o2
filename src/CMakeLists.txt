@@ -92,6 +92,11 @@ if(NOT o2_WITH_QT5)
     add_definitions(${QT4_DEFINITIONS})
 endif(NOT o2_WITH_QT5)
 
+if(BUILD_SHARED_LIBS AND APPLE AND POLICY CMP0042) # in CMake >= 2.8.12
+    cmake_policy(SET CMP0042 OLD)
+    set(CMAKE_MACOSX_RPATH OFF) # don't embed @rpath in install name
+endif(BUILD_SHARED_LIBS AND APPLE AND POLICY CMP0042)
+
 add_library( o2 ${o2_SRCS} )
 
 if(o2_WITH_QT5)
@@ -99,3 +104,25 @@ if(o2_WITH_QT5)
 else(o2_WITH_QT5)
     target_link_libraries( o2 ${QT_LIBRARIES} )
 endif(o2_WITH_QT5)
+
+if(BUILD_SHARED_LIBS)
+    if(APPLE)
+      set_target_properties(o2
+          PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib
+      )
+    endif(APPLE)
+    set_target_properties(o2
+        PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${API_VERSION}
+    )
+else(BUILD_SHARED_LIBS)
+    # needed for statically linked o2 in shared libs on x86_64
+    set_target_properties(o2
+        PROPERTIES POSITION_INDEPENDENT_CODE TRUE
+    )
+endif(BUILD_SHARED_LIBS)
+
+install(TARGETS o2
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib${o2_LIB_SUFFIX}
+    ARCHIVE DESTINATION lib${o2_LIB_SUFFIX}
+)
