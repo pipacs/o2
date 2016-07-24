@@ -25,8 +25,19 @@ set( o2_SRCS
     o2simplecrypt.cpp
     o0settingsstore.cpp
     o0baseauth.cpp
+)
+
+set( o2_HDRS
+    o2.h
+    o2reply.h
+    o2replyserver.h
+    o2requestor.h
     o0abstractstore.h
+    o0baseauth.h
     o0globals.h
+    o0requestparameter.h
+    o0settingsstore.h
+    o0simplecrypt.h
 )
 
 if(o2_WITH_OAUTH1)
@@ -36,19 +47,30 @@ if(o2_WITH_OAUTH1)
         o1requestor.cpp
         o1timedreply.cpp
     )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o1.h
+        o1requestor.h
+        o1timedreply.h
+        o1freshbooks.h
+    )
 endif(o2_WITH_OAUTH1)
 
 if(o2_WITH_TWITTER)
     set( o2_SRCS
         ${o2_SRCS}
-        o1twitter.h
         oxtwitter.cpp
+    )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o1twitter.h
+        oxtwitter.h
     )
 endif(o2_WITH_TWITTER)
 
 if(o2_WITH_DROPBOX)
-    set( o2_SRCS
-        ${o2_SRCS}
+    set( o2_HDRS
+        ${o2_HDRS}
         o1dropbox.h
     )
 endif(o2_WITH_DROPBOX)
@@ -58,12 +80,20 @@ if(o2_WITH_GOOGLE)
         ${o2_SRCS}
         o2gft.cpp
     )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o2gft.h
+    )
 endif(o2_WITH_GOOGLE)
 
 if(o2_WITH_FACEBOOK)
     set( o2_SRCS
         ${o2_SRCS}
         o2facebook.cpp
+    )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o2facebook.h
     )
 endif(o2_WITH_FACEBOOK)
 
@@ -72,11 +102,15 @@ if(o2_WITH_SKYDRIVE)
         ${o2_SRCS}
         o2skydrive.cpp
     )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o2skydrive.h
+    )
 endif(o2_WITH_SKYDRIVE)
 
 if(o2_WITH_FLICKR)
-    set( o2_SRCS
-        ${o2_SRCS}
+    set( o2_HDRS
+        ${o2_HDRS}
         o1flickr.h
     )
 endif(o2_WITH_FLICKR)
@@ -86,7 +120,22 @@ if(o2_WITH_HUBIC)
         ${o2_SRCS}
         o2hubic.cpp
     )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o2hubic.h
+    )
 endif(o2_WITH_HUBIC)
+
+if(o2_WITH_SURVEYMONKEY)
+    set( o2_SRCS
+        ${o2_SRCS}
+        o2surveymonkey.cpp
+    )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o2surveymonkey.h
+    )
+endif(o2_WITH_SURVEYMONKEY)
 
 if(NOT o2_WITH_QT5)
     add_definitions(${QT4_DEFINITIONS})
@@ -97,7 +146,7 @@ if(BUILD_SHARED_LIBS AND APPLE AND POLICY CMP0042) # in CMake >= 2.8.12
     set(CMAKE_MACOSX_RPATH OFF) # don't embed @rpath in install name
 endif(BUILD_SHARED_LIBS AND APPLE AND POLICY CMP0042)
 
-add_library( o2 ${o2_SRCS} )
+add_library( o2 ${o2_SRCS} ${o2_HDRS} )
 
 if(o2_WITH_QT5)
     target_link_libraries( o2 Qt5::Core Qt5::Network)
@@ -125,4 +174,8 @@ install(TARGETS o2
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib${o2_LIB_SUFFIX}
     ARCHIVE DESTINATION lib${o2_LIB_SUFFIX}
+)
+
+install(FILES ${o2_HDRS}
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/o2
 )
