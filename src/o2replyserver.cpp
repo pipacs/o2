@@ -33,7 +33,7 @@ void O2ReplyServer::onBytesReady() {
     QByteArray reply;
     reply.append("HTTP/1.0 200 OK \r\n");
     reply.append("Content-Type: text/html; charset=\"utf-8\"\r\n");
-    reply.append(QString("Content-Length: %1\r\n\r\n").arg(replyContent_.size()));
+    reply.append(QString("Content-Length: %1\r\n\r\n").arg(replyContent_.size()).toLatin1());
     reply.append(replyContent_);
     socket->write(reply);
 
@@ -65,8 +65,8 @@ QMap<QString, QString> O2ReplyServer::parseQueryParams(QByteArray *data) {
     QPair<QString, QString> tokenPair;
     foreach (tokenPair, tokens) {
         // FIXME: We are decoding key and value again. This helps with Google OAuth, but is it mandated by the standard?
-        QString key = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.first.trimmed()));
-        QString value = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.second.trimmed()));
+        QString key = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.first.trimmed().toLatin1()));
+        QString value = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.second.trimmed().toLatin1()));
         queryParams.insert(key, value);
     }
     return queryParams;
