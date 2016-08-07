@@ -76,6 +76,11 @@ public:
     QString requestUrl();
     void setRequestUrl(const QString &value);
 
+    /// User-defined extra parameters to append to request URL
+    Q_PROPERTY(QVariantMap extraRequestParams READ extraRequestParams WRITE setExtraRequestParams NOTIFY extraRequestParamsChanged)
+    QVariantMap extraRequestParams();
+    void setExtraRequestParams(const QVariantMap &value);
+
     /// Token request URL.
     Q_PROPERTY(QString tokenUrl READ tokenUrl WRITE setTokenUrl NOTIFY tokenUrlChanged)
     QString tokenUrl();
@@ -120,6 +125,7 @@ Q_SIGNALS:
     void usernameChanged();
     void passwordChanged();
     void requestUrlChanged();
+    void extraRequestParamsChanged();
     void refreshTokenUrlChanged();
     void tokenUrlChanged();
 
@@ -156,6 +162,7 @@ protected:
     QString username_;
     QString password_;
     QUrl requestUrl_;
+    QVariantMap extraReqParams_;
     QUrl tokenUrl_;
     QUrl refreshTokenUrl_;
     QString scope_;
