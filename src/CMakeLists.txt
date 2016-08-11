@@ -35,6 +35,7 @@ set( o2_HDRS
     o2requestor.h
     o0abstractstore.h
     o0baseauth.h
+    o0export.h
     o0globals.h
     o0requestparameter.h
     o0settingsstore.h
