@@ -60,7 +60,7 @@ void O2Skydrive::redirected(const QUrl &url) {
         // Get access code
         QString urlCode;
 #if QT_VERSION < 0x050000
-        urlCode = url.queryItemValue(O2_OAUTH2_CODE);
+        urlCode = url.queryItemValue(O2_OAUTH2_GRANT_TYPE_CODE);
 #else
         QUrlQuery query(url);
         urlCode = query.queryItemValue(O2_OAUTH2_GRANT_TYPE_CODE);
