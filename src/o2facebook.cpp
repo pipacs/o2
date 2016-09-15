@@ -42,7 +42,7 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
     url.addQueryItem(O2_OAUTH2_CLIENT_ID, clientId_);
     url.addQueryItem(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
     url.addQueryItem(O2_OAUTH2_SCOPE, scope_);
-    url.addQueryItem(O2_OAUTH2_CODE, code());
+    url.addQueryItem(O2_OAUTH2_GRANT_TYPE_CODE, code());
     url.addQueryItem(O2_OAUTH2_REDIRECT_URI, redirectUri_);
 #else
     QUrlQuery query(url);
