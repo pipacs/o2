@@ -90,6 +90,13 @@ if(o2_WITH_HUBIC)
     )
 endif(o2_WITH_HUBIC)
 
+if(o2_WITH_SPOTIFY)
+    set( o2_SRCS
+        ${o2_SRCS}
+        o2spotify.cpp
+    )
+endif(o2_WITH_SPOTIFY)
+
 if(NOT o2_WITH_QT5)
     add_definitions(${QT4_DEFINITIONS})
 endif(NOT o2_WITH_QT5)
