@@ -5,12 +5,13 @@
 #include <QUrl>
 #include <QNetworkReply>
 
+#include "o0export.h"
 #include "o0baseauth.h"
 
 class O2ReplyServer;
 
 /// Simple OAuth 1.0 authenticator.
-class O1: public O0BaseAuth {
+class O0_EXPORT O1: public O0BaseAuth {
     Q_OBJECT
 
 public:

@@ -4,8 +4,10 @@
 #include <QNetworkReply>
 #include <QTimer>
 
+#include "o0export.h"
+
 /// A timer connected to a network reply.
-class O1TimedReply: public QTimer {
+class O0_EXPORT O1TimedReply: public QTimer {
     Q_OBJECT
 
 public:

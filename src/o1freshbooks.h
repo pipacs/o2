@@ -1,10 +1,11 @@
 #ifndef O1FRESHBOOKS_H
 #define O1FRESHBOOKS_H
 
+#include "o0export.h"
 #include "o1.h"
 
 /// FreshBooks authenticator.
-class O1Freshbooks: public O1 {
+class O0_EXPORT O1Freshbooks: public O1 {
     Q_OBJECT
 
 public:

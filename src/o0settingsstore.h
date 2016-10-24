@@ -4,11 +4,12 @@
 #include <QSettings>
 #include <QString>
 
+#include "o0baseauth.h"
 #include "o0abstractstore.h"
 #include "o0simplecrypt.h"
 
 /// Persistent storage for authentication tokens, using QSettings.
-class O0SettingsStore: public O0AbstractStore {
+class O0_EXPORT O0SettingsStore: public O0AbstractStore {
     Q_OBJECT
 
 public:

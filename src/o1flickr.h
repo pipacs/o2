@@ -1,10 +1,11 @@
 #ifndef O1FLICKR_H
 #define O1FLICKR_H
 
+#include "o0export.h"
 #include "o1.h"
 
 /// Flickr authenticator.
-class O1Flickr: public O1 {
+class O0_EXPORT O1Flickr: public O1 {
     Q_OBJECT
 
 public:
