@@ -8,8 +8,10 @@
 #include <QNetworkAccessManager>
 #include <QByteArray>
 
+#include "o0export.h"
+
 /// A network request/reply pair that can time out.
-class O2Reply: public QTimer {
+class O0_EXPORT O2Reply: public QTimer {
     Q_OBJECT
 
 public:
