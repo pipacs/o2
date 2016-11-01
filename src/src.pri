@@ -19,7 +19,8 @@ SOURCES += \
     $$PWD/oxtwitter.cpp \
     $$PWD/o2simplecrypt.cpp \
     $$PWD/o0baseauth.cpp \
-    $$PWD/o0settingsstore.cpp
+    $$PWD/o0settingsstore.cpp \
+    $$PWD/o2spotify.cpp
 
 HEADERS += \
     $$PWD/o1.h \
@@ -42,4 +43,5 @@ HEADERS += \
     $$PWD/o0simplecrypt.h \
     $$PWD/o0requestparameter.h \
     $$PWD/o0abstractstore.h \
-    $$PWD/o0settingsstore.h
+    $$PWD/o0settingsstore.h \
+    $$PWD/o2spotify.h
