@@ -4,8 +4,10 @@
 #include <QObject>
 #include <QString>
 
+#include "o0export.h"
+
 /// Storage for strings.
-class O0AbstractStore: public QObject {
+class O0_EXPORT O0AbstractStore: public QObject {
     Q_OBJECT
 
 public:

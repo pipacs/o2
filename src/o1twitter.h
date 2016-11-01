@@ -1,10 +1,11 @@
 #ifndef O1TWITTER_H
 #define O1TWITTER_H
 
+#include "o0export.h"
 #include "o1.h"
 
 /// Twitter OAuth 1.0 client
-class O1Twitter: public O1 {
+class O0_EXPORT O1Twitter: public O1 {
     Q_OBJECT
 
 public:
