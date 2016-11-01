@@ -4,7 +4,7 @@
 #include "o2.h"
 
 /// Spotify's dialect of OAuth 2.0
-class O2Spotify: public O2 {
+class O0_EXPORT O2Spotify: public O2 {
     Q_OBJECT
 
 public:

@@ -6,7 +6,9 @@
 * Fix Skydrive specialization
 * If available, use ```qml``` instead of ```script```
 * Use ```Q_SIGNALS``` etc. instead of ```signals``` etc.
-* 
+* Add versioning, shared library support
+* Add Surveymonkey specialization
+* Add DLL import/export declarations for Windows
 
 ## 1.0.0
 
