@@ -2,7 +2,11 @@
 
 ## 1.0.1
 
-
+* Add Spotify specialization
+* Fix Skydrive specialization
+* If available, use ```qml``` instead of ```script```
+* Use ```Q_SIGNALS``` etc. instead of ```signals``` etc.
+* 
 
 ## 1.0.0
 
