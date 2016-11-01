@@ -55,3 +55,27 @@ SurveyMonkey specialization
 
 CMake related fixes and improvements.
 
+# Lukas Vogel <https://github.com/lukedirtwalker>
+
+Spotify support
+
+# Alan Garny <https://github.com/agarny>
+
+Windows DLL build support
+
+# MartinMikita <https://github.com/MartinMikita>
+
+Bug fixes
+
+# Larry Shaffer <https://github.com/dakcarto>
+
+Versioning, shared lib, install target and header support
+
+# Gilmanov Ildar <https://github.com/gilmanov-ildar>
+
+Bug fixes, support for ```qml``` module
+
+# Fabian Vogt <https://github.com/Vogtinator>
+
+Bug fixes, support for building without Qt keywords enabled
+
