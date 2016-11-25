@@ -373,7 +373,8 @@ QByteArray O1::nonce() {
         firstTime = false;
         qsrand(QTime::currentTime().msec());
     }
-    QString u = QString::number(QDateTime::currentDateTimeUtc().toTime_t());
-    u.append(QString::number(qrand()));
-    return u.toLatin1();
+    QCryptographicHash hash(QCryptographicHash::Md5);
+    hash.addData(QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1());
+    hash.addData(QString::number(qrand()).toLatin1());
+    return hash.result().toHex();
 }
