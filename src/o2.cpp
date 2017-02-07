@@ -157,7 +157,8 @@ void O2::link() {
 
     if (grantFlow_ == GrantFlowAuthorizationCode) {
         // Start listening to authentication replies
-        replyServer_->listen(QHostAddress::Any, localPort_);
+        if (!replyServer_->isListening())
+            replyServer_->listen(QHostAddress::Any, localPort_);
 
         // Save redirect URI, as we have to reuse it when requesting the access token
         redirectUri_ = localhostPolicy_.arg(replyServer_->serverPort());
