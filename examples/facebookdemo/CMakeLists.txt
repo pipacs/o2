@@ -27,6 +27,7 @@ include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} "../../src" )
 set(fb_SRCS
     main.cpp
     fbdemo.cpp
+    fbdemo.h
 )
 
 if(NOT o2_WITH_QT5)
