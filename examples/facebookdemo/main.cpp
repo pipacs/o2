@@ -63,6 +63,8 @@ private:
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
+    QCoreApplication::setOrganizationName("O2");
+    QCoreApplication::setApplicationName("Facebook Test");
     Helper helper;
     QTimer::singleShot(0, &helper, SLOT(processArgs()));
     return a.exec();
