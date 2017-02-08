@@ -15,3 +15,7 @@ endif(o2_WITH_TWITTER)
 #if(o2_WITH_SPOTIFY)
 #    add_subdirectory(spotifydemo)
 #endif(o2_WITH_SPOTIFY)
+
+if (o2_WITH_VIMEO)
+    add_subdirectory(vimeodemo)
+endif(o2_WITH_VIMEO)
