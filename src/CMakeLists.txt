@@ -90,6 +90,17 @@ if(o2_WITH_GOOGLE)
     )
 endif(o2_WITH_GOOGLE)
 
+if(o2_WITH_VIMEO)
+    set( o2_SRCS
+        ${o2_SRCS}
+        o2vimeo.cpp
+    )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o2vimeo.h
+    )
+endif(o2_WITH_VIMEO)
+
 if(o2_WITH_FACEBOOK)
     set( o2_SRCS
         ${o2_SRCS}
