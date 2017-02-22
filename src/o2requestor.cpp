@@ -155,7 +155,9 @@ void O2Requestor::finish() {
     timedReplies_.remove(reply_);
     reply_->disconnect(this);
     reply_->deleteLater();
+    QList<QNetworkReply::RawHeaderPair> headers = reply_->rawHeaderPairs();
     Q_EMIT finished(id_, error_, data);
+    Q_EMIT finished(id_, error_, data, headers);
 }
 
 void O2Requestor::retry() {
