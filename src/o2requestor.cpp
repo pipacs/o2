@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include <QDebug>
 #include <QTimer>
 #if QT_VERSION >= 0x050000
@@ -185,8 +187,12 @@ void O2Requestor::retry() {
     case QNetworkAccessManager::PostOperation:
         reply_ = manager_->post(request_, data_);
         break;
-    default:
+    case QNetworkAccessManager::PutOperation:
         reply_ = manager_->put(request_, data_);
+        break;
+    default:
+        assert(!"Unspecified operation for request");
+        reply_ = manager_->get(request_);
     }
     timedReplies_.add(reply_);
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
