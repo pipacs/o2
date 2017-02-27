@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include <QDebug>
 #include <QTimer>
 #include <QBuffer>
@@ -239,8 +241,12 @@ void O2Requestor::retry() {
         buffer->setParent(reply_);
     }
         break;
-    default:
+    case QNetworkAccessManager::PutOperation:
         reply_ = manager_->put(request_, data_);
+        break;
+    default:
+        assert(!"Unspecified operation for request");
+        reply_ = manager_->get(request_);
         break;
     }
     timedReplies_.add(reply_);
