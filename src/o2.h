@@ -115,6 +115,9 @@ public Q_SLOTS:
     /// Refresh token.
     Q_INVOKABLE void refresh();
 
+    /// Handle situation where reply server has opted to close its connection
+    void serverHasClosed(bool paramsfound = false);
+
 Q_SIGNALS:
     /// Emitted when a token refresh has been completed or failed.
     void refreshFinished(QNetworkReply::NetworkError error);

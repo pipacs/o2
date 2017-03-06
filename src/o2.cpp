@@ -74,6 +74,7 @@ O2::O2(QObject *parent, QNetworkAccessManager *manager): O0BaseAuth(parent) {
     localhostPolicy_ = QString(O2_CALLBACK_URL);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+    connect(replyServer_, SIGNAL(serverClosed(bool)), this, SLOT(serverHasClosed(bool)));
 }
 
 O2::GrantFlow O2::grantFlow() {
@@ -166,10 +167,17 @@ void O2::link() {
     setRefreshToken(QString());
     setExpires(0);
 
-    if (grantFlow_ == GrantFlowAuthorizationCode) {
+    if (grantFlow_ == GrantFlowAuthorizationCode || grantFlow_ == GrantFlowImplicit) {
         // Start listening to authentication replies
-        if (!replyServer_->isListening())
-            replyServer_->listen(QHostAddress::Any, localPort_);
+        if (!replyServer_->isListening()) {
+	        if (replyServer_->listen(QHostAddress::Any, localPort_)) {
+	            qDebug() << "O2::link: Reply server listening on port" << localPort();
+	        } else {
+	            qWarning() << "O2::link: Reply server failed to start listening on port" << localPort();
+	            Q_EMIT linkingFailed();
+	            return;
+	        }
+		}
 
         // Save redirect URI, as we have to reuse it when requesting the access token
         redirectUri_ = localhostPolicy_.arg(replyServer_->serverPort());
@@ -207,6 +215,7 @@ void O2::link() {
         }
         QByteArray payload = O0BaseAuth::createQueryParameters(parameters);
 
+        qDebug() << "O2::link: Sending token request for resource owner flow";
         QUrl url(tokenUrl_);
         QNetworkRequest tokenRequest(url);
         tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -233,7 +242,7 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
     Q_EMIT closeBrowser();
 
     if (response.contains("error")) {
-        qWarning() << "O2::onVerificationReceived: Verification failed: " << response;
+        qWarning() << "O2::onVerificationReceived: Verification failed:" << response;
         Q_EMIT linkingFailed();
         return;
     }
@@ -256,10 +265,32 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
         parameters.insert(O2_OAUTH2_REDIRECT_URI, redirectUri_);
         parameters.insert(O2_OAUTH2_GRANT_TYPE, O2_AUTHORIZATION_CODE);
         QByteArray data = buildRequestBody(parameters);
+
+        qDebug() << QString("O2::onVerificationReceived: Exchange access code data:\n%1").arg(QString(data));
+
         QNetworkReply *tokenReply = manager_->post(tokenRequest, data);
         timedReplies_.add(tokenReply);
         connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
         connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+    } else if (grantFlow_ == GrantFlowImplicit) {
+      // Check for mandatory tokens
+      if (response.contains(O2_OAUTH2_ACCESS_TOKEN)) {
+          qDebug() << "O2::onVerificationReceived: Access token returned for implicit flow";
+          setToken(response.value(O2_OAUTH2_ACCESS_TOKEN));
+          if (response.contains(O2_OAUTH2_EXPIRES_IN)) {
+            bool ok = false;
+            int expiresIn = response.value(O2_OAUTH2_EXPIRES_IN).toInt(&ok);
+            if (ok) {
+                qDebug() << "O2::onVerificationReceived: Token expires in" << expiresIn << "seconds";
+                setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
+            }
+          }
+          setLinked(true);
+          Q_EMIT linkingSucceeded();
+      } else {
+          qWarning() << "O2::onVerificationReceived: Access token missing from response for implicit flow";
+          Q_EMIT linkingFailed();
+      }
     } else {
         setToken(response.value(O2_OAUTH2_ACCESS_TOKEN));
         setRefreshToken(response.value(O2_OAUTH2_REFRESH_TOKEN));
@@ -286,10 +317,24 @@ void O2::onTokenReplyFinished() {
     }
     if (tokenReply->error() == QNetworkReply::NoError) {
         QByteArray replyData = tokenReply->readAll();
+
+        // Dump replyData
+        // SENSITIVE DATA in RelWithDebInfo or Debug builds
+        //qDebug() << "O2::onTokenReplyFinished: replyData\n";
+        //qDebug() << QString( replyData );
+
         QVariantMap tokens = parseTokenResponse(replyData);
+
+        // Dump tokens
+        qDebug() << "O2::onTokenReplyFinished: Tokens returned:\n";
+        foreach (QString key, tokens.keys()) {
+            // SENSITIVE DATA in RelWithDebInfo or Debug builds, so it is truncated first
+            qDebug() << key << ": "<< tokens.value( key ).toString().left( 3 ) << "...";
+        }
 
         // Check for mandatory tokens
         if (tokens.contains(O2_OAUTH2_ACCESS_TOKEN)) {
+            qDebug() << "O2::onTokenReplyFinished: Access token returned";
             setToken(tokens.take(O2_OAUTH2_ACCESS_TOKEN).toString());
             bool ok = false;
             int expiresIn = tokens.take(O2_OAUTH2_EXPIRES_IN).toInt(&ok);
@@ -303,7 +348,7 @@ void O2::onTokenReplyFinished() {
             setLinked(true);
             Q_EMIT linkingSucceeded();
         } else {
-            qWarning() << "O2::onTokenReplyFinished: oauth_token missing from response" << replyData;
+            qWarning() << "O2::onTokenReplyFinished: Access token missing from response";
             Q_EMIT linkingFailed();
         }
     }
@@ -409,6 +454,14 @@ void O2::onRefreshError(QNetworkReply::NetworkError error) {
     unlink();
     timedReplies_.remove(refreshReply);
     Q_EMIT refreshFinished(error);
+}
+
+void O2::serverHasClosed(bool paramsfound)
+{
+    if ( !paramsfound ) {
+        // server has probably timed out after receiving first response
+        Q_EMIT linkingFailed();
+    }
 }
 
 QString O2::localhostPolicy() const {
