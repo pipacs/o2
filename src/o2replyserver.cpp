@@ -11,6 +11,7 @@
 #include <QUrlQuery>
 #endif
 
+#include "o0globals.h"
 #include "o2replyserver.h"
 
 O2ReplyServer::O2ReplyServer(QObject *parent): QTcpServer(parent) {
@@ -41,6 +42,9 @@ void O2ReplyServer::onBytesReady() {
     QMap<QString, QString> queryParams = parseQueryParams(&data);
     socket->disconnectFromHost();
     close();
+    if (!uniqueState_.isEmpty() && !queryParams.contains(QString(O2_OAUTH2_STATE)))
+        return; // Malicious or service (e.g. favicon.ico) request
+
     Q_EMIT verificationReceived(queryParams);
 }
 
@@ -78,4 +82,12 @@ QByteArray O2ReplyServer::replyContent() {
 
 void O2ReplyServer::setReplyContent(const QByteArray &value) {
     replyContent_ = value;
+}
+
+QString O2ReplyServer::uniqueState() {
+    return uniqueState_;
+}
+
+void O2ReplyServer::setUniqueState(const QString &state) {
+    uniqueState_ = state;
 }

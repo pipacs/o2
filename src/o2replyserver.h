@@ -20,6 +20,9 @@ public:
     QByteArray replyContent();
     void setReplyContent(const QByteArray &value);
 
+    QString uniqueState();
+    void setUniqueState(const QString &state);
+
 Q_SIGNALS:
     void verificationReceived(QMap<QString, QString>);
 
@@ -30,6 +33,7 @@ public Q_SLOTS:
 
 protected:
     QByteArray replyContent_;
+    QString uniqueState_;
 };
 
 #endif // O2REPLYSERVER_H

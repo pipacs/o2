@@ -10,6 +10,7 @@
 #include <QCryptographicHash>
 #include <QTimer>
 #include <QVariantMap>
+#include <Quuid>
 
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
@@ -160,8 +161,11 @@ void O2::link() {
         if (!replyServer_->listen(QHostAddress::Any, localPort_))
             qWarning() << "O2::link: Failed to start local reply server on port " << localPort_;
 
+        QString uniqueState = QUuid().toString();
+
         // Save redirect URI, as we have to reuse it when requesting the access token
         redirectUri_ = localhostPolicy_.arg(replyServer_->serverPort());
+        replyServer_->setUniqueState(uniqueState);
 
         // Assemble intial authentication URL
         QList<QPair<QString, QString> > parameters;
@@ -170,6 +174,7 @@ void O2::link() {
         parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
         parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_));
         parameters.append(qMakePair(QString(O2_OAUTH2_API_KEY), apiKey_));
+        parameters.append(qMakePair(QString(O2_OAUTH2_STATE), uniqueState));
 
         // Show authentication URL with a web browser
         QUrl url(requestUrl_);
