@@ -15,7 +15,7 @@ Class | Header | Purpose
 :-- | :-- | :--
 O0AbstractStore | o0abstractstore.h | Base class of persistent stores
 O0BaseAuth | o0baseauth.h | Base class of OAuth authenticators
-O0SettingsStore | o0simplecrypt.h | QSettings-based persistent store
+O0SettingsStore | o0settingsstore.h | QSettings-based persistent store
 o0keyChainStore | o0keychainstore.h | Settings stored through the system keychain [keychain](https://github.com/frankosterfeld/qtkeychain)
 O0SimpleCrypt | o0simplecrypt.h | Simple encryption and decryption by Andre Somers
 O1 | o1.h | Generic OAuth 1.0 authenticator
@@ -28,7 +28,7 @@ O1Twitter | o1twitter.h | Twitter OAuth specialization
 O2 | o2.h | Generic OAuth 2.0 authenticator
 O2Facebook | o2facebook.h | Facebook OAuth specialization
 O2Gft | o2gft.h | Google Fusion Tables OAuth specialization
-O2Google | o2gft.h | Google Oauth specialization [scopes](https://developers.google.com/identity/protocols/googlescopes)
+O2Google | o2google.h | Google Oauth specialization [scopes](https://developers.google.com/identity/protocols/googlescopes)
 O2Hubic | o2hubic.h | Hubic OAuth specialization
 O2Reply | o2reply.h | A network request/reply that can time out
 O2ReplyServer | o2replyserver.h | HTTP server to process authentication responses
