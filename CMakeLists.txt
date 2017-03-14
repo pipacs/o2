@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 2.8.11)
 if(POLICY CMP0048) # in CMake >= 3.0.0
     cmake_policy(SET CMP0048 OLD) # keep project() from clearing VERSION variables
 endif(POLICY CMP0048)
+
+set( CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules )
+
 set(VER_MAJOR "1")
 set(VER_MINOR "0")
 set(VER_PATCH "1")
@@ -33,6 +36,7 @@ option(o2_WITH_FLICKR "Authenticate with Flickr" OFF)
 option(o2_WITH_HUBIC "Authenticate with Hubic" OFF)
 option(o2_WITH_SPOTIFY "Authenticate with Spotify" OFF)
 option(o2_WITH_SURVEYMONKEY "Authenticate with SurveyMonkey" OFF)
+option(o2_WITH_KEYCHAIN "keychain store" ON)
 
 option(o2_WITH_OAUTH1 "Include OAuth1 authentication" OFF)
 if(o2_WITH_TWITTER OR o2_WITH_DROPBOX OR o2_WITH_FLICKR)
