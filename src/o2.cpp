@@ -22,24 +22,21 @@
 
 #include "o2.h"
 #include "o2replyserver.h"
-#include "o2globals.h"
-#include "o2settingsstore.h"
+#include "o0globals.h"
+#include "o0settingsstore.h"
 
-#define trace() if (1) qDebug()
-// define trace() if (0) qDebug()
-
-static QVariantMap parseTokenResponse(const QByteArray &data)
-{
+/// Parse JSON data into a QVariantMap
+static QVariantMap parseTokenResponse(const QByteArray &data) {
 #if QT_VERSION >= 0x050000
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(data, &err);
     if (err.error != QJsonParseError::NoError) {
-        qWarning() << "Failed to parse token response due to err:" << err.errorString();
+        qWarning() << "parseTokenResponse: Failed to parse token response due to err:" << err.errorString();
         return QVariantMap();
     }
 
     if (!doc.isObject()) {
-        qWarning() << "Token response is not an object";
+        qWarning() << "parseTokenResponse: Token response is not an object";
         return QVariantMap();
     }
 
@@ -59,31 +56,24 @@ static QVariantMap parseTokenResponse(const QByteArray &data)
 #endif
 }
 
-O2::O2(QObject *parent): QObject(parent) {
+/// Add query parameters to a query
+static void addQueryParametersToUrl(QUrl &url,  QList<QPair<QString, QString> > parameters) {
+#if QT_VERSION < 0x050000
+    url.setQueryItems(parameters);
+#else
+    QUrlQuery query(url);
+    query.setQueryItems(parameters);
+    url.setQuery(query);
+#endif
+}
+
+O2::O2(QObject *parent): O0BaseAuth(parent) {
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
     grantFlow_ = GrantFlowAuthorizationCode;
-    localPort_ = 0;
     localhostPolicy_ = QString(O2_CALLBACK_URL);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
-    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)),
-            this, SLOT(onVerificationReceived(QMap<QString,QString>)));
-    store_ = new O2SettingsStore(O2_ENCRYPTION_KEY, this);
-}
-
-O2::~O2() {
-}
-
-void O2::setStore(O2AbstractStore *store) {
-    if (!store) {
-        qWarning() << "Store object is null! Using default O2SettingsStore";
-        return;
-    }
-    // Delete the previously stored object
-    store_->deleteLater();
-    store_ = store;
-    // re-parent it to this class as we take ownership of it now
-    store_->setParent(this);
+    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
 }
 
 O2::GrantFlow O2::grantFlow() {
@@ -92,25 +82,7 @@ O2::GrantFlow O2::grantFlow() {
 
 void O2::setGrantFlow(O2::GrantFlow value) {
     grantFlow_ = value;
-    emit grantFlowChanged();
-}
-
-QString O2::clientId() {
-    return clientId_;
-}
-
-void O2::setClientId(const QString &value) {
-    clientId_ = value;
-    emit clientIdChanged();
-}
-
-QString O2::clientSecret() {
-    return clientSecret_;
-}
-
-void O2::setClientSecret(const QString &value) {
-    clientSecret_ = value;
-    emit clientSecretChanged();
+    Q_EMIT grantFlowChanged();
 }
 
 QString O2::username() {
@@ -119,7 +91,7 @@ QString O2::username() {
 
 void O2::setUsername(const QString &value) {
     username_ = value;
-    emit usernameChanged();
+    Q_EMIT usernameChanged();
 }
 
 QString O2::password() {
@@ -128,7 +100,7 @@ QString O2::password() {
 
 void O2::setPassword(const QString &value) {
     password_ = value;
-    emit passwordChanged();
+    Q_EMIT passwordChanged();
 }
 
 QString O2::scope() {
@@ -137,7 +109,7 @@ QString O2::scope() {
 
 void O2::setScope(const QString &value) {
     scope_ = value;
-    emit scopeChanged();
+    Q_EMIT scopeChanged();
 }
 
 QString O2::requestUrl() {
@@ -146,7 +118,7 @@ QString O2::requestUrl() {
 
 void O2::setRequestUrl(const QString &value) {
     requestUrl_ = value;
-    emit requestUrlChanged();
+    Q_EMIT requestUrlChanged();
 }
 
 QString O2::tokenUrl() {
@@ -155,7 +127,7 @@ QString O2::tokenUrl() {
 
 void O2::setTokenUrl(const QString &value) {
     tokenUrl_= value;
-    emit tokenUrlChanged();
+    Q_EMIT tokenUrlChanged();
 }
 
 QString O2::refreshTokenUrl() {
@@ -164,127 +136,100 @@ QString O2::refreshTokenUrl() {
 
 void O2::setRefreshTokenUrl(const QString &value) {
     refreshTokenUrl_ = value;
-    emit refreshTokenUrlChanged();
-}
-
-int O2::localPort() {
-    return localPort_;
-}
-
-void O2::setLocalPort(int value) {
-    localPort_ = value;
-    emit localPortChanged();
-}
-
-QVariantMap O2::extraTokens() const {
-    return extraTokens_;
-}
-
-void O2::setExtraTokens(QVariantMap extraTokens) {
-    extraTokens_ = extraTokens;
+    Q_EMIT refreshTokenUrlChanged();
 }
 
 void O2::link() {
-    trace() << "O2::link";
-
+    qDebug() << "O2::link";
 
     if (linked()) {
-        trace() << " Linked already";
-        emit linkingSucceeded();
+        qDebug() << "O2::link: Linked already";
+        Q_EMIT linkingSucceeded();
         return;
     }
 
-    if(grantFlow_ == GrantFlowAuthorizationCode){
+    setLinked(false);
+    setToken("");
+    setTokenSecret("");
+    setExtraTokens(QVariantMap());
+    setRefreshToken(QString());
+    setExpires(0);
 
+    if (grantFlow_ == GrantFlowAuthorizationCode) {
         // Start listening to authentication replies
-        replyServer_->listen(QHostAddress::Any, localPort_);
+        if (!replyServer_->isListening())
+            replyServer_->listen(QHostAddress::Any, localPort_);
 
         // Save redirect URI, as we have to reuse it when requesting the access token
         redirectUri_ = localhostPolicy_.arg(replyServer_->serverPort());
 
         // Assemble intial authentication URL
         QList<QPair<QString, QString> > parameters;
-        parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode) ? QString(O2_OAUTH2_CODE) : QString(O2_OAUTH2_TOKEN)));
+        parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode)? QString(O2_OAUTH2_GRANT_TYPE_CODE): QString(O2_OAUTH2_GRANT_TYPE_TOKEN)));
         parameters.append(qMakePair(QString(O2_OAUTH2_CLIENT_ID), clientId_));
         parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
-        // parameters.append(qMakePair(QString(OAUTH2_REDIRECT_URI), QString(QUrl::toPercentEncoding(redirectUri_))));
         parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_));
         parameters.append(qMakePair(QString(O2_OAUTH2_API_KEY), apiKey_));
 
         // Show authentication URL with a web browser
         QUrl url(requestUrl_);
-    #if QT_VERSION < 0x050000
-        url.setQueryItems(parameters);
-    #else
-        QUrlQuery query(url);
-        query.setQueryItems(parameters);
-        url.setQuery(query);
-    #endif
-
-        trace() << "Emit openBrowser" << url.toString();
-        emit openBrowser(url);
-
-    }else if(grantFlow_ == GrantFlowResourceOwnerPasswordCredentials){
+        addQueryParametersToUrl(url, parameters);
+        qDebug() << "O2::link: Emit openBrowser" << url.toString();
+        Q_EMIT openBrowser(url);
+    } else if (grantFlow_ == GrantFlowResourceOwnerPasswordCredentials) {
+        QList<O0RequestParameter> parameters;
+        parameters.append(O0RequestParameter(O2_OAUTH2_CLIENT_ID, clientId_.toUtf8()));
+        parameters.append(O0RequestParameter(O2_OAUTH2_CLIENT_SECRET, clientSecret_.toUtf8()));
+        parameters.append(O0RequestParameter(O2_OAUTH2_USERNAME, username_.toUtf8()));
+        parameters.append(O0RequestParameter(O2_OAUTH2_PASSWORD, password_.toUtf8()));
+        parameters.append(O0RequestParameter(O2_OAUTH2_GRANT_TYPE, O2_OAUTH2_GRANT_TYPE_PASSWORD));
+        parameters.append(O0RequestParameter(O2_OAUTH2_SCOPE, scope_.toUtf8()));
+        parameters.append(O0RequestParameter(O2_OAUTH2_API_KEY, apiKey_.toUtf8()));
+        QByteArray payload = O0BaseAuth::createQueryParameters(parameters);
 
         QUrl url(tokenUrl_);
-
-        QUrlQuery params;
-        params.addQueryItem(O2_OAUTH2_CLIENT_ID,clientId_);
-        params.addQueryItem(O2_OAUTH2_CLIENT_SECRET,clientSecret_);
-        params.addQueryItem(O2_OAUTH2_USERNAME,username_);
-        params.addQueryItem(O2_OAUTH2_PASSWORD,password_);
-        params.addQueryItem(O2_OAUTH2_GRANT_TYPE,"password");
-
         QNetworkRequest tokenRequest(url);
         tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-        QNetworkReply *tokenReply = manager_->post(tokenRequest, params.toString(QUrl::FullyEncoded).toUtf8());
-
-        qDebug() << params.toString(QUrl::FullyEncoded).toUtf8();
+        QNetworkReply *tokenReply = manager_->post(tokenRequest, payload);
 
         connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
         connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
-
     }
 }
 
 void O2::unlink() {
-    if (!linked()) {
-        return;
-    }
+    qDebug() << "O2::unlink";
+    setLinked(false);
     setToken(QString());
     setRefreshToken(QString());
     setExpires(0);
-    emit linkedChanged();
-    emit linkingSucceeded();
-}
-
-bool O2::linked() {
-    return token().length();
+    setExtraTokens(QVariantMap());
+    Q_EMIT linkingSucceeded();
 }
 
 void O2::onVerificationReceived(const QMap<QString, QString> response) {
-    trace() << "O2::onVerificationReceived";
-    trace() << "" << response;
+    qDebug() << "O2::onVerificationReceived:" << response;
+    qDebug() << "O2::onVerificationReceived: Emitting closeBrowser()";
+    Q_EMIT closeBrowser();
 
-    emit closeBrowser();
     if (response.contains("error")) {
-        trace() << " Verification failed";
-        store_->setValue("error", response.value("error"));
-        store_->setValue("error_description", response.value("error_description"));
-        emit linkingFailed();
+        qWarning() << "O2::onVerificationReceived: Verification failed: " << response;
+        Q_EMIT linkingFailed();
         return;
     }
 
     if (grantFlow_ == GrantFlowAuthorizationCode) {
         // Save access code
-        setCode(response.value(QString(O2_OAUTH2_CODE)));
+        setCode(response.value(QString(O2_OAUTH2_GRANT_TYPE_CODE)));
 
         // Exchange access code for access/refresh tokens
-        QNetworkRequest tokenRequest(tokenUrl_.toString() +
-              (apiKey_.isEmpty() ? "" : ("?" + QString(O2_OAUTH2_API_KEY) + "=" + apiKey_)));
+        QString query;
+        if(!apiKey_.isEmpty())
+            query = QString("?" + QString(O2_OAUTH2_API_KEY) + "=" + apiKey_);
+        QNetworkRequest tokenRequest(QUrl(tokenUrl_.toString() + query));
         tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
         QMap<QString, QString> parameters;
-        parameters.insert(O2_OAUTH2_CODE, code());
+        parameters.insert(O2_OAUTH2_GRANT_TYPE_CODE, code());
         parameters.insert(O2_OAUTH2_CLIENT_ID, clientId_);
         parameters.insert(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
         parameters.insert(O2_OAUTH2_REDIRECT_URI, redirectUri_);
@@ -311,7 +256,7 @@ void O2::setCode(const QString &c) {
 }
 
 void O2::onTokenReplyFinished() {
-    trace() << "O2::onTokenReplyFinished";
+    qDebug() << "O2::onTokenReplyFinished";
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     if (tokenReply->error() == QNetworkReply::NoError) {
         QByteArray replyData = tokenReply->readAll();
@@ -323,25 +268,17 @@ void O2::onTokenReplyFinished() {
             bool ok = false;
             int expiresIn = tokens.take(O2_OAUTH2_EXPIRES_IN).toInt(&ok);
             if (ok) {
-                trace() << "Token expires in" << expiresIn << "seconds";
+                qDebug() << "O2::onTokenReplyFinished: Token expires in" << expiresIn << "seconds";
                 setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
             }
             setRefreshToken(tokens.take(O2_OAUTH2_REFRESH_TOKEN).toString());
-            // Set extra tokens if any
-            if (!tokens.isEmpty()) {
-                setExtraTokens(tokens);
-            }
+            setExtraTokens(tokens);
             timedReplies_.remove(tokenReply);
-            emit linkedChanged();
-            emit tokenChanged();
-            emit linkingSucceeded();
+            setLinked(true);
+            Q_EMIT linkingSucceeded();
         } else {
             qWarning() << "O2::onTokenReplyFinished: oauth_token missing from response" << replyData;
-            store_->setValue("error", "oauth_token missing from response");
-            store_->setValue("error_description", "oauth_token missing from response");
-            emit linkedChanged();
-            emit tokenChanged();
-            emit linkingFailed();
+            Q_EMIT linkingFailed();
         }
     }
     tokenReply->deleteLater();
@@ -349,16 +286,12 @@ void O2::onTokenReplyFinished() {
 
 void O2::onTokenReplyError(QNetworkReply::NetworkError error) {
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
-    trace() << "O2::onTokenReplyError" << error << tokenReply->errorString();
-    trace() << "" << tokenReply->readAll();
+    qWarning() << "O2::onTokenReplyError: " << error << ": " << tokenReply->errorString();
+    qDebug() << "O2::onTokenReplyError: " << tokenReply->readAll();
     setToken(QString());
     setRefreshToken(QString());
     timedReplies_.remove(tokenReply);
-    store_->setValue("error", QString::number(error));
-    store_->setValue("error_description", tokenReply->errorString());
-    emit linkedChanged();
-    emit tokenChanged();
-    emit linkingFailed();
+    Q_EMIT linkingFailed();
 }
 
 QByteArray O2::buildRequestBody(const QMap<QString, QString> &parameters) {
@@ -374,16 +307,6 @@ QByteArray O2::buildRequestBody(const QMap<QString, QString> &parameters) {
         body.append(QUrl::toPercentEncoding(key) + QString("=").toUtf8() + QUrl::toPercentEncoding(value));
     }
     return body;
-}
-
-QString O2::token() {
-    QString key = QString(O2_KEY_TOKEN).arg(clientId_);
-    return store_->value(key);
-}
-
-void O2::setToken(const QString &v) {
-    QString key = QString(O2_KEY_TOKEN).arg(clientId_);
-    store_->setValue(key, v);
 }
 
 int O2::expires() {
@@ -402,13 +325,13 @@ QString O2::refreshToken() {
 }
 
 void O2::setRefreshToken(const QString &v) {
-    trace() << "O2::setRefreshToken" << v.left(4) << "...";
+    qDebug() << "O2::setRefreshToken" << v.left(4) << "...";
     QString key = QString(O2_KEY_REFRESH_TOKEN).arg(clientId_);
     store_->setValue(key, v);
 }
 
 void O2::refresh() {
-    trace() << "O2::refresh: Token: ..." << refreshToken().right(7);
+    qDebug() << "O2::refresh: Token: ..." << refreshToken().right(7);
 
     if (refreshToken().isEmpty()) {
         qWarning() << "O2::refresh: No refresh token";
@@ -438,7 +361,7 @@ void O2::refresh() {
 
 void O2::onRefreshFinished() {
     QNetworkReply *refreshReply = qobject_cast<QNetworkReply *>(sender());
-    trace() << "O2::onRefreshFinished: Error" << (int)refreshReply->error() << refreshReply->errorString();
+    qDebug() << "O2::onRefreshFinished: Error" << (int)refreshReply->error() << refreshReply->errorString();
     if (refreshReply->error() == QNetworkReply::NoError) {
         QByteArray reply = refreshReply->readAll();
         QVariantMap tokens = parseTokenResponse(reply);
@@ -446,65 +369,50 @@ void O2::onRefreshFinished() {
         setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + tokens.value(O2_OAUTH2_EXPIRES_IN).toInt());
         setRefreshToken(tokens.value(O2_OAUTH2_REFRESH_TOKEN).toString());
         timedReplies_.remove(refreshReply);
-        emit linkingSucceeded();
-        emit tokenChanged();
-        emit linkedChanged();
-        emit refreshFinished(QNetworkReply::NoError);
-        trace() << " New token expires in" << expires() << "seconds";
+        setLinked(true);
+        Q_EMIT linkingSucceeded();
+        Q_EMIT refreshFinished(QNetworkReply::NoError);
+        qDebug() << " New token expires in" << expires() << "seconds";
     }
     refreshReply->deleteLater();
 }
 
 void O2::onRefreshError(QNetworkReply::NetworkError error) {
     QNetworkReply *refreshReply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "O2::onRefreshFailed: Error" << error << ", resetting tokens";
-    setToken(QString());
-    setRefreshToken(QString());
+    qWarning() << "O2::onRefreshError: " << error;
+    unlink();
     timedReplies_.remove(refreshReply);
-    store_->setValue("error", QString::number(error));
-    store_->setValue("error_description", QString("Error %1, resetting tokens").arg(error));
-    emit tokenChanged();
-    emit linkingFailed();
-    emit linkedChanged();
-    emit refreshFinished(error);
+    Q_EMIT refreshFinished(error);
 }
 
-QString O2::localhostPolicy() const
-{
+QString O2::localhostPolicy() const {
     return localhostPolicy_;
 }
 
-void O2::setLocalhostPolicy(const QString& value)
-{
+void O2::setLocalhostPolicy(const QString &value) {
     localhostPolicy_ = value;
 }
 
-QString O2::apiKey()
-{
+QString O2::apiKey() {
     return apiKey_;
 }
 
-void O2::setApiKey(const QString& value)
-{
+void O2::setApiKey(const QString &value) {
     apiKey_ = value;
 }
 
-QByteArray O2::replyContent()
-{
+QByteArray O2::replyContent() {
     return replyServer_->replyContent();
 }
 
-void O2::setReplyContent(const QByteArray& value)
-{
+void O2::setReplyContent(const QByteArray &value) {
     replyServer_->setReplyContent(value);
 }
 
-bool O2::ignoreSslErrors()
-{
+bool O2::ignoreSslErrors() {
     return timedReplies_.ignoreSslErrors();
 }
 
-void O2::setIgnoreSslErrors(bool ignoreSslErrors)
-{
+void O2::setIgnoreSslErrors(bool ignoreSslErrors) {
     timedReplies_.setIgnoreSslErrors(ignoreSslErrors);
 }

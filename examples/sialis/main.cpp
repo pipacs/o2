@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QtQml>
+#include <QtWebView/QtWebView>
 
 #include "o1.h"
 #include "o1twitter.h"
@@ -9,6 +10,7 @@
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
+    QtWebView::initialize();
     qmlRegisterType<O1Twitter>("com.pipacs.o2", 1, 0, "O1Twitter");
     qmlRegisterType<TwitterApi>("com.pipacs.o2", 1, 0, "TwitterApi");
     QQmlApplicationEngine engine;

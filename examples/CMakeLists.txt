@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 2.8.11)
 
-if(WITH_FACEBOOK)
+if(o2_WITH_FACEBOOK)
     add_subdirectory(facebookdemo)
-endif(WITH_FACEBOOK)
+endif(o2_WITH_FACEBOOK)
 
-if(WITH_TWITTER)
+if(o2_WITH_TWITTER)
     add_subdirectory(twitterdemo)
-    add_subdirectory(sialis)
-endif(WITH_TWITTER)
+endif(o2_WITH_TWITTER)
+
+if(o2_WITH_SPOTIFY)
+    add_subdirectory(spotifydemo)
+endif(o2_WITH_SPOTIFY)

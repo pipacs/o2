@@ -17,99 +17,16 @@
 
 #include "o1.h"
 #include "o2replyserver.h"
-#include "o2globals.h"
-#include "o2settingsstore.h"
+#include "o0globals.h"
+#include "o0settingsstore.h"
 
-#define trace() if (1) qDebug()
-// #define trace() if (0) qDebug()
-
-O1::O1(QObject *parent) :
-    QObject(parent) {
+O1::O1(QObject *parent): O0BaseAuth(parent) {
     setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
     manager_ = new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
-    localPort_ = 0;
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
-    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)),
-            this, SLOT(onVerificationReceived(QMap<QString,QString>)));
-    store_ = new O2SettingsStore(O2_ENCRYPTION_KEY, this);
-}
-
-O1::~O1() {
-}
-
-void O1::setStore(O2AbstractStore *store) {
-    if (!store) {
-        qWarning() << "Store object is null! Using default O2SettingsStore";
-        return;
-    }
-    // Delete the previously stored object
-    store_->deleteLater();
-    store_ = store;
-
-    // Re-parent it to this class as we take ownership of it now
-    store_->setParent(this);
-}
-
-bool O1::linked() {
-    QString key = QString(O2_KEY_LINKED).arg(clientId_);
-    return !store_->value(key).isEmpty();
-}
-
-void O1::setLinked(bool v) {
-    bool oldValue = linked();
-    QString key = QString(O2_KEY_LINKED).arg(clientId_);
-    store_->setValue(key, v? "1": "");
-    if (oldValue != v) {
-        emit linkedChanged();
-    }
-}
-
-QString O1::tokenSecret() {
-    QString key = QString(O2_KEY_TOKEN_SECRET).arg(clientId_);
-    return store_->value(key);
-}
-
-void O1::setTokenSecret(const QString &v) {
-    QString key = QString(O2_KEY_TOKEN_SECRET).arg(clientId_);
-    store_->setValue(key, v);
-}
-
-QString O1::token() {
-    QString key = QString(O2_KEY_TOKEN).arg(clientId_);
-    return store_->value(key);
-}
-
-void O1::setToken(const QString &v) {
-    QString key = QString(O2_KEY_TOKEN).arg(clientId_);
-    store_->setValue(key, v);
-}
-
-QString O1::clientId() {
-    return clientId_;
-}
-
-void O1::setClientId(const QString &value) {
-    clientId_ = value;
-    emit clientIdChanged();
-}
-
-QString O1::clientSecret() {
-    return clientSecret_;
-}
-
-void O1::setClientSecret(const QString &value) {
-    clientSecret_ = value;
-    emit clientSecretChanged();
-}
-
-int O1::localPort() {
-    return localPort_;
-}
-
-void O1::setLocalPort(int value) {
-    localPort_ = value;
-    emit localPortChanged();
+    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+    setCallbackUrl(O2_CALLBACK_URL);
 }
 
 QUrl O1::requestTokenUrl() {
@@ -118,7 +35,23 @@ QUrl O1::requestTokenUrl() {
 
 void O1::setRequestTokenUrl(const QUrl &v) {
     requestTokenUrl_ = v;
-    emit requestTokenUrlChanged();
+    Q_EMIT requestTokenUrlChanged();
+}
+
+QList<O0RequestParameter> O1::requestParameters() {
+    return requestParameters_;
+}
+
+void O1::setRequestParameters(const QList<O0RequestParameter> &v) {
+    requestParameters_ = v;
+}
+
+QString O1::callbackUrl() {
+    return callbackUrl_;
+}
+
+void O1::setCallbackUrl(const QString &v) {
+    callbackUrl_ = v;
 }
 
 QUrl O1::authorizeUrl() {
@@ -127,7 +60,7 @@ QUrl O1::authorizeUrl() {
 
 void O1::setAuthorizeUrl(const QUrl &value) {
     authorizeUrl_ = value;
-    emit authorizeUrlChanged();
+    Q_EMIT authorizeUrlChanged();
 }
 
 QUrl O1::accessTokenUrl() {
@@ -136,7 +69,7 @@ QUrl O1::accessTokenUrl() {
 
 void O1::setAccessTokenUrl(const QUrl &value) {
     accessTokenUrl_ = value;
-    emit accessTokenUrlChanged();
+    Q_EMIT accessTokenUrlChanged();
 }
 
 QString O1::signatureMethod() {
@@ -144,35 +77,17 @@ QString O1::signatureMethod() {
 }
 
 void O1::setSignatureMethod(const QString &value) {
+    qDebug() << "O1::setSignatureMethod: " << value;
     signatureMethod_ = value;
 }
 
-QVariantMap O1::extraTokens() {
-    QString key = QString(O2_KEY_EXTRA_TOKENS).arg(clientId_);
-    QString value = store_->value(key);
-    QByteArray bytes = QByteArray::fromBase64(value.toLatin1());
-    QDataStream stream(&bytes, QIODevice::ReadOnly);
-    stream >> extraTokens_;
-    return extraTokens_;
-}
-
-void O1::setExtraTokens(QVariantMap extraTokens) {
-    extraTokens_ = extraTokens;
-    QByteArray bytes;
-    QDataStream stream(&bytes, QIODevice::WriteOnly);
-    stream << extraTokens;
-    QString key = QString(O2_KEY_EXTRA_TOKENS).arg(clientId_);
-    store_->setValue(key, bytes.toBase64());
-    emit extraTokensChanged();
-}
-
 void O1::unlink() {
-    trace() << "O1::unlink";
+    qDebug() << "O1::unlink";
     setLinked(false);
     setToken("");
     setTokenSecret("");
     setExtraTokens(QVariantMap());
-    emit linkingSucceeded();
+    Q_EMIT linkingSucceeded();
 }
 
 #if QT_VERSION < 0x050100
@@ -211,27 +126,12 @@ static QString getOperationName(QNetworkAccessManager::Operation op) {
 }
 
 /// Build a concatenated/percent-encoded string from a list of headers.
-QByteArray O1::encodeHeaders(const QList<O1RequestParameter> &headers) {
-    return QUrl::toPercentEncoding(createQueryParams(headers));
-}
-
-/// Construct query string from list of headers
-QByteArray O1::createQueryParams(const QList<O1RequestParameter> &params) {
-    QByteArray ret;
-    bool first = true;
-    foreach (O1RequestParameter h, params) {
-        if (first) {
-            first = false;
-        } else {
-            ret.append("&");
-        }
-        ret.append(QUrl::toPercentEncoding(h.name) + "=" + QUrl::toPercentEncoding(h.value));
-    }
-    return ret;
+QByteArray O1::encodeHeaders(const QList<O0RequestParameter> &headers) {
+    return QUrl::toPercentEncoding(createQueryParameters(headers));
 }
 
 /// Build a base string for signing.
-QByteArray O1::getRequestBase(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op) {
+QByteArray O1::getRequestBase(const QList<O0RequestParameter> &oauthParams, const QList<O0RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op) {
     QByteArray base;
 
     // Initialize base string with the operation name (e.g. "GET") and the base URL
@@ -239,7 +139,7 @@ QByteArray O1::getRequestBase(const QList<O1RequestParameter> &oauthParams, cons
     base.append(QUrl::toPercentEncoding(url.toString(QUrl::RemoveQuery)) + "&");
 
     // Append a sorted+encoded list of all request parameters to the base string
-    QList<O1RequestParameter> headers(oauthParams);
+    QList<O0RequestParameter> headers(oauthParams);
     headers.append(otherParams);
     qSort(headers);
     base.append(encodeHeaders(headers));
@@ -247,7 +147,7 @@ QByteArray O1::getRequestBase(const QList<O1RequestParameter> &oauthParams, cons
     return base;
 }
 
-QByteArray O1::sign(const QList<O1RequestParameter> &oauthParams, const QList<O1RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret) {
+QByteArray O1::sign(const QList<O0RequestParameter> &oauthParams, const QList<O0RequestParameter> &otherParams, const QUrl &url, QNetworkAccessManager::Operation op, const QString &consumerSecret, const QString &tokenSecret) {
     QByteArray baseString = getRequestBase(oauthParams, otherParams, url, op);
     QByteArray secret = QUrl::toPercentEncoding(consumerSecret) + "&" + QUrl::toPercentEncoding(tokenSecret);
 #if QT_VERSION >= 0x050100
@@ -257,12 +157,12 @@ QByteArray O1::sign(const QList<O1RequestParameter> &oauthParams, const QList<O1
 #endif
 }
 
-QByteArray O1::buildAuthorizationHeader(const QList<O1RequestParameter> &oauthParams) {
+QByteArray O1::buildAuthorizationHeader(const QList<O0RequestParameter> &oauthParams) {
     bool first = true;
     QByteArray ret("OAuth ");
-    QList<O1RequestParameter> headers(oauthParams);
+    QList<O0RequestParameter> headers(oauthParams);
     qSort(headers);
-    foreach (O1RequestParameter h, headers) {
+    foreach (O0RequestParameter h, headers) {
         if (first) {
             first = false;
         } else {
@@ -276,9 +176,8 @@ QByteArray O1::buildAuthorizationHeader(const QList<O1RequestParameter> &oauthPa
     return ret;
 }
 
-QByteArray O1::generateSignature(const QList<O1RequestParameter> headers, const QNetworkRequest &req, const QList<O1RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
+QByteArray O1::generateSignature(const QList<O0RequestParameter> headers, const QNetworkRequest &req, const QList<O0RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
     QByteArray signature;
-
     if (signatureMethod() == O2_SIGNATURE_TYPE_HMAC_SHA1) {
         signature = sign(headers, signingParameters, req.url(), operation, clientSecret(), tokenSecret());
     } else if (signatureMethod() == O2_SIGNATURE_TYPE_PLAINTEXT) {
@@ -288,32 +187,44 @@ QByteArray O1::generateSignature(const QList<O1RequestParameter> headers, const 
 }
 
 void O1::link() {
-    trace() << "O1::link";
+    qDebug() << "O1::link";
     if (linked()) {
-        trace() << "O1::link: Linked already";
-        emit linkingSucceeded();
+        qDebug() << "O1::link: Linked already";
+        Q_EMIT linkingSucceeded();
         return;
     }
 
     setLinked(false);
     setToken("");
     setTokenSecret("");
+    setExtraTokens(QVariantMap());
 
     // Start reply server
-    replyServer_->listen(QHostAddress::Any, localPort());
+    if (!replyServer_->isListening())
+        replyServer_->listen(QHostAddress::Any, localPort());
+
+    // Get any query parameters for the request
+    QUrlQuery requestData;
+    O0RequestParameter param("", "");
+    foreach(param, requestParameters())
+      requestData.addQueryItem(QString(param.name), QUrl::toPercentEncoding(QString(param.value)));
+
+    // Get the request url and add parameters
+    QUrl requestUrl = requestTokenUrl();
+    requestUrl.setQuery(requestData);
 
     // Create request
-    QNetworkRequest request(requestTokenUrl());
+    QNetworkRequest request(requestUrl);
 
     // Create initial token request
-    QList<O1RequestParameter> headers;
-    headers.append(O1RequestParameter(O2_OAUTH_CALLBACK, QString(O2_CALLBACK_URL).arg(replyServer_->serverPort()).toLatin1()));
-    headers.append(O1RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
-    headers.append(O1RequestParameter(O2_OAUTH_NONCE, nonce()));
-    headers.append(O1RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
-    headers.append(O1RequestParameter(O2_OAUTH_VERSION, "1.0"));
-    headers.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
-    headers.append(O1RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(headers, request, QList<O1RequestParameter>(), QNetworkAccessManager::PostOperation)));
+    QList<O0RequestParameter> headers;
+    headers.append(O0RequestParameter(O2_OAUTH_CALLBACK, callbackUrl().arg(replyServer_->serverPort()).toLatin1()));
+    headers.append(O0RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
+    headers.append(O0RequestParameter(O2_OAUTH_NONCE, nonce()));
+    headers.append(O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
+    headers.append(O0RequestParameter(O2_OAUTH_VERSION, "1.0"));
+    headers.append(O0RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
+    headers.append(O0RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(headers, request, requestParameters(), QNetworkAccessManager::PostOperation)));
 
     // Clear request token
     requestToken_.clear();
@@ -330,11 +241,11 @@ void O1::link() {
 void O1::onTokenRequestError(QNetworkReply::NetworkError error) {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     qWarning() << "O1::onTokenRequestError:" << (int)error << reply->errorString() << reply->readAll();
-    emit linkingFailed();
+    Q_EMIT linkingFailed();
 }
 
 void O1::onTokenRequestFinished() {
-    trace() << "O1::onTokenRequestFinished";
+    qDebug() << "O1::onTokenRequestFinished";
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     reply->deleteLater();
     if (reply->error() != QNetworkReply::NoError) {
@@ -354,7 +265,7 @@ void O1::onTokenRequestFinished() {
     QString oAuthCbConfirmed = response.value(O2_OAUTH_CALLBACK_CONFIRMED, "false");
     if (requestToken_.isEmpty() || requestTokenSecret_.isEmpty() || (oAuthCbConfirmed == "false")) {
         qWarning() << "O1::onTokenRequestFinished: No oauth_token, oauth_token_secret or oauth_callback_confirmed in response :" << data;
-        emit linkingFailed();
+        Q_EMIT linkingFailed();
         return;
     }
 
@@ -362,43 +273,43 @@ void O1::onTokenRequestFinished() {
     QUrl url(authorizeUrl());
 #if QT_VERSION < 0x050000
     url.addQueryItem(O2_OAUTH_TOKEN, requestToken_);
-    url.addQueryItem(O2_OAUTH_CALLBACK, QString(O2_CALLBACK_URL).arg(replyServer_->serverPort()).toLatin1());
+    url.addQueryItem(O2_OAUTH_CALLBACK, callbackUrl().arg(replyServer_->serverPort()).toLatin1());
 #else
     QUrlQuery query(url);
     query.addQueryItem(O2_OAUTH_TOKEN, requestToken_);
-    query.addQueryItem(O2_OAUTH_CALLBACK, QString(O2_CALLBACK_URL).arg(replyServer_->serverPort()).toLatin1());
+    query.addQueryItem(O2_OAUTH_CALLBACK, callbackUrl().arg(replyServer_->serverPort()).toLatin1());
     url.setQuery(query);
 #endif
-    emit openBrowser(url);
+    Q_EMIT openBrowser(url);
 }
 
 void O1::onVerificationReceived(QMap<QString, QString> params) {
-    trace() << "O1::onVerificationReceived";
-    emit closeBrowser();
+    qDebug() << "O1::onVerificationReceived";
+    Q_EMIT closeBrowser();
     verifier_ = params.value(O2_OAUTH_VERFIER, "");
     if (params.value(O2_OAUTH_TOKEN) == requestToken_) {
         // Exchange request token for access token
         exchangeToken();
     } else {
         qWarning() << "O1::onVerificationReceived: oauth_token missing or doesn't match";
-        emit linkingFailed();
+        Q_EMIT linkingFailed();
     }
 }
 
 void O1::exchangeToken() {
+    qDebug() << "O1::exchangeToken";
+
     // Create token exchange request
-
     QNetworkRequest request(accessTokenUrl());
-
-    QList<O1RequestParameter> oauthParams;
-    oauthParams.append(O1RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_VERSION, "1.0"));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_NONCE, nonce()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_TOKEN, requestToken_.toLatin1()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_VERFIER, verifier_.toLatin1()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
-    oauthParams.append(O1RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(oauthParams, request, QList<O1RequestParameter>(), QNetworkAccessManager::PostOperation)));
+    QList<O0RequestParameter> oauthParams;
+    oauthParams.append(O0RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_VERSION, "1.0"));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_NONCE, nonce()));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_TOKEN, requestToken_.toLatin1()));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_VERFIER, verifier_.toLatin1()));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
+    oauthParams.append(O0RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(oauthParams, request, QList<O0RequestParameter>(), QNetworkAccessManager::PostOperation)));
 
     // Post request
     request.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER, buildAuthorizationHeader(oauthParams));
@@ -411,10 +322,12 @@ void O1::exchangeToken() {
 void O1::onTokenExchangeError(QNetworkReply::NetworkError error) {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     qWarning() << "O1::onTokenExchangeError:" << (int)error << reply->errorString() << reply->readAll();
-    emit linkingFailed();
+    Q_EMIT linkingFailed();
 }
 
 void O1::onTokenExchangeFinished() {
+    qDebug() << "O1::onTokenExchangeFinished";
+
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     reply->deleteLater();
     if (reply->error() != QNetworkReply::NoError) {
@@ -437,10 +350,10 @@ void O1::onTokenExchangeFinished() {
             setExtraTokens(extraTokens);
         }
         setLinked(true);
-        emit linkingSucceeded();
+        Q_EMIT linkingSucceeded();
     } else {
         qWarning() << "O1::onTokenExchangeFinished: oauth_token or oauth_token_secret missing from response" << data;
-        emit linkingFailed();
+        Q_EMIT linkingFailed();
     }
 }
 

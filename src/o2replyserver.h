@@ -6,23 +6,24 @@
 #include <QByteArray>
 #include <QString>
 
+#include "o0export.h"
+
 /// HTTP server to process authentication response.
-class O2ReplyServer: public QTcpServer {
+class O0_EXPORT O2ReplyServer: public QTcpServer {
     Q_OBJECT
 
 public:
     explicit O2ReplyServer(QObject *parent = 0);
-    ~O2ReplyServer();
 
     /// Page content on local host after successful oauth - in case you do not want to close the browser, but display something
-        Q_PROPERTY(QByteArray replyContent READ replyContent WRITE setReplyContent)
+    Q_PROPERTY(QByteArray replyContent READ replyContent WRITE setReplyContent)
     QByteArray replyContent();
     void setReplyContent(const QByteArray &value);
 
-signals:
+Q_SIGNALS:
     void verificationReceived(QMap<QString, QString>);
 
-public slots:
+public Q_SLOTS:
     void onIncomingConnection();
     void onBytesReady();
     QMap<QString, QString> parseQueryParams(QByteArray *data);

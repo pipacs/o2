@@ -6,16 +6,14 @@
 
 #include "o2requestor.h"
 #include "o2.h"
-#include "o2globals.h"
-
-#define trace() if (1) qDebug()
-// define trace() if (0) qDebug()
+#include "o0globals.h"
 
 O2Requestor::O2Requestor(QNetworkAccessManager *manager, O2 *authenticator, QObject *parent): QObject(parent), reply_(NULL), status_(Idle) {
     manager_ = manager;
     authenticator_ = authenticator;
-    if (authenticator)
-            timedReplies_.setIgnoreSslErrors(authenticator->ignoreSslErrors());
+    if (authenticator) {
+        timedReplies_.setIgnoreSslErrors(authenticator->ignoreSslErrors());
+    }
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(authenticator, SIGNAL(refreshFinished(QNetworkReply::NetworkError)), this, SLOT(onRefreshFinished(QNetworkReply::NetworkError)), Qt::QueuedConnection);
 }
@@ -97,7 +95,7 @@ void O2Requestor::onRequestError(QNetworkReply::NetworkError error) {
     }
     int httpStatus = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     qWarning() << "O2Requestor::onRequestError: HTTP status" << httpStatus << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
-    trace() << reply_->readAll();
+    qDebug() << reply_->readAll();
     if ((status_ == Requesting) && (httpStatus == 401)) {
         // Call O2::refresh. Note the O2 instance might live in a different thread
         if (QMetaObject::invokeMethod(authenticator_, "refresh")) {
@@ -117,7 +115,7 @@ void O2Requestor::onUploadProgress(qint64 uploaded, qint64 total) {
     if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
         return;
     }
-    emit uploadProgress(id_, uploaded, total);
+    Q_EMIT uploadProgress(id_, uploaded, total);
 }
 
 int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operation operation) {
@@ -157,7 +155,7 @@ void O2Requestor::finish() {
     timedReplies_.remove(reply_);
     reply_->disconnect(this);
     reply_->deleteLater();
-    emit finished(id_, error_, data);
+    Q_EMIT finished(id_, error_, data);
 }
 
 void O2Requestor::retry() {

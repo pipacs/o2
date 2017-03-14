@@ -11,7 +11,7 @@ O2Reply::O2Reply(QNetworkReply *r, int timeOut, QObject *parent): QTimer(parent)
 }
 
 void O2Reply::onTimeOut() {
-    emit error(QNetworkReply::TimeoutError);
+    Q_EMIT error(QNetworkReply::TimeoutError);
 }
 
 O2ReplyList::~O2ReplyList() {

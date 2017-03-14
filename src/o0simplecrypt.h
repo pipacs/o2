@@ -31,6 +31,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QVector>
 #include <QFlags>
 
+#include "o0baseauth.h"
+
 /**
   @short Simple encryption and decryption of strings and byte arrays
 
@@ -54,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   SimpleCrypt is prepared for the case that the encryption and decryption
   algorithm is changed in a later version, by prepending a version identifier to the cypertext.
   */
-class SimpleCrypt
+class O0_EXPORT O0SimpleCrypt
 {
 public:
     /**
@@ -94,13 +96,13 @@ public:
 
       Constructs a SimpleCrypt instance without a valid key set on it.
      */
-    SimpleCrypt();
+    O0SimpleCrypt();
     /**
       Constructor.
 
       Constructs a SimpleCrypt instance and initializes it with the given @arg key.
      */
-    explicit SimpleCrypt(quint64 key);
+    explicit O0SimpleCrypt(quint64 key);
 
     /**
       (Re-) initializes the key with the given @arg key.
@@ -209,7 +211,7 @@ public:
                     CryptoFlagChecksum = 0x02,
                     CryptoFlagHash = 0x04
                    };
-    Q_DECLARE_FLAGS(CryptoFlags, CryptoFlag);
+    Q_DECLARE_FLAGS(CryptoFlags, CryptoFlag)
 private:
 
     void splitKey();
@@ -220,6 +222,6 @@ private:
     IntegrityProtectionMode m_protectionMode;
     Error m_lastError;
 };
-Q_DECLARE_OPERATORS_FOR_FLAGS(SimpleCrypt::CryptoFlags)
+Q_DECLARE_OPERATORS_FOR_FLAGS(O0SimpleCrypt::CryptoFlags)
 
 #endif // SimpleCrypt_H

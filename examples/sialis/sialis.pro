@@ -1,6 +1,6 @@
 TARGET = Sialis
 TEMPLATE = app
-QT += qml quick
+QT += qml quick webview
 CONFIG += c++11
 SOURCES += main.cpp \
     twitterapi.cpp \

@@ -8,10 +8,7 @@
 #endif
 
 #include "o2skydrive.h"
-#include "o2globals.h"
-
-#define trace() if (1) qDebug()
-// define trace() if (0) qDebug()
+#include "o0globals.h"
 
 O2Skydrive::O2Skydrive(QObject *parent): O2(parent) {
     setRequestUrl("https://login.live.com/oauth20_authorize.srf");
@@ -20,17 +17,24 @@ O2Skydrive::O2Skydrive(QObject *parent): O2(parent) {
 }
 
 void O2Skydrive::link() {
-    trace() << "O2::link";
+    qDebug() << "O2Skydrive::link";
     if (linked()) {
-        trace() << "Linked already";
+        qDebug() << "O2kydrive::link: Linked already";
         return;
     }
+
+    setLinked(false);
+    setToken("");
+    setTokenSecret("");
+    setExtraTokens(QVariantMap());
+    setRefreshToken(QString());
+    setExpires(0);
 
     redirectUri_ = QString("https://login.live.com/oauth20_desktop.srf");
 
     // Assemble intial authentication URL
     QList<QPair<QString, QString> > parameters;
-    parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode) ? QString(O2_OAUTH2_CODE) : QString(O2_OAUTH2_TOKEN)));
+    parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode) ? QString(O2_OAUTH2_GRANT_TYPE_CODE) : QString(O2_OAUTH2_GRANT_TYPE_TOKEN)));
     parameters.append(qMakePair(QString(O2_OAUTH2_CLIENT_ID), clientId_));
     parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
     parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_));
@@ -44,26 +48,26 @@ void O2Skydrive::link() {
     query.setQueryItems(parameters);
     url.setQuery(query);
 #endif
-    emit openBrowser(url);
+    Q_EMIT openBrowser(url);
 }
 
 void O2Skydrive::redirected(const QUrl &url) {
-    trace() << "O2::redirected" << url;
+    qDebug() << "O2Skydrive::redirected" << url;
 
-    emit closeBrowser();
+    Q_EMIT closeBrowser();
 
     if (grantFlow_ == GrantFlowAuthorizationCode) {
         // Get access code
         QString urlCode;
 #if QT_VERSION < 0x050000
-        urlCode = url.queryItemValue(O2_OAUTH2_CODE);
+        urlCode = url.queryItemValue(O2_OAUTH2_GRANT_TYPE_CODE);
 #else
         QUrlQuery query(url);
-        urlCode = query.queryItemValue(O2_OAUTH2_CODE);
+        urlCode = query.queryItemValue(O2_OAUTH2_GRANT_TYPE_CODE);
 #endif
         if (urlCode.isEmpty()) {
-            trace() << " Code not received";
-            emit linkingFailed();
+            qDebug() << "O2Skydrive::redirected: Code not received";
+            Q_EMIT linkingFailed();
             return;
         }
         setCode(urlCode);
@@ -72,7 +76,7 @@ void O2Skydrive::redirected(const QUrl &url) {
         QNetworkRequest tokenRequest(tokenUrl_);
         tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
         QMap<QString, QString> parameters;
-        parameters.insert(O2_OAUTH2_CODE, code());
+        parameters.insert(O2_OAUTH2_GRANT_TYPE_CODE, code());
         parameters.insert(O2_OAUTH2_CLIENT_ID, clientId_);
         parameters.insert(O2_OAUTH2_CLIENT_SECRET, clientSecret_);
         parameters.insert(O2_OAUTH2_REDIRECT_URI, redirectUri_);
@@ -97,7 +101,7 @@ void O2Skydrive::redirected(const QUrl &url) {
                 }
                 QString key = item.left(index);
                 QString value = item.mid(index + 1);
-                trace() << "" << key;
+                qDebug() << "O2Skydrive::redirected: Got" << key;
                 if (key == O2_OAUTH2_ACCESS_TOKEN) {
                     urlToken = value;
                 } else if (key == O2_OAUTH2_EXPIRES_IN) {
@@ -112,10 +116,10 @@ void O2Skydrive::redirected(const QUrl &url) {
         setRefreshToken(urlRefreshToken);
         setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + urlExpiresIn);
         if (urlToken.isEmpty()) {
-            emit linkingFailed();
+            Q_EMIT linkingFailed();
         } else {
-            emit linkedChanged();
-            emit linkingSucceeded();
+            setLinked(true);
+            Q_EMIT linkingSucceeded();
         }
     }
 }
