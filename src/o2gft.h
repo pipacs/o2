@@ -2,10 +2,10 @@
 #define O2GFT_H
 
 #include "o0export.h"
-#include "o2.h"
+#include "o2google.h"
 
 /// Google Fusion Tables' dialect of OAuth 2.0
-class O0_EXPORT O2Gft: public O2 {
+class O0_EXPORT O2Gft: public O2Google{
     Q_OBJECT
 
 public:
