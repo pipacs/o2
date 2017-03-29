@@ -262,6 +262,11 @@ void O2::setCode(const QString &c) {
 void O2::onTokenReplyFinished() {
     qDebug() << "O2::onTokenReplyFinished";
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
+    if (!tokenReply)
+    {
+      qDebug() << "O2::onTokenReplyFinished: reply is null";
+      return;
+    }
     if (tokenReply->error() == QNetworkReply::NoError) {
         QByteArray replyData = tokenReply->readAll();
         QVariantMap tokens = parseTokenResponse(replyData);
