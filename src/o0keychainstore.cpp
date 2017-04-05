@@ -17,6 +17,7 @@ o0keyChainStore::o0keyChainStore(const QString& app,const QString& name,QObject 
 }
 
 QString o0keyChainStore::value(const QString &key, const QString &defaultValue) {
+    Q_UNUSED(defaultValue)
     return  pairs_.value(key);
 }
 
@@ -52,7 +53,9 @@ void o0keyChainStore::fetchFromKeychain() {
     loop.exec();
 
     QByteArray data;
-    data.append(job.textData());
+    // QKeychain::ReadPasswordJob::textData() returns QString::fromUtf8( <password data> )
+    // switch back to UTF-8 to avoid issues when QT_NO_CAST_TO_ASCII is defined
+    data.append(job.textData().toUtf8());
     QDataStream ds(&data,QIODevice::ReadOnly);
     ds >> pairs_;
 
