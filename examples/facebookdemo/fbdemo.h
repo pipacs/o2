@@ -12,16 +12,16 @@ class FBDemo : public QObject
 public:
     explicit FBDemo(QObject *parent = 0);
 
-signals:
+Q_SIGNALS:
     void extraTokensReady(const QVariantMap &extraTokens);
     void linkingFailed();
     void linkingSucceeded();
 
-public slots:
+public Q_SLOTS:
     void doOAuth(O2::GrantFlow grantFlowType);
     void validateToken();
 
-private slots:
+private Q_SLOTS:
     void onLinkedChanged();
     void onLinkingSucceeded();
     void onOpenBrowser(const QUrl &url);

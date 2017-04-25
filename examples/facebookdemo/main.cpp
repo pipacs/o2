@@ -22,7 +22,7 @@ class Helper : public QObject {
 public:
     Helper() : QObject(), fbdemo_(this), waitForMsg_(false), msg_(QString()) {}
 
-public slots:
+public Q_SLOTS:
     void processArgs() {
         QStringList argList = qApp->arguments();
         QByteArray help = QString(USAGE).arg(OPT_OAUTH_CODE,
