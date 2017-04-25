@@ -1,7 +1,7 @@
 #ifndef O0REQUESTPARAMETER_H
 #define O0REQUESTPARAMETER_H
 
-#include "o0baseauth.h"
+#include "o0export.h"
 
 /// Request parameter (name-value pair) participating in authentication.
 struct O0_EXPORT O0RequestParameter {

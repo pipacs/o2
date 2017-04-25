@@ -8,7 +8,7 @@
 #include "o0abstractstore.h"
 #include <QString>
 
-class o0keyChainStore  : public  O0AbstractStore{
+class O0_EXPORT o0keyChainStore  : public  O0AbstractStore{
     Q_OBJECT
 public:
     explicit o0keyChainStore(const QString& app,const QString& name,QObject *parent = 0);

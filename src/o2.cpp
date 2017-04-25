@@ -168,8 +168,9 @@ void O2::link() {
         parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE), (grantFlow_ == GrantFlowAuthorizationCode)? QString(O2_OAUTH2_GRANT_TYPE_CODE): QString(O2_OAUTH2_GRANT_TYPE_TOKEN)));
         parameters.append(qMakePair(QString(O2_OAUTH2_CLIENT_ID), clientId_));
         parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
-        parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_));
-        parameters.append(qMakePair(QString(O2_OAUTH2_API_KEY), apiKey_));
+        parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_.replace( " ", "+" )));
+        if ( !apiKey_.isEmpty() )
+            parameters.append(qMakePair(QString(O2_OAUTH2_API_KEY), apiKey_));
 
         // Show authentication URL with a web browser
         QUrl url(requestUrl_);
@@ -179,12 +180,14 @@ void O2::link() {
     } else if (grantFlow_ == GrantFlowResourceOwnerPasswordCredentials) {
         QList<O0RequestParameter> parameters;
         parameters.append(O0RequestParameter(O2_OAUTH2_CLIENT_ID, clientId_.toUtf8()));
-        parameters.append(O0RequestParameter(O2_OAUTH2_CLIENT_SECRET, clientSecret_.toUtf8()));
+        if ( !clientSecret_.isEmpty() )
+            parameters.append(O0RequestParameter(O2_OAUTH2_CLIENT_SECRET, clientSecret_.toUtf8()));
         parameters.append(O0RequestParameter(O2_OAUTH2_USERNAME, username_.toUtf8()));
         parameters.append(O0RequestParameter(O2_OAUTH2_PASSWORD, password_.toUtf8()));
         parameters.append(O0RequestParameter(O2_OAUTH2_GRANT_TYPE, O2_OAUTH2_GRANT_TYPE_PASSWORD));
         parameters.append(O0RequestParameter(O2_OAUTH2_SCOPE, scope_.toUtf8()));
-        parameters.append(O0RequestParameter(O2_OAUTH2_API_KEY, apiKey_.toUtf8()));
+        if ( !apiKey_.isEmpty() )
+            parameters.append(O0RequestParameter(O2_OAUTH2_API_KEY, apiKey_.toUtf8()));
         QByteArray payload = O0BaseAuth::createQueryParameters(parameters);
 
         QUrl url(tokenUrl_);
@@ -228,6 +231,7 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
             query = QString("?" + QString(O2_OAUTH2_API_KEY) + "=" + apiKey_);
         QNetworkRequest tokenRequest(QUrl(tokenUrl_.toString() + query));
         tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
+        tokenRequest.setRawHeader("Accept", O2_MIME_TYPE_JSON);
         QMap<QString, QString> parameters;
         parameters.insert(O2_OAUTH2_GRANT_TYPE_CODE, code());
         parameters.insert(O2_OAUTH2_CLIENT_ID, clientId_);
@@ -258,6 +262,11 @@ void O2::setCode(const QString &c) {
 void O2::onTokenReplyFinished() {
     qDebug() << "O2::onTokenReplyFinished";
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
+    if (!tokenReply)
+    {
+      qDebug() << "O2::onTokenReplyFinished: reply is null";
+      return;
+    }
     if (tokenReply->error() == QNetworkReply::NoError) {
         QByteArray replyData = tokenReply->readAll();
         QVariantMap tokens = parseTokenResponse(replyData);
