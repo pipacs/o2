@@ -20,9 +20,9 @@
 #include "o0globals.h"
 #include "o0settingsstore.h"
 
-O1::O1(QObject *parent): O0BaseAuth(parent) {
+O1::O1(QObject *parent, QNetworkAccessManager *manager): O0BaseAuth(parent) {
     setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
-    manager_ = new QNetworkAccessManager(this);
+    manager_ = manager ? manager : new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
