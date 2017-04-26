@@ -48,7 +48,7 @@ public:
     void setAccessTokenUrl(const QUrl &value);
 
     /// Constructor.
-    explicit O1(QObject *parent = 0);
+    explicit O1(QObject *parent = 0, QNetworkAccessManager *manager = 0);
 
     /// Parse a URL-encoded response string.
     static QMap<QString, QString> parseResponse(const QByteArray &response);

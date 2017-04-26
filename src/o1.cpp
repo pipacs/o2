@@ -20,9 +20,9 @@
 #include "o0globals.h"
 #include "o0settingsstore.h"
 
-O1::O1(QObject *parent): O0BaseAuth(parent) {
+O1::O1(QObject *parent, QNetworkAccessManager *manager): O0BaseAuth(parent) {
     setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
-    manager_ = new QNetworkAccessManager(this);
+    manager_ = manager ? manager : new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
@@ -204,17 +204,25 @@ void O1::link() {
         replyServer_->listen(QHostAddress::Any, localPort());
 
     // Get any query parameters for the request
+#if QT_VERSION >= 0x050000
     QUrlQuery requestData;
+#else
+    QUrl requestData = requestTokenUrl();
+#endif
     O0RequestParameter param("", "");
     foreach(param, requestParameters())
       requestData.addQueryItem(QString(param.name), QUrl::toPercentEncoding(QString(param.value)));
 
     // Get the request url and add parameters
+#if QT_VERSION >= 0x050000
     QUrl requestUrl = requestTokenUrl();
     requestUrl.setQuery(requestData);
-
     // Create request
     QNetworkRequest request(requestUrl);
+#else
+    // Create request
+    QNetworkRequest request(requestData);
+#endif
 
     // Create initial token request
     QList<O0RequestParameter> headers;
@@ -247,6 +255,7 @@ void O1::onTokenRequestError(QNetworkReply::NetworkError error) {
 void O1::onTokenRequestFinished() {
     qDebug() << "O1::onTokenRequestFinished";
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    qDebug() << QString( "Request: %1" ).arg(reply->request().url().toString());
     reply->deleteLater();
     if (reply->error() != QNetworkReply::NoError) {
         qWarning() << "O1::onTokenRequestFinished: " << reply->errorString();

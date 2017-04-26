@@ -17,6 +17,7 @@ if (NOT o2_WITH_QT5)
     include( ${QT_USE_FILE} )
 endif(NOT o2_WITH_QT5)
 
+
 set( o2_SRCS
     o2.cpp
     o2reply.cpp
@@ -34,6 +35,7 @@ set( o2_HDRS
     o2requestor.h
     o0abstractstore.h
     o0baseauth.h
+    o0export.h
     o0globals.h
     o0requestparameter.h
     o0settingsstore.h
@@ -150,6 +152,35 @@ if(o2_WITH_SURVEYMONKEY)
     )
 endif(o2_WITH_SURVEYMONKEY)
 
+
+if(o2_WITH_KEYCHAIN)
+    if (Qt5Core_DIR)
+        find_package(Qt5Keychain REQUIRED)
+    else()
+        find_package(QtKeychain REQUIRED)
+    endif()
+    if(QTKEYCHAIN_FOUND OR QT5KEYCHAIN_FOUND)
+        MESSAGE("Found QTKeychain")
+        list(APPEND LINK_TARGETS ${QTKEYCHAIN_LIBRARY})
+        include_directories(${QTKEYCHAIN_INCLUDE_DIR})
+        set( o2_SRCS
+                ${o2_SRCS}
+                o0keychainstore.cpp
+                )
+        set( o2_HDRS
+                ${o2_HDRS}
+                o0keychainstore.h
+                )
+    else()
+        MESSAGE("Qt5Keychain or QtKeychain is required")
+    endif()
+
+
+endif(o2_WITH_KEYCHAIN)
+
+
+
+
 if(NOT o2_WITH_QT5)
     add_definitions(${QT4_DEFINITIONS})
 endif(NOT o2_WITH_QT5)
@@ -162,9 +193,9 @@ endif(BUILD_SHARED_LIBS AND APPLE AND POLICY CMP0042)
 add_library( o2 ${o2_SRCS} ${o2_HDRS} )
 
 if(o2_WITH_QT5)
-    target_link_libraries( o2 Qt5::Core Qt5::Network)
+    target_link_libraries( o2 Qt5::Core Qt5::Network ${LINK_TARGETS})
 else(o2_WITH_QT5)
-    target_link_libraries( o2 ${QT_LIBRARIES} )
+    target_link_libraries( o2 ${QT_LIBRARIES} ${LINK_TARGETS})
 endif(o2_WITH_QT5)
 
 if(BUILD_SHARED_LIBS)
