@@ -11,7 +11,7 @@
 #include "o2.h"
 #include "o0globals.h"
 
-O2Requestor::O2Requestor(QNetworkAccessManager *manager, O2 *authenticator, QObject *parent): QObject(parent), reply_(NULL), status_(Idle), addAccessTokenInQuery_(true) {
+O2Requestor::O2Requestor(QNetworkAccessManager *manager, O2 *authenticator, QObject *parent): QObject(parent), reply_(NULL), status_(Idle), addAccessTokenInQuery_(true), rawData_(false) {
     manager_ = manager;
     authenticator_ = authenticator;
     if (authenticator) {
@@ -47,8 +47,25 @@ int O2Requestor::post(const QNetworkRequest &req, const QByteArray &data) {
     if (-1 == setup(req, QNetworkAccessManager::PostOperation)) {
         return -1;
     }
+    rawData_ = true;
     data_ = data;
     reply_ = manager_->post(request_, data_);
+    timedReplies_.add(reply_);
+    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
+    return id_;
+}
+
+int O2Requestor::post(const QNetworkRequest & req, QHttpMultiPart* data)
+{
+    if (-1 == setup(req, QNetworkAccessManager::PostOperation)) {
+        return -1;
+    }
+    rawData_ = false;
+    multipartData_ = data;
+    reply_ = manager_->post(request_, multipartData_);
+    multipartData_->setParent(reply_);
     timedReplies_.add(reply_);
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
@@ -60,8 +77,25 @@ int O2Requestor::put(const QNetworkRequest &req, const QByteArray &data) {
     if (-1 == setup(req, QNetworkAccessManager::PutOperation)) {
         return -1;
     }
+    rawData_ = true;
     data_ = data;
     reply_ = manager_->put(request_, data_);
+    timedReplies_.add(reply_);
+    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
+    return id_;
+}
+
+int O2Requestor::put(const QNetworkRequest & req, QHttpMultiPart* data)
+{
+    if (-1 == setup(req, QNetworkAccessManager::PutOperation)) {
+        return -1;
+    }
+    rawData_ = false;
+    multipartData_ = data;
+    reply_ = manager_->put(request_, multipartData_);
+    multipartData_->setParent(reply_);
     timedReplies_.add(reply_);
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
@@ -155,7 +189,7 @@ int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operat
     operation_ = operation;
     id_ = currentId++;
     url_ = req.url();
-    
+
     QUrl url = url_;
     if (addAccessTokenInQuery_) {
 #if QT_VERSION < 0x050000
@@ -166,14 +200,14 @@ int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operat
         url.setQuery(query);
 #endif
     }
-    
+
     request_.setUrl(url);
-	
+
     // If the service require the access token to be sent as a Authentication HTTP header, we add the access token.
     if (!accessTokenInAuthenticationHTTPHeaderFormat_.isEmpty()) {
         request_.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER, accessTokenInAuthenticationHTTPHeaderFormat_.arg(authenticator_->token()).toLatin1());
     }
-	
+
     if (!verb.isEmpty()) {
         request_.setRawHeader(O2_HTTP_HTTP_HEADER, verb);
     }
@@ -218,20 +252,20 @@ void O2Requestor::retry() {
 #endif
     }
     request_.setUrl(url);
-	
+
     // If the service require the access token to be sent as a Authentication HTTP header,
     // we update the access token when retrying.
     if(!accessTokenInAuthenticationHTTPHeaderFormat_.isEmpty()) {
         request_.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER, accessTokenInAuthenticationHTTPHeaderFormat_.arg(authenticator_->token()).toLatin1());
     }
-	
+
     status_ = ReRequesting;
     switch (operation_) {
     case QNetworkAccessManager::GetOperation:
         reply_ = manager_->get(request_);
         break;
     case QNetworkAccessManager::PostOperation:
-        reply_ = manager_->post(request_, data_);
+        reply_ = rawData_ ? manager_->post(request_, data_) : manager_->post(request_, multipartData_);
         break;
     case QNetworkAccessManager::CustomOperation:
     {
@@ -242,7 +276,7 @@ void O2Requestor::retry() {
     }
         break;
     case QNetworkAccessManager::PutOperation:
-        reply_ = manager_->put(request_, data_);
+        reply_ = rawData_ ? manager_->post(request_, data_) : manager_->put(request_, multipartData_);
         break;
     default:
         assert(!"Unspecified operation for request");
