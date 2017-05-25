@@ -43,21 +43,21 @@ public:
 public Q_SLOTS:
     /// Make a GET request.
     /// @return Request ID or -1 if there are too many requests in the queue.
-    int get(const QNetworkRequest &req);
+    int get(const QNetworkRequest &req, int timeout = 60*1000);
 
     /// Make a POST request.
     /// @return Request ID or -1 if there are too many requests in the queue.
-    int post(const QNetworkRequest &req, const QByteArray &data);
-    int post(const QNetworkRequest &req, QHttpMultiPart* data);
+    int post(const QNetworkRequest &req, const QByteArray &data, int timeout = 60*1000);
+    int post(const QNetworkRequest &req, QHttpMultiPart* data, int timeout = 60*1000);
 
     /// Make a PUT request.
     /// @return Request ID or -1 if there are too many requests in the queue.
-    int put(const QNetworkRequest &req, const QByteArray &data);
-    int put(const QNetworkRequest &req, QHttpMultiPart* data);
+    int put(const QNetworkRequest &req, const QByteArray &data, int timeout = 60*1000);
+    int put(const QNetworkRequest &req, QHttpMultiPart* data, int timeout = 60*1000);
 
     /// Make a custom request.
     /// @return Request ID or -1 if there are too many requests in the queue.
-    int customRequest(const QNetworkRequest &req, const QByteArray &verb, const QByteArray &data);
+    int customRequest(const QNetworkRequest &req, const QByteArray &verb, const QByteArray &data, int timeout = 60*1000);
 
 Q_SIGNALS:
 
