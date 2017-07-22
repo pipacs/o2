@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QDataStream>
 #include <QStringList>
+#include <algorithm>
 
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
