@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QDataStream>
 #include <QStringList>
+#include <algorithm>
 
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
@@ -141,7 +142,7 @@ QByteArray O1::getRequestBase(const QList<O0RequestParameter> &oauthParams, cons
     // Append a sorted+encoded list of all request parameters to the base string
     QList<O0RequestParameter> headers(oauthParams);
     headers.append(otherParams);
-    qSort(headers);
+    std::sort(headers.begin(), headers.end());
     base.append(encodeHeaders(headers));
 
     return base;
@@ -161,7 +162,7 @@ QByteArray O1::buildAuthorizationHeader(const QList<O0RequestParameter> &oauthPa
     bool first = true;
     QByteArray ret("OAuth ");
     QList<O0RequestParameter> headers(oauthParams);
-    qSort(headers);
+    std::sort(headers.begin(), headers.end());
     foreach (O0RequestParameter h, headers) {
         if (first) {
             first = false;
