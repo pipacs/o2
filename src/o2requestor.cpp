@@ -95,7 +95,6 @@ void O2Requestor::onRequestError(QNetworkReply::NetworkError error) {
     }
     int httpStatus = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     qWarning() << "O2Requestor::onRequestError: HTTP status" << httpStatus << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
-    qDebug() << reply_->readAll();
     if ((status_ == Requesting) && (httpStatus == 401)) {
         // Call O2::refresh. Note the O2 instance might live in a different thread
         if (QMetaObject::invokeMethod(authenticator_, "refresh")) {
