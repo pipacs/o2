@@ -101,7 +101,9 @@ private:
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
-
+    QCoreApplication::setOrganizationName("MySoft");
+    QCoreApplication::setOrganizationDomain("mysoft.com");
+    QCoreApplication::setApplicationName("tweeter");
     Helper helper;
     QTimer::singleShot(0, &helper, SLOT(processArgs()));
 

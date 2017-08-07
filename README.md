@@ -193,7 +193,15 @@ You can also create it with your customized QSettings object. O2SettingsStore wi
 
 Once set, O2SettingsStore takes ownership of the QSettings object.
 
-**Note:** If you do not specify a storage object to use, O2 will create one by default (which QSettings based), and use it. In such a case, a default encryption key is used for encrypting the data.
+**Note:** If you do not specify a storage object to use, O2 will create one by default (which QSettings based), and use it. In such a case, a default encryption key is used for encrypting the data. *This is not a secure solution: prefer storing the tokens in a Keychain or Wallet based facility instead*.
+
+**Note:** If using O2SettingsStore, make sure organization name, domain and application name are set:
+
+```
+QCoreApplication::setOrganizationName("MySoft");
+QCoreApplication::setOrganizationDomain("mysoft.com");
+QCoreApplication::setApplicationName("Star Runner");
+```
 
 ### Extra OAuth Tokens
 

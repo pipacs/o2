@@ -10,6 +10,9 @@
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
+    QCoreApplication::setOrganizationName("MySoft");
+    QCoreApplication::setOrganizationDomain("mysoft.com");
+    QCoreApplication::setApplicationName("sialis");
     QtWebView::initialize();
     qmlRegisterType<O1Twitter>("com.pipacs.o2", 1, 0, "O1Twitter");
     qmlRegisterType<TwitterApi>("com.pipacs.o2", 1, 0, "TwitterApi");
