@@ -56,6 +56,9 @@ public:
     /// Build the value of the "Authorization:" header.
     static QByteArray buildAuthorizationHeader(const QList<O0RequestParameter> &oauthParams);
 
+    /// Add common configuration (headers) to @p req.
+    void decorateRequest(QNetworkRequest &req, const QList<O0RequestParameter> &oauthParams);
+
     /// Create unique bytes to prevent replay attacks.
     static QByteArray nonce();
 

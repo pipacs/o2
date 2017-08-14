@@ -52,6 +52,6 @@ QNetworkRequest O1Requestor::setup(const QNetworkRequest &req, const QList<O0Req
 
     // Return a copy of the original request with authorization header set
     QNetworkRequest request(req);
-    request.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER, O1::buildAuthorizationHeader(oauthParams));
+    authenticator_->decorateRequest(request, oauthParams);
     return request;
 }
