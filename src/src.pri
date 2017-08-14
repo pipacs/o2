@@ -1,8 +1,6 @@
 QT *= network
 
-# script module is deprecated since Qt 5.5 (http://wiki.qt.io/New-Features-in-Qt-5.5)
-!qtHaveModule(qml): QT *= script
-qtHaveModule(qml): QT *= qml
+lessThan(QT_MAJOR_VERSION, 5): QT *= script
 
 INCLUDEPATH += $$PWD
 SOURCES += \
