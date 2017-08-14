@@ -71,7 +71,7 @@ void O2Facebook::onTokenReplyFinished() {
         // Process reply
         QByteArray replyData = tokenReply->readAll();
         QJsonDocument doc = QJsonDocument::fromJson(replyData);
-        QJsonObject rootObject = doc.object();
+        const QJsonObject rootObject = doc.object();
 
         QVariantMap reply;
         for (const QString &key : rootObject.keys()) {
