@@ -15,6 +15,14 @@ class O0_EXPORT O1: public O0BaseAuth {
     Q_OBJECT
 
 public:
+    /// HTTP User-Agent header
+    /// Set user agent to a value unique for your application (https://tools.ietf.org/html/rfc7231#section-5.5.3)
+    /// if you see the following error in the application log:
+    /// O1::onTokenRequestError: 201 "Error transferring requestTokenUrl() - server replied: Forbidden" "Bad bot"
+    Q_PROPERTY(QByteArray userAgent READ userAgent WRITE setUserAgent)
+    QByteArray userAgent() const;
+    void setUserAgent(const QByteArray &value);
+
     /// Signature method
     Q_PROPERTY(QString signatureMethod READ signatureMethod WRITE setSignatureMethod NOTIFY signatureMethodChanged)
     QString signatureMethod();
@@ -114,6 +122,7 @@ protected:
     /// Exchange temporary token to authentication token
     void exchangeToken();
 
+    QByteArray userAgent_;
     QUrl requestUrl_;
     QList<O0RequestParameter> requestParameters_;
     QString callbackUrl_;

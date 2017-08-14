@@ -30,6 +30,14 @@ O1::O1(QObject *parent, QNetworkAccessManager *manager): O0BaseAuth(parent) {
     setCallbackUrl(O2_CALLBACK_URL);
 }
 
+QByteArray O1::userAgent() const {
+    return userAgent_;
+}
+
+void O1::setUserAgent(const QByteArray &v) {
+    userAgent_ = v;
+}
+
 QUrl O1::requestTokenUrl() {
     return requestTokenUrl_;
 }
@@ -179,6 +187,13 @@ QByteArray O1::buildAuthorizationHeader(const QList<O0RequestParameter> &oauthPa
 
 void O1::decorateRequest(QNetworkRequest &req, const QList<O0RequestParameter> &oauthParams) {
     req.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER, buildAuthorizationHeader(oauthParams));
+    if (!userAgent_.isEmpty()) {
+#if QT_VERSION >= 0x050000
+        req.setHeader(QNetworkRequest::UserAgentHeader, userAgent_);
+#else
+        req.setRawHeader("User-Agent", userAgent_);
+#endif
+    }
 }
 
 QByteArray O1::generateSignature(const QList<O0RequestParameter> headers, const QNetworkRequest &req, const QList<O0RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
