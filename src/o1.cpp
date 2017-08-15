@@ -21,7 +21,7 @@
 #include "o0globals.h"
 #include "o0settingsstore.h"
 
-O1::O1(QObject *parent, QNetworkAccessManager *manager): O0BaseAuth(parent) {
+O1::O1(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store): O0BaseAuth(parent, store) {
     setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
     manager_ = manager ? manager : new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);

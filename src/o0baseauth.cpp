@@ -7,9 +7,9 @@
 
 static const quint16 DefaultLocalPort = 1965;
 
-O0BaseAuth::O0BaseAuth(QObject *parent): QObject(parent) {
+O0BaseAuth::O0BaseAuth(QObject *parent, O0AbstractStore *store): QObject(parent), store_(0) {
     localPort_ = DefaultLocalPort;
-    store_ = new O0SettingsStore(O2_ENCRYPTION_KEY, this);
+    setStore(store);
 }
 
 void O0BaseAuth::setStore(O0AbstractStore *store) {
