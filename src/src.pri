@@ -6,6 +6,7 @@ INCLUDEPATH += $$PWD
 SOURCES += \
     $$PWD/o1.cpp \
     $$PWD/o1requestor.cpp \
+    $$PWD/o1smugmug.cpp \
     $$PWD/o1timedreply.cpp \
     $$PWD/o2.cpp \
     $$PWD/o2facebook.cpp \
@@ -26,6 +27,7 @@ HEADERS += \
     $$PWD/o1dropbox.h \
     $$PWD/o1flickr.h \
     $$PWD/o1requestor.h \
+    $$PWD/o1smugmug.h \
     $$PWD/o1twitter.h \
     $$PWD/o1timedreply.h \
     $$PWD/o1upwork.h \

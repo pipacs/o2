@@ -152,6 +152,17 @@ if(o2_WITH_SURVEYMONKEY)
     )
 endif(o2_WITH_SURVEYMONKEY)
 
+if(o2_WITH_SMUGMUG)
+    set( o2_SRCS
+        ${o2_SRCS}
+        o1smugmug.cpp
+    )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o1smugmug.h
+    )
+endif(o2_WITH_SMUGMUG)
+
 
 if(o2_WITH_KEYCHAIN)
     if (Qt5Core_DIR)

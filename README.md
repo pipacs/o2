@@ -25,6 +25,7 @@ O1Freshbooks | o1freshbooks.h | Freshbooks OAuth specialization
 O1Requestor | o1requestor.h | Makes authenticated OAuth 1.0 requests: GET, POST or PUT, handles timeouts
 O1RequestParameter | o1.h | An extra request parameter participating in request signing
 O1Twitter | o1twitter.h | Twitter OAuth specialization
+O1SmugMug | o1smugmug.h | SmugMug OAuth specialization
 O2 | o2.h | Generic OAuth 2.0 authenticator
 O2Facebook | o2facebook.h | Facebook OAuth specialization
 O2Gft | o2gft.h | Google Fusion Tables OAuth specialization
