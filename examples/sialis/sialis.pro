@@ -17,6 +17,7 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 # Core O2
+DEFINES += O0_EXPORT=
 include(../../src/src.pri)
 
 HEADERS += \

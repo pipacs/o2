@@ -1,13 +1,12 @@
 QT *= network
 
-# script module is deprecated since Qt 5.5 (http://wiki.qt.io/New-Features-in-Qt-5.5)
-!qtHaveModule(qml): QT *= script
-qtHaveModule(qml): QT *= qml
+lessThan(QT_MAJOR_VERSION, 5): QT *= script
 
 INCLUDEPATH += $$PWD
 SOURCES += \
     $$PWD/o1.cpp \
     $$PWD/o1requestor.cpp \
+    $$PWD/o1smugmug.cpp \
     $$PWD/o1timedreply.cpp \
     $$PWD/o2.cpp \
     $$PWD/o2facebook.cpp \
@@ -28,6 +27,7 @@ HEADERS += \
     $$PWD/o1dropbox.h \
     $$PWD/o1flickr.h \
     $$PWD/o1requestor.h \
+    $$PWD/o1smugmug.h \
     $$PWD/o1twitter.h \
     $$PWD/o1timedreply.h \
     $$PWD/o1upwork.h \

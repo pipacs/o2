@@ -36,10 +36,11 @@ option(o2_WITH_FLICKR "Authenticate with Flickr" OFF)
 option(o2_WITH_HUBIC "Authenticate with Hubic" OFF)
 option(o2_WITH_SPOTIFY "Authenticate with Spotify" OFF)
 option(o2_WITH_SURVEYMONKEY "Authenticate with SurveyMonkey" OFF)
+option(o2_WITH_SMUGMUG "Authenticate with SmugMug" OFF)
 option(o2_WITH_KEYCHAIN "keychain store" ON)
 
 option(o2_WITH_OAUTH1 "Include OAuth1 authentication" OFF)
-if(o2_WITH_TWITTER OR o2_WITH_DROPBOX OR o2_WITH_FLICKR)
+if(o2_WITH_TWITTER OR o2_WITH_DROPBOX OR o2_WITH_FLICKR OR o2_WITH_SMUGMUG)
   set(o2_WITH_OAUTH1 ON)
 endif()
 

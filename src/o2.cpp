@@ -67,7 +67,7 @@ static void addQueryParametersToUrl(QUrl &url,  QList<QPair<QString, QString> > 
 #endif
 }
 
-O2::O2(QObject *parent, QNetworkAccessManager *manager): O0BaseAuth(parent) {
+O2::O2(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store): O0BaseAuth(parent, store) {
     manager_ = manager ? manager : new QNetworkAccessManager(this);
     replyServer_ = new O2ReplyServer(this);
     grantFlow_ = GrantFlowAuthorizationCode;

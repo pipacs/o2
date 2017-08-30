@@ -1,5 +1,6 @@
 #pragma once
 
+#ifndef O0_EXPORT
 // For exporting symbols from Windows' DLLs
 #ifdef _WIN32
     #ifdef O2_DLL_EXPORT
@@ -10,3 +11,5 @@
 #else
     #define O0_EXPORT
 #endif
+
+#endif // O0_EXPORT
