@@ -282,7 +282,7 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
             int expiresIn = response.value(O2_OAUTH2_EXPIRES_IN).toInt(&ok);
             if (ok) {
                 qDebug() << "O2::onVerificationReceived: Token expires in" << expiresIn << "seconds";
-                setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
+                setExpires((int)(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn));
             }
           }
           setLinked(true);
@@ -340,7 +340,7 @@ void O2::onTokenReplyFinished() {
             int expiresIn = tokens.take(O2_OAUTH2_EXPIRES_IN).toInt(&ok);
             if (ok) {
                 qDebug() << "O2::onTokenReplyFinished: Token expires in" << expiresIn << "seconds";
-                setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
+                setExpires((int)(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn));
             }
             setRefreshToken(tokens.take(O2_OAUTH2_REFRESH_TOKEN).toString());
             setExtraTokens(tokens);
@@ -437,7 +437,7 @@ void O2::onRefreshFinished() {
         QByteArray reply = refreshReply->readAll();
         QVariantMap tokens = parseTokenResponse(reply);
         setToken(tokens.value(O2_OAUTH2_ACCESS_TOKEN).toString());
-        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + tokens.value(O2_OAUTH2_EXPIRES_IN).toInt());
+        setExpires((int)(QDateTime::currentMSecsSinceEpoch() / 1000 + tokens.value(O2_OAUTH2_EXPIRES_IN).toInt()));
         setRefreshToken(tokens.value(O2_OAUTH2_REFRESH_TOKEN).toString());
         timedReplies_.remove(refreshReply);
         setLinked(true);

@@ -114,7 +114,7 @@ void O2Skydrive::redirected(const QUrl &url) {
 
         setToken(urlToken);
         setRefreshToken(urlRefreshToken);
-        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + urlExpiresIn);
+        setExpires((int)(QDateTime::currentMSecsSinceEpoch() / 1000 + urlExpiresIn));
         if (urlToken.isEmpty()) {
             Q_EMIT linkingFailed();
         } else {
