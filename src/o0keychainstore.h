@@ -14,10 +14,10 @@ public:
     explicit o0keyChainStore(const QString& app,const QString& name,QObject *parent = 0);
 
     /// Retrieve a string value by key.
-    virtual QString value(const QString &key, const QString &defaultValue = QString()) = 0;
+    QString value(const QString &key, const QString &defaultValue = QString());
 
     /// Set a string value for a key.
-    virtual void setValue(const QString &key, const QString &value) = 0;
+    void setValue(const QString &key, const QString &value);
 
     void persist();
     void fetchFromKeychain();
