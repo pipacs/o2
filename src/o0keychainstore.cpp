@@ -17,8 +17,7 @@ o0keyChainStore::o0keyChainStore(const QString& app,const QString& name,QObject 
 }
 
 QString o0keyChainStore::value(const QString &key, const QString &defaultValue) {
-    Q_UNUSED(defaultValue)
-    return  pairs_.value(key);
+    return pairs_.value(key, defaultValue);
 }
 
 void o0keyChainStore::setValue(const QString &key, const QString &value) {
