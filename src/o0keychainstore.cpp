@@ -32,7 +32,7 @@ void o0keyChainStore::persist() {
     QDataStream ds(&data,QIODevice::ReadWrite);
     ds << pairs_;
 
-    job.setTextData(data);
+    job.setBinaryData(data);
     QEventLoop loop;
     job.connect( &job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()) );
     job.start();
@@ -52,9 +52,7 @@ void o0keyChainStore::fetchFromKeychain() {
     loop.exec();
 
     QByteArray data;
-    // QKeychain::ReadPasswordJob::textData() returns QString::fromUtf8( <password data> )
-    // switch back to UTF-8 to avoid issues when QT_NO_CAST_TO_ASCII is defined
-    data.append(job.textData().toUtf8());
+    data.append(job.binaryData());
     QDataStream ds(&data,QIODevice::ReadOnly);
     ds >> pairs_;
 
