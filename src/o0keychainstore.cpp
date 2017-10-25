@@ -26,8 +26,7 @@ void o0keyChainStore::setValue(const QString &key, const QString &value) {
 
 void o0keyChainStore::persist() {
     WritePasswordJob job(app_);
-    job.setAutoDelete(false);
-    job.setKey(name_);
+    initJob(job);
     QByteArray data;
     QDataStream ds(&data,QIODevice::ReadWrite);
     ds << pairs_;
@@ -45,7 +44,7 @@ void o0keyChainStore::persist() {
 
 void o0keyChainStore::fetchFromKeychain() {
     ReadPasswordJob job(app_);
-    job.setKey(name_);
+    initJob(job);
     QEventLoop loop;
     job.connect( &job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()) );
     job.start();
@@ -64,7 +63,7 @@ void o0keyChainStore::fetchFromKeychain() {
 
 void o0keyChainStore::clearFromKeychain() {
     DeletePasswordJob job(app_);
-    job.setKey(name_);
+    initJob(job);
     QEventLoop loop;
     job.connect( &job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()) );
     job.start();
@@ -72,4 +71,9 @@ void o0keyChainStore::clearFromKeychain() {
     if ( job.error() ) {
         qWarning() << "Deleting keychain failed: " << qPrintable(job.errorString());
     }
+}
+
+void o0keyChainStore::initJob(QKeychain::Job &job) const {
+    job.setAutoDelete(false);
+    job.setKey(name_);
 }

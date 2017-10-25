@@ -8,6 +8,10 @@
 #include "o0abstractstore.h"
 #include <QString>
 
+namespace QKeychain {
+class Job;
+}
+
 class O0_EXPORT o0keyChainStore  : public  O0AbstractStore{
     Q_OBJECT
 public:
@@ -23,6 +27,8 @@ public:
     void fetchFromKeychain();
     void clearFromKeychain();
 private:
+    void initJob(QKeychain::Job &job) const;
+
     QString app_;
     QString name_;
     QMap<QString,QString> pairs_;
