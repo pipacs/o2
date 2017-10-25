@@ -27,53 +27,46 @@ void o0keyChainStore::setValue(const QString &key, const QString &value) {
 void o0keyChainStore::persist() {
     WritePasswordJob job(app_);
     initJob(job);
+
     QByteArray data;
     QDataStream ds(&data,QIODevice::ReadWrite);
     ds << pairs_;
-
     job.setBinaryData(data);
-    QEventLoop loop;
-    job.connect( &job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()) );
-    job.start();
-    loop.exec();
-    if(job.error())
-    {
-        qWarning() << "keychain could not be persisted "<< name_ << ":" << qPrintable(job.errorString());
-    }
+
+    executeJob(job, "persist");
 }
 
 void o0keyChainStore::fetchFromKeychain() {
     ReadPasswordJob job(app_);
     initJob(job);
-    QEventLoop loop;
-    job.connect( &job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()) );
-    job.start();
-    loop.exec();
+    executeJob(job, "fetch");
 
     QByteArray data;
     data.append(job.binaryData());
     QDataStream ds(&data,QIODevice::ReadOnly);
     ds >> pairs_;
-
-    if(job.error())
-    {
-        qWarning() << "keychain could not be fetched"<< name_ << ":" << qPrintable(job.errorString());
-    }
 }
 
 void o0keyChainStore::clearFromKeychain() {
     DeletePasswordJob job(app_);
     initJob(job);
-    QEventLoop loop;
-    job.connect( &job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()) );
-    job.start();
-    loop.exec();
-    if ( job.error() ) {
-        qWarning() << "Deleting keychain failed: " << qPrintable(job.errorString());
-    }
+    executeJob(job, "clear");
 }
 
 void o0keyChainStore::initJob(QKeychain::Job &job) const {
     job.setAutoDelete(false);
     job.setKey(name_);
+}
+
+void o0keyChainStore::executeJob(QKeychain::Job &job, const char *actionName) const {
+    QEventLoop loop;
+    job.connect( &job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()) );
+    job.start();
+    loop.exec();
+
+    const QKeychain::Error errorCode = job.error();
+    if (errorCode != QKeychain::NoError) {
+        qWarning() << "keychain store could not" << actionName << name_ << ":"
+                   << job.errorString() << "(" << errorCode << ").";
+    }
 }

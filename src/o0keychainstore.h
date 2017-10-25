@@ -28,6 +28,7 @@ public:
     void clearFromKeychain();
 private:
     void initJob(QKeychain::Job &job) const;
+    void executeJob(QKeychain::Job &job, const char *actionName) const;
 
     QString app_;
     QString name_;
