@@ -12,6 +12,13 @@ namespace QKeychain {
 class Job;
 }
 
+/// Calling persist(), fetchFromKeychain() and clearFromKeychain() member
+/// functions is the responsibility of the user of this class.
+/// This is important to minimize the number of keychain accesses (and
+/// potentially the number of user password prompts).
+/// For example: fetchFromKeychain() can be called immediately after
+/// creating a keychain store; persist() - after a successful authorization;
+/// clearFromKeychain() - when the user logs out from the service.
 class O0_EXPORT o0keyChainStore  : public  O0AbstractStore{
     Q_OBJECT
 public:
