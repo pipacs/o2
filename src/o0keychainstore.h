@@ -30,12 +30,18 @@ public:
     /// Set a string value for a key.
     void setValue(const QString &key, const QString &value);
 
-    void persist();
-    void fetchFromKeychain();
-    void clearFromKeychain();
+    // The functions below return QKeychain::Error casted to int. They don't
+    // return the enumerator directly because it can not be forward-declared reliably,
+    // and including <keychain.h> into this header may be undesirable.
+    // Note that if 0 is returned, then there was no error.
+
+    int persist();
+    int fetchFromKeychain();
+    int clearFromKeychain();
+
 private:
     void initJob(QKeychain::Job &job) const;
-    void executeJob(QKeychain::Job &job, const char *actionName) const;
+    int executeJob(QKeychain::Job &job, const char *actionName) const;
 
     QString app_;
     QString name_;

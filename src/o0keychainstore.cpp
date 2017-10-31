@@ -24,7 +24,7 @@ void o0keyChainStore::setValue(const QString &key, const QString &value) {
     pairs_.insert(key,value);
 }
 
-void o0keyChainStore::persist() {
+int o0keyChainStore::persist() {
     WritePasswordJob job(app_);
     initJob(job);
 
@@ -33,24 +33,26 @@ void o0keyChainStore::persist() {
     ds << pairs_;
     job.setBinaryData(data);
 
-    executeJob(job, "persist");
+    return executeJob(job, "persist");
 }
 
-void o0keyChainStore::fetchFromKeychain() {
+int o0keyChainStore::fetchFromKeychain() {
     ReadPasswordJob job(app_);
     initJob(job);
-    executeJob(job, "fetch");
-
-    QByteArray data;
-    data.append(job.binaryData());
-    QDataStream ds(&data,QIODevice::ReadOnly);
-    ds >> pairs_;
+    const int result = executeJob(job, "fetch");
+    if (result == 0) { // success
+        QByteArray data;
+        data.append(job.binaryData());
+        QDataStream ds(&data, QIODevice::ReadOnly);
+        ds >> pairs_;
+    }
+    return result;
 }
 
-void o0keyChainStore::clearFromKeychain() {
+int o0keyChainStore::clearFromKeychain() {
     DeletePasswordJob job(app_);
     initJob(job);
-    executeJob(job, "clear");
+    return executeJob(job, "clear");
 }
 
 void o0keyChainStore::initJob(QKeychain::Job &job) const {
@@ -58,7 +60,7 @@ void o0keyChainStore::initJob(QKeychain::Job &job) const {
     job.setKey(name_);
 }
 
-void o0keyChainStore::executeJob(QKeychain::Job &job, const char *actionName) const {
+int o0keyChainStore::executeJob(QKeychain::Job &job, const char *actionName) const {
     QEventLoop loop;
     job.connect( &job, SIGNAL(finished(QKeychain::Job*)), &loop, SLOT(quit()) );
     job.start();
@@ -69,4 +71,5 @@ void o0keyChainStore::executeJob(QKeychain::Job &job, const char *actionName) co
         qWarning() << "keychain store could not" << actionName << name_ << ":"
                    << job.errorString() << "(" << errorCode << ").";
     }
+    return errorCode;
 }
