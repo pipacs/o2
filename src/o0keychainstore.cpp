@@ -55,6 +55,10 @@ int o0keyChainStore::clearFromKeychain() {
     return executeJob(job, "clear");
 }
 
+bool o0keyChainStore::isEntryNotFoundError(int errorCode) {
+    return errorCode == QKeychain::EntryNotFound;
+}
+
 void o0keyChainStore::initJob(QKeychain::Job &job) const {
     job.setAutoDelete(false);
     job.setKey(name_);

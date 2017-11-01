@@ -39,6 +39,13 @@ public:
     int fetchFromKeychain();
     int clearFromKeychain();
 
+    /// @return true if @p errorCode is equal to QKeychain::EntryNotFound.
+    /// @note This function can be used to single out one type of an error
+    /// returned from the functions above without including <keychain.h>.
+    /// The EntryNotFound error type is special because it can be considered
+    /// not an error if returned from clearFromKeychain().
+    static bool isEntryNotFoundError(int errorCode);
+
 private:
     void initJob(QKeychain::Job &job) const;
     int executeJob(QKeychain::Job &job, const char *actionName) const;
