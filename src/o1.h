@@ -55,6 +55,12 @@ public:
     QUrl accessTokenUrl();
     void setAccessTokenUrl(const QUrl &value);
 
+    /// Page content on local host after successful oauth.
+    /// Provide it in case you do not want to close the browser, but display something
+    Q_PROPERTY(QByteArray replyContent READ replyContent WRITE setReplyContent)
+    QByteArray replyContent() const;
+    void setReplyContent(const QByteArray &value);
+
     /// Constructor.
     explicit O1(QObject *parent = 0, QNetworkAccessManager *manager = 0, O0AbstractStore *store = 0);
 

@@ -81,6 +81,14 @@ void O1::setAccessTokenUrl(const QUrl &value) {
     Q_EMIT accessTokenUrlChanged();
 }
 
+QByteArray O1::replyContent() const {
+    return replyServer_->replyContent();
+}
+
+void O1::setReplyContent(const QByteArray &value) {
+    replyServer_->setReplyContent(value);
+}
+
 QString O1::signatureMethod() {
     return signatureMethod_;
 }
