@@ -8,8 +8,6 @@
 #include "o0export.h"
 #include "o0baseauth.h"
 
-class O2ReplyServer;
-
 /// Simple OAuth 1.0 authenticator.
 class O0_EXPORT O1: public O0BaseAuth {
     Q_OBJECT
@@ -131,7 +129,6 @@ protected:
     QString verifier_;
     QString signatureMethod_;
     QNetworkAccessManager *manager_;
-    O2ReplyServer *replyServer_;
 };
 
 #endif // O1_H

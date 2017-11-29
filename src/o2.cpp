@@ -69,7 +69,6 @@ static void addQueryParametersToUrl(QUrl &url,  QList<QPair<QString, QString> > 
 
 O2::O2(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store): O0BaseAuth(parent, store) {
     manager_ = manager ? manager : new QNetworkAccessManager(this);
-    replyServer_ = new O2ReplyServer(this);
     grantFlow_ = GrantFlowAuthorizationCode;
     localhostPolicy_ = QString(O2_CALLBACK_URL);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
@@ -478,14 +477,6 @@ QString O2::apiKey() {
 
 void O2::setApiKey(const QString &value) {
     apiKey_ = value;
-}
-
-QByteArray O2::replyContent() {
-    return replyServer_->replyContent();
-}
-
-void O2::setReplyContent(const QByteArray &value) {
-    replyServer_->setReplyContent(value);
 }
 
 bool O2::ignoreSslErrors() {
