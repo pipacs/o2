@@ -4,11 +4,13 @@
 #include "o0baseauth.h"
 #include "o0globals.h"
 #include "o0settingsstore.h"
+#include "o2replyserver.h"
 
 static const quint16 DefaultLocalPort = 1965;
 
 O0BaseAuth::O0BaseAuth(QObject *parent, O0AbstractStore *store): QObject(parent), store_(0) {
     localPort_ = DefaultLocalPort;
+    replyServer_ = new O2ReplyServer(this);
     setStore(store);
 }
 
@@ -80,6 +82,14 @@ QString O0BaseAuth::clientSecret() {
 void O0BaseAuth::setClientSecret(const QString &value) {
     clientSecret_ = value;
     Q_EMIT clientSecretChanged();
+}
+
+QByteArray O0BaseAuth::replyContent() const {
+    return replyServer_->replyContent();
+}
+
+void O0BaseAuth::setReplyContent(const QByteArray &value) {
+    replyServer_->setReplyContent(value);
 }
 
 int O0BaseAuth::localPort() {

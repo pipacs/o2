@@ -11,8 +11,6 @@
 #include "o2reply.h"
 #include "o0abstractstore.h"
 
-class O2ReplyServer;
-
 /// Simple OAuth2 authenticator.
 class O0_EXPORT O2: public O0BaseAuth {
     Q_OBJECT
@@ -58,12 +56,6 @@ public:
     Q_PROPERTY(QString apiKey READ apiKey WRITE setApiKey)
     QString apiKey();
     void setApiKey(const QString &value);
-
-    /// Page content on local host after successful oauth.
-    /// Provide it in case you do not want to close the browser, but display something
-    Q_PROPERTY(QByteArray replyContent READ replyContent WRITE setReplyContent)
-    QByteArray replyContent();
-    void setReplyContent(const QByteArray &value);
 
     /// Allow ignoring SSL errors?
     /// E.g. SurveyMonkey fails on Mac due to SSL error. Ignoring the error circumvents the problem
@@ -173,7 +165,6 @@ protected:
     QString localhostPolicy_;
     QString apiKey_;
     QNetworkAccessManager *manager_;
-    O2ReplyServer *replyServer_;
     O2ReplyList timedReplies_;
     GrantFlow grantFlow_;
 };
