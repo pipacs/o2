@@ -63,7 +63,7 @@ public:
     void initAuthorizationUrl(const AuthorizationUrlBuilder &builder);
 #endif // QT_VERSION >= 0x050000
 
-    explicit O1SmugMug(QObject *parent = 0, QNetworkAccessManager *manager = 0, O0AbstractStore *store = 0);
+    explicit O1SmugMug(QObject *parent = 0, QNetworkAccessManager *manager = 0, O0AbstractStore *store = 0, bool inUseExternalInterceptor = false);
 };
 
 #endif // O1SMUGMUG_H

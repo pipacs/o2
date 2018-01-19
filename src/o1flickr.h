@@ -9,7 +9,7 @@ class O0_EXPORT O1Flickr: public O1 {
     Q_OBJECT
 
 public:
-    explicit O1Flickr(QObject *parent = 0): O1(parent) {
+    explicit O1Flickr(QObject *parent = 0, bool inUseExternalInterceptor = false): O1(parent, NULL, NULL, inUseExternalInterceptor) {
         setRequestTokenUrl(QUrl("http://www.flickr.com/services/oauth/request_token"));
         setAuthorizeUrl(QUrl("http://www.flickr.com/services/oauth/authorize?perms=write"));
         setAccessTokenUrl(QUrl("http://www.flickr.com/services/oauth/access_token"));

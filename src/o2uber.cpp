@@ -18,7 +18,7 @@ static const char *UberTokenUrl = "https://login.uber.com/oauth/v2/token";
 static const char *UberExpiresIn = "expires_in";
 static const char *UberGrantType = "authorization_code";
 
-O2Uber::O2Uber(QObject *parent): O2(parent)
+O2Uber::O2Uber(QObject *parent, bool inUseExternalInterceptor): O2(parent, NULL, NULL, inUseExternalInterceptor)
 {
     setRequestUrl(UberEndpoint);
     setTokenUrl(UberTokenUrl);

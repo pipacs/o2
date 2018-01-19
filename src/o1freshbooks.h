@@ -9,7 +9,7 @@ class O0_EXPORT O1Freshbooks: public O1 {
     Q_OBJECT
 
 public:
-    explicit O1Freshbooks(QObject *parent = 0): O1(parent) {
+    explicit O1Freshbooks(QObject *parent = 0, bool inUseExternalInterceptor = false): O1(parent, NULL, NULL, inUseExternalInterceptor) {
     }
 
     void setClientId(const QString &value) {

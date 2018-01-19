@@ -9,7 +9,7 @@ class O0_EXPORT OXTwitter: public O1Twitter {
     Q_OBJECT
 
 public:
-    explicit OXTwitter(QObject *parent = 0);
+    explicit OXTwitter(QObject *parent = 0, bool inUseExternalInterceptor = false);
 
     /// XAuth Username
     Q_PROPERTY(QString username READ username WRITE setUsername NOTIFY usernameChanged)

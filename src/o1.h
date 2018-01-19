@@ -54,7 +54,7 @@ public:
     void setAccessTokenUrl(const QUrl &value);
 
     /// Constructor.
-    explicit O1(QObject *parent = 0, QNetworkAccessManager *manager = 0, O0AbstractStore *store = 0);
+    explicit O1(QObject *parent = 0, QNetworkAccessManager *manager = 0, O0AbstractStore *store = 0, bool inUseExternalInterceptor = false);
 
     /// Parse a URL-encoded response string.
     static QMap<QString, QString> parseResponse(const QByteArray &response);
@@ -119,6 +119,9 @@ protected Q_SLOTS:
 protected:
     /// Exchange temporary token to authentication token
     void exchangeToken();
+
+    /// Handle params from a OAuth callback when set up to use an external interceptor
+    virtual void processParamsFromExternalInterceptor(QMap<QString, QString> params);
 
     QByteArray userAgent_;
     QUrl requestUrl_;

@@ -9,7 +9,7 @@ class O0_EXPORT O2Facebook: public O2 {
     Q_OBJECT
 
 public:
-    explicit O2Facebook(QObject *parent = 0);
+    explicit O2Facebook(QObject *parent = 0, bool inUseExternalInterceptor = false);
 
 protected Q_SLOTS:
     void onVerificationReceived(QMap<QString, QString>);

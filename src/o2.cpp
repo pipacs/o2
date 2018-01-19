@@ -67,13 +67,16 @@ static void addQueryParametersToUrl(QUrl &url,  QList<QPair<QString, QString> > 
 #endif
 }
 
-O2::O2(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store): O0BaseAuth(parent, store) {
+O2::O2(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store, bool inUseExternalInterceptor): O0BaseAuth(parent, store, inUseExternalInterceptor) {
     manager_ = manager ? manager : new QNetworkAccessManager(this);
     grantFlow_ = GrantFlowAuthorizationCode;
     localhostPolicy_ = QString(O2_CALLBACK_URL);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
-    connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
-    connect(replyServer_, SIGNAL(serverClosed(bool)), this, SLOT(serverHasClosed(bool)));
+    
+    if(!inUseExternalInterceptor) {
+        connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+        connect(replyServer_, SIGNAL(serverClosed(bool)), this, SLOT(serverHasClosed(bool)));
+    }
 }
 
 O2::GrantFlow O2::grantFlow() {
@@ -167,20 +170,26 @@ void O2::link() {
     setExpires(0);
 
     if (grantFlow_ == GrantFlowAuthorizationCode || grantFlow_ == GrantFlowImplicit) {
-        // Start listening to authentication replies
-        if (!replyServer_->isListening()) {
-	        if (replyServer_->listen(QHostAddress::Any, localPort_)) {
-	            qDebug() << "O2::link: Reply server listening on port" << localPort();
-	        } else {
-	            qWarning() << "O2::link: Reply server failed to start listening on port" << localPort();
-	            Q_EMIT linkingFailed();
-	            return;
-	        }
-		}
 
-        // Save redirect URI, as we have to reuse it when requesting the access token
-        redirectUri_ = localhostPolicy_.arg(replyServer_->serverPort());
-
+        if (useExternalInterceptor_) {
+            // Save redirect URI, as we have to reuse it when requesting the access token
+            redirectUri_ = localhostPolicy_.arg(localPort());
+        } else {
+            // Start listening to authentication replies
+            if (!replyServer_->isListening()) {
+                if (replyServer_->listen(QHostAddress::Any, localPort_)) {
+                    qDebug() << "O2::link: Reply server listening on port" << localPort();
+                } else {
+                    qWarning() << "O2::link: Reply server failed to start listening on port" << localPort();
+                    Q_EMIT linkingFailed();
+                    return;
+                }
+            }
+            
+            // Save redirect URI, as we have to reuse it when requesting the access token
+            redirectUri_ = localhostPolicy_.arg(replyServer_->serverPort());
+        }
+        
         // Assemble intial authentication URL
         QList<QPair<QString, QString> > parameters;
         parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE),
@@ -281,7 +290,7 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
             int expiresIn = response.value(O2_OAUTH2_EXPIRES_IN).toInt(&ok);
             if (ok) {
                 qDebug() << "O2::onVerificationReceived: Token expires in" << expiresIn << "seconds";
-                setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
+                setExpires((int)(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn));
             }
           }
           setLinked(true);
@@ -339,7 +348,7 @@ void O2::onTokenReplyFinished() {
             int expiresIn = tokens.take(O2_OAUTH2_EXPIRES_IN).toInt(&ok);
             if (ok) {
                 qDebug() << "O2::onTokenReplyFinished: Token expires in" << expiresIn << "seconds";
-                setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn);
+                setExpires((int)(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn));
             }
             setRefreshToken(tokens.take(O2_OAUTH2_REFRESH_TOKEN).toString());
             setExtraTokens(tokens);
@@ -389,6 +398,10 @@ void O2::setExpires(int v) {
     store_->setValue(key, QString::number(v));
 }
 
+void O2::processParamsFromExternalInterceptor(QMap<QString, QString> params) {
+    onVerificationReceived(params);
+}
+
 QString O2::refreshToken() {
     QString key = QString(O2_KEY_REFRESH_TOKEN).arg(clientId_);
     return store_->value(key);
@@ -436,7 +449,7 @@ void O2::onRefreshFinished() {
         QByteArray reply = refreshReply->readAll();
         QVariantMap tokens = parseTokenResponse(reply);
         setToken(tokens.value(O2_OAUTH2_ACCESS_TOKEN).toString());
-        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + tokens.value(O2_OAUTH2_EXPIRES_IN).toInt());
+        setExpires((int)(QDateTime::currentMSecsSinceEpoch() / 1000 + tokens.value(O2_OAUTH2_EXPIRES_IN).toInt()));
         QString refreshToken = tokens.value(O2_OAUTH2_REFRESH_TOKEN).toString();
         if(!refreshToken.isEmpty()) {
             setRefreshToken(refreshToken);

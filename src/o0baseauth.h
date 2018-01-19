@@ -19,7 +19,7 @@ class O0_EXPORT O0BaseAuth : public QObject {
     Q_OBJECT
 
 public:
-    explicit O0BaseAuth(QObject *parent = 0, O0AbstractStore *store = 0);
+    explicit O0BaseAuth(QObject *parent = 0, O0AbstractStore *store = 0, bool inUseExternalInterceptor = false);
 
 public:
     /// Are we authenticated?
@@ -75,6 +75,9 @@ public Q_SLOTS:
 
     /// De-authenticate.
     Q_INVOKABLE virtual void unlink() = 0;
+    
+    /// Handle OAuth callback when set up to use an external interceptor
+    Q_INVOKABLE void processOAuthCallbackFromExternalInterceptor(const QString &inURLString);
 
 Q_SIGNALS:
     /// Emitted when client needs to open a web browser window, with the given URL.
@@ -111,6 +114,9 @@ protected:
 
     /// Set extra tokens found in OAuth response
     void setExtraTokens(QVariantMap extraTokens);
+    
+    /// Handle OAuth callback when set up to use an external interceptor
+    virtual void processParamsFromExternalInterceptor(QMap<QString, QString> params) = 0;
 
 protected:
     QString clientId_;
@@ -124,6 +130,7 @@ protected:
     quint16 localPort_;
     O0AbstractStore *store_;
     QVariantMap extraTokens_;
+    bool useExternalInterceptor_;
     O2ReplyServer *replyServer_;
 };
 

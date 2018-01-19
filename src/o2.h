@@ -86,7 +86,7 @@ public:
 public:
     /// Constructor.
     /// @param  parent  Parent object.
-    explicit O2(QObject *parent = 0, QNetworkAccessManager *manager = 0, O0AbstractStore *store = 0);
+    explicit O2(QObject *parent = 0, QNetworkAccessManager *manager = 0, O0AbstractStore *store = 0, bool inUseExternalInterceptor = false);
 
     /// Get authentication code.
     QString code();
@@ -152,6 +152,9 @@ protected:
 
     /// Set token expiration time.
     void setExpires(int v);
+    
+    /// Handle params from a OAuth callback when set up to use an external interceptor
+    virtual void processParamsFromExternalInterceptor(QMap<QString, QString> params);
 
 protected:
     QString username_;

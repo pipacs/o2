@@ -10,7 +10,7 @@
 #include "o2skydrive.h"
 #include "o0globals.h"
 
-O2Skydrive::O2Skydrive(QObject *parent): O2(parent) {
+O2Skydrive::O2Skydrive(QObject *parent, bool inUseExternalInterceptor): O2(parent, NULL, NULL, inUseExternalInterceptor) {
     setRequestUrl("https://login.live.com/oauth20_authorize.srf");
     setTokenUrl("https://login.live.com/oauth20_token.srf");
     setRefreshTokenUrl("https://login.live.com/oauth20_token.srf");
@@ -114,7 +114,7 @@ void O2Skydrive::redirected(const QUrl &url) {
 
         setToken(urlToken);
         setRefreshToken(urlRefreshToken);
-        setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + urlExpiresIn);
+        setExpires((int)(QDateTime::currentMSecsSinceEpoch() / 1000 + urlExpiresIn));
         if (urlToken.isEmpty()) {
             Q_EMIT linkingFailed();
         } else {
