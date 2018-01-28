@@ -9,32 +9,9 @@
 
 static const quint16 DefaultLocalPort = 1965;
 
-O0BaseAuth::O0BaseAuth(QObject *parent, O0AbstractStore *store, bool inUseExternalInterceptor): QObject(parent), store_(0), useExternalInterceptor_(inUseExternalInterceptor) {
+O0BaseAuth::O0BaseAuth(QObject *parent, O0AbstractStore *store): QObject(parent), store_(0), useExternalWebInterceptor_(false), replyServer_(NULL) {
     localPort_ = DefaultLocalPort;
-    
-    if(!inUseExternalInterceptor) {
-        replyServer_ = new O2ReplyServer(this);
-    }
-    
     setStore(store);
-}
-
-void O0BaseAuth::processOAuthCallbackFromExternalInterceptor(const QString &inURLString)
-{
-    QUrl getTokenUrl(inURLString);
-    QUrlQuery query(getTokenUrl);
-    QList< QPair<QString, QString> > tokens = query.queryItems();
-    
-    QMultiMap<QString, QString> queryParams;
-    QPair<QString, QString> tokenPair;
-    foreach (tokenPair, tokens) {
-        // FIXME: We are decoding key and value again. This helps with Google OAuth, but is it mandated by the standard?
-        QString key = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.first.trimmed().toLatin1()));
-        QString value = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.second.trimmed().toLatin1()));
-        queryParams.insert(key, value);
-    }
-    
-    processParamsFromExternalInterceptor(queryParams);
 }
 
 void O0BaseAuth::setStore(O0AbstractStore *store) {
@@ -105,6 +82,14 @@ QString O0BaseAuth::clientSecret() {
 void O0BaseAuth::setClientSecret(const QString &value) {
     clientSecret_ = value;
     Q_EMIT clientSecretChanged();
+}
+
+bool O0BaseAuth::useExternalWebInterceptor() {
+    return useExternalWebInterceptor_;
+}
+
+void O0BaseAuth::setUseExternalWebInterceptor(bool useExternalWebInterceptor) {
+    useExternalWebInterceptor_ = useExternalWebInterceptor;
 }
 
 QByteArray O0BaseAuth::replyContent() const {

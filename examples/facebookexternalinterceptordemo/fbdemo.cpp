@@ -4,6 +4,7 @@
 #include <QDesktopServices>
 #include <QMetaEnum>
 #include <QDebug>
+#include <QUrlQuery>
 
 #include "fbdemo.h"
 #include "o0globals.h"
@@ -13,7 +14,6 @@ const char FB_APP_KEY[] = "227896037359072";
 const char FB_APP_SECRET[] = "3d35b063872579cf7213e09e76b65ceb";
 
 const char FB_REQUEST_URL[] = "https://www.facebook.com/dialog/oauth";
-const char FB_DEBUG_TOKEN[] = "https://graph.facebook.com/me?fields=id&access_token=%1";
 
 const int localPort = 8888;
 
@@ -22,10 +22,11 @@ const int localPort = 8888;
 
 FBDemo::FBDemo(QObject *parent) :
     QObject(parent), authDialog(NULL) {
-    o2Facebook_ = new O2Facebook(this, true);
+    o2Facebook_ = new O2Facebook(this);
 
     o2Facebook_->setClientId(FB_APP_KEY);
     o2Facebook_->setClientSecret(FB_APP_SECRET);
+    o2Facebook_->setUseExternalWebInterceptor(true);
     o2Facebook_->setLocalPort(localPort);
     o2Facebook_->setRequestUrl(FB_REQUEST_URL);  // Use the desktop login UI
 
@@ -61,7 +62,20 @@ void FBDemo::onAuthWindowCallbackCalled(const QString &inURLString)
 {
     if(o2Facebook_ != NULL)
     {
-        o2Facebook_->processOAuthCallbackFromExternalInterceptor(inURLString);
+        QUrl getTokenUrl(inURLString);
+        QUrlQuery query(getTokenUrl);
+        QList< QPair<QString, QString> > tokens = query.queryItems();
+
+        QMultiMap<QString, QString> queryParams;
+        QPair<QString, QString> tokenPair;
+        foreach (tokenPair, tokens) {
+            // FIXME: We are decoding key and value again. This helps with Google OAuth, but is it mandated by the standard?
+            QString key = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.first.trimmed().toLatin1()));
+            QString value = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.second.trimmed().toLatin1()));
+            queryParams.insert(key, value);
+        }
+
+        o2Facebook_->onVerificationReceived(queryParams);
     }
 }
 

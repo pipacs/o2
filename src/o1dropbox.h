@@ -9,7 +9,7 @@ class O0_EXPORT O1Dropbox: public O1 {
     Q_OBJECT
 
 public:
-    explicit O1Dropbox(QObject *parent = 0, bool inUseExternalInterceptor = false): O1(parent, NULL, NULL, inUseExternalInterceptor) {
+    explicit O1Dropbox(QObject *parent = 0): O1(parent, NULL, NULL) {
         setRequestTokenUrl(QUrl("https://api.dropbox.com/1/oauth/request_token"));
         setAuthorizeUrl(QUrl("https://www.dropbox.com/1/oauth/authorize?display=mobile"));
         setAccessTokenUrl(QUrl("https://api.dropbox.com/1/oauth/access_token"));

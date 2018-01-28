@@ -21,14 +21,10 @@
 #include "o0globals.h"
 #include "o0settingsstore.h"
 
-O1::O1(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store, bool inUseExternalInterceptor): O0BaseAuth(parent, store, inUseExternalInterceptor) {
+O1::O1(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store): O0BaseAuth(parent, store) {
     setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
     manager_ = manager ? manager : new QNetworkAccessManager(this);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
-    
-    if(!inUseExternalInterceptor) {
-        connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
-    }
     
     setCallbackUrl(O2_CALLBACK_URL);
 }
@@ -211,6 +207,16 @@ QByteArray O1::generateSignature(const QList<O0RequestParameter> headers, const 
 
 void O1::link() {
     qDebug() << "O1::link";
+
+    // Create the reply server if it doesn't exist
+    // and we don't use an external web interceptor
+    if(!useExternalWebInterceptor_) {
+        if(replyServer_ == NULL) {
+            replyServer_ = new O2ReplyServer(this);
+            connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+        }
+    }
+
     if (linked()) {
         qDebug() << "O1::link: Linked already";
         Q_EMIT linkingSucceeded();
@@ -222,7 +228,7 @@ void O1::link() {
     setTokenSecret("");
     setExtraTokens(QVariantMap());
     
-    if (!useExternalInterceptor_) {
+    if (!useExternalWebInterceptor_) {
         // Start reply server
         if (!replyServer_->isListening())
             replyServer_->listen(QHostAddress::Any, localPort());
@@ -389,10 +395,6 @@ void O1::onTokenExchangeFinished() {
         qWarning() << "O1::onTokenExchangeFinished: oauth_token or oauth_token_secret missing from response" << data;
         Q_EMIT linkingFailed();
     }
-}
-
-void O1::processParamsFromExternalInterceptor(QMap<QString, QString> params) {
-    onVerificationReceived(params);
 }
 
 QMap<QString, QString> O1::parseResponse(const QByteArray &response) {

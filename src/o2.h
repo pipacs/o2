@@ -86,7 +86,7 @@ public:
 public:
     /// Constructor.
     /// @param  parent  Parent object.
-    explicit O2(QObject *parent = 0, QNetworkAccessManager *manager = 0, O0AbstractStore *store = 0, bool inUseExternalInterceptor = false);
+    explicit O2(QObject *parent = 0, QNetworkAccessManager *manager = 0, O0AbstractStore *store = 0);
 
     /// Get authentication code.
     QString code();
@@ -124,10 +124,11 @@ Q_SIGNALS:
     void refreshTokenUrlChanged();
     void tokenUrlChanged();
 
-protected Q_SLOTS:
+public Q_SLOTS:
     /// Handle verification response.
     virtual void onVerificationReceived(QMap<QString, QString>);
 
+protected Q_SLOTS:
     /// Handle completion of a token request.
     virtual void onTokenReplyFinished();
 
@@ -152,9 +153,6 @@ protected:
 
     /// Set token expiration time.
     void setExpires(int v);
-    
-    /// Handle params from a OAuth callback when set up to use an external interceptor
-    virtual void processParamsFromExternalInterceptor(QMap<QString, QString> params);
 
 protected:
     QString username_;

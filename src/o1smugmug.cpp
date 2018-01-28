@@ -79,8 +79,8 @@ void O1SmugMug::initAuthorizationUrl(const AuthorizationUrlBuilder &builder) {
 
 #endif // QT_VERSION >= 0x050000
 
-O1SmugMug::O1SmugMug(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store, bool inUseExternalInterceptor)
-    : O1(parent, manager, store, inUseExternalInterceptor) {
+O1SmugMug::O1SmugMug(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store)
+    : O1(parent, manager, store) {
    setRequestTokenUrl(QUrl("https://secure.smugmug.com/services/oauth/1.0a/getRequestToken"));
    setAccessTokenUrl(QUrl("https://secure.smugmug.com/services/oauth/1.0a/getAccessToken"));
 }

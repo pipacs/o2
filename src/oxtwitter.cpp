@@ -9,7 +9,7 @@ const char XAUTH_PASSWORD[] = "x_auth_password";
 const char XAUTH_MODE[] = "x_auth_mode";
 const char XAUTH_MODE_VALUE[] = "client_auth";
 
-OXTwitter::OXTwitter(QObject *parent, bool inUseExternalInterceptor): O1Twitter(parent, inUseExternalInterceptor) {
+OXTwitter::OXTwitter(QObject *parent): O1Twitter(parent) {
 }
 
 QString OXTwitter::username() {
