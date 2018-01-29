@@ -1,5 +1,6 @@
 #include <QDataStream>
 #include <QDebug>
+#include <QUrlQuery>
 
 #include "o0baseauth.h"
 #include "o0globals.h"
@@ -8,9 +9,8 @@
 
 static const quint16 DefaultLocalPort = 1965;
 
-O0BaseAuth::O0BaseAuth(QObject *parent, O0AbstractStore *store): QObject(parent), store_(0) {
+O0BaseAuth::O0BaseAuth(QObject *parent, O0AbstractStore *store): QObject(parent), store_(0), useExternalWebInterceptor_(false), replyServer_(NULL) {
     localPort_ = DefaultLocalPort;
-    replyServer_ = new O2ReplyServer(this);
     setStore(store);
 }
 
@@ -84,12 +84,26 @@ void O0BaseAuth::setClientSecret(const QString &value) {
     Q_EMIT clientSecretChanged();
 }
 
+bool O0BaseAuth::useExternalWebInterceptor() {
+    return useExternalWebInterceptor_;
+}
+
+void O0BaseAuth::setUseExternalWebInterceptor(bool useExternalWebInterceptor) {
+    useExternalWebInterceptor_ = useExternalWebInterceptor;
+}
+
 QByteArray O0BaseAuth::replyContent() const {
-    return replyServer_->replyContent();
+    if(replyServer_ != NULL) {
+        return replyServer_->replyContent();
+    }
+    
+    return QByteArray();
 }
 
 void O0BaseAuth::setReplyContent(const QByteArray &value) {
-    replyServer_->setReplyContent(value);
+    if(replyServer_ != NULL) {
+        return replyServer_->setReplyContent(value);
+    }
 }
 
 int O0BaseAuth::localPort() {

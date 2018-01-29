@@ -100,10 +100,11 @@ Q_SIGNALS:
     void accessTokenUrlChanged();
     void signatureMethodChanged();
 
-protected Q_SLOTS:
+public Q_SLOTS:
     /// Handle verification received from the reply server.
     virtual void onVerificationReceived(QMap<QString,QString> params);
 
+protected Q_SLOTS:
     /// Handle token request error.
     virtual void onTokenRequestError(QNetworkReply::NetworkError error);
 

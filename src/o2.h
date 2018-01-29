@@ -124,10 +124,11 @@ Q_SIGNALS:
     void refreshTokenUrlChanged();
     void tokenUrlChanged();
 
-protected Q_SLOTS:
+public Q_SLOTS:
     /// Handle verification response.
     virtual void onVerificationReceived(QMap<QString, QString>);
 
+protected Q_SLOTS:
     /// Handle completion of a token request.
     virtual void onTokenReplyFinished();
 

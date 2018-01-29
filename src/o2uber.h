@@ -10,8 +10,10 @@ class O0_EXPORT O2Uber: public O2{
 public:
     O2Uber(QObject *parent = 0);
 
-protected Q_SLOTS:
+public Q_SLOTS:
     void onVerificationReceived(QMap<QString, QString>);
+
+protected Q_SLOTS:
     virtual void onTokenReplyFinished();
 };
 
