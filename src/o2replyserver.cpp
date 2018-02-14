@@ -101,7 +101,7 @@ QMap<QString, QString> O2ReplyServer::parseQueryParams(QByteArray *data) {
     QPair<QString, QString> tokenPair;
     foreach (tokenPair, tokens) {
         // FIXME: We are decoding key and value again. This helps with Google OAuth, but is it mandated by the standard?
-        QString key = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.first.trimmed().toLatin1()));
+        const QString key = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.first.trimmed().toLatin1()));
         QString value = QUrl::fromPercentEncoding(QByteArray().append(tokenPair.second.trimmed().toLatin1()));
         queryParams.insert(key, value);
     }

@@ -311,12 +311,12 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
 }
 
 QString O2::code() {
-    QString key = QString(O2_KEY_CODE).arg(clientId_);
+    const QString key = QString(O2_KEY_CODE).arg(clientId_);
     return store_->value(key);
 }
 
 void O2::setCode(const QString &c) {
-    QString key = QString(O2_KEY_CODE).arg(clientId_);
+    const QString key = QString(O2_KEY_CODE).arg(clientId_);
     store_->setValue(key, c);
 }
 
@@ -394,23 +394,23 @@ QByteArray O2::buildRequestBody(const QMap<QString, QString> &parameters) {
 }
 
 int O2::expires() {
-    QString key = QString(O2_KEY_EXPIRES).arg(clientId_);
+    const QString key = QString(O2_KEY_EXPIRES).arg(clientId_);
     return store_->value(key).toInt();
 }
 
 void O2::setExpires(int v) {
-    QString key = QString(O2_KEY_EXPIRES).arg(clientId_);
+    const QString key = QString(O2_KEY_EXPIRES).arg(clientId_);
     store_->setValue(key, QString::number(v));
 }
 
 QString O2::refreshToken() {
-    QString key = QString(O2_KEY_REFRESH_TOKEN).arg(clientId_);
+    const QString key = QString(O2_KEY_REFRESH_TOKEN).arg(clientId_);
     return store_->value(key);
 }
 
 void O2::setRefreshToken(const QString &v) {
     qDebug() << "O2::setRefreshToken" << v.left(4) << "...";
-    QString key = QString(O2_KEY_REFRESH_TOKEN).arg(clientId_);
+    const QString key = QString(O2_KEY_REFRESH_TOKEN).arg(clientId_);
     store_->setValue(key, v);
 }
 
