@@ -1,4 +1,4 @@
-#include <QDebug>
+#include "o0debug.h"
 #include <QDateTime>
 #include <QMap>
 #include <QString>
@@ -17,9 +17,9 @@ O2Skydrive::O2Skydrive(QObject *parent): O2(parent) {
 }
 
 void O2Skydrive::link() {
-    qDebug() << "O2Skydrive::link";
+    o0debug() << "O2Skydrive::link";
     if (linked()) {
-        qDebug() << "O2kydrive::link: Linked already";
+        o0debug() << "O2kydrive::link: Linked already";
         return;
     }
 
@@ -52,7 +52,7 @@ void O2Skydrive::link() {
 }
 
 void O2Skydrive::redirected(const QUrl &url) {
-    qDebug() << "O2Skydrive::redirected" << url;
+    o0debug() << "O2Skydrive::redirected" << url;
 
     Q_EMIT closeBrowser();
 
@@ -66,7 +66,7 @@ void O2Skydrive::redirected(const QUrl &url) {
         urlCode = query.queryItemValue(O2_OAUTH2_GRANT_TYPE_CODE);
 #endif
         if (urlCode.isEmpty()) {
-            qDebug() << "O2Skydrive::redirected: Code not received";
+            o0debug() << "O2Skydrive::redirected: Code not received";
             Q_EMIT linkingFailed();
             return;
         }
@@ -101,7 +101,7 @@ void O2Skydrive::redirected(const QUrl &url) {
                 }
                 QString key = item.left(index);
                 QString value = item.mid(index + 1);
-                qDebug() << "O2Skydrive::redirected: Got" << key;
+                o0debug() << "O2Skydrive::redirected: Got" << key;
                 if (key == O2_OAUTH2_ACCESS_TOKEN) {
                     urlToken = value;
                 } else if (key == O2_OAUTH2_EXPIRES_IN) {

@@ -26,6 +26,7 @@ set( o2_SRCS
     o2simplecrypt.cpp
     o0settingsstore.cpp
     o0baseauth.cpp
+    o0debug.cpp
 )
 
 set( o2_HDRS

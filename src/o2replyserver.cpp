@@ -7,7 +7,7 @@
 #include <QTimer>
 #include <QStringList>
 #include <QUrl>
-#include <QDebug>
+#include "o0debug.h"
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
 #endif
@@ -16,13 +16,13 @@
 
 O2ReplyServer::O2ReplyServer(QObject *parent): QTcpServer(parent),
   timeout_(15), maxtries_(3), tries_(0) {
-    qDebug() << "O2ReplyServer: Starting";
+    o0debug() << "O2ReplyServer: Starting";
     connect(this, SIGNAL(newConnection()), this, SLOT(onIncomingConnection()));
     replyContent_ = "<HTML></HTML>";
 }
 
 void O2ReplyServer::onIncomingConnection() {
-    qDebug() << "O2ReplyServer::onIncomingConnection: Receiving...";
+    o0debug() << "O2ReplyServer::onIncomingConnection: Receiving...";
     QTcpSocket *socket = nextPendingConnection();
     connect(socket, SIGNAL(readyRead()), this, SLOT(onBytesReady()), Qt::UniqueConnection);
     connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
@@ -44,11 +44,11 @@ void O2ReplyServer::onBytesReady() {
         // server has been closed, stop processing queued connections
         return;
     }
-    qDebug() << "O2ReplyServer::onBytesReady: Processing request";
+    o0debug() << "O2ReplyServer::onBytesReady: Processing request";
     // NOTE: on first call, the timeout timer is started
     QTcpSocket *socket = qobject_cast<QTcpSocket *>(sender());
     if (!socket) {
-        qWarning() << "O2ReplyServer::onBytesReady: No socket available";
+        o0warning() << "O2ReplyServer::onBytesReady: No socket available";
         return;
     }
     QByteArray reply;
@@ -57,31 +57,31 @@ void O2ReplyServer::onBytesReady() {
     reply.append(QString("Content-Length: %1\r\n\r\n").arg(replyContent_.size()).toLatin1());
     reply.append(replyContent_);
     socket->write(reply);
-    qDebug() << "O2ReplyServer::onBytesReady: Sent reply";
+    o0debug() << "O2ReplyServer::onBytesReady: Sent reply";
 
     QByteArray data = socket->readAll();
     QMap<QString, QString> queryParams = parseQueryParams(&data);
     if (queryParams.isEmpty()) {
         if (tries_ < maxtries_ ) {
-            qDebug() << "O2ReplyServer::onBytesReady: No query params found, waiting for more callbacks";
+            o0debug() << "O2ReplyServer::onBytesReady: No query params found, waiting for more callbacks";
             ++tries_;
             return;
         } else {
             tries_ = 0;
-            qWarning() << "O2ReplyServer::onBytesReady: No query params found, maximum callbacks received";
+            o0warning() << "O2ReplyServer::onBytesReady: No query params found, maximum callbacks received";
             closeServer(socket, false);
             return;
         }
     }
-    qDebug() << "O2ReplyServer::onBytesReady: Query params found, closing server";
+    o0debug() << "O2ReplyServer::onBytesReady: Query params found, closing server";
     closeServer(socket, true);
     Q_EMIT verificationReceived(queryParams);
 }
 
 QMap<QString, QString> O2ReplyServer::parseQueryParams(QByteArray *data) {
-    qDebug() << "O2ReplyServer::parseQueryParams";
+    o0debug() << "O2ReplyServer::parseQueryParams";
 
-    //qDebug() << QString("O2ReplyServer::parseQueryParams data:\n%1").arg(QString(*data));
+    //o0debug() << QString("O2ReplyServer::parseQueryParams data:\n%1").arg(QString(*data));
 
     QString splitGetLine = QString(*data).split("\r\n").first();
     splitGetLine.remove("GET ");
@@ -114,13 +114,13 @@ void O2ReplyServer::closeServer(QTcpSocket *socket, bool hasparameters)
       return;
   }
 
-  qDebug() << "O2ReplyServer::closeServer: Initiating";
+  o0debug() << "O2ReplyServer::closeServer: Initiating";
   int port = serverPort();
 
   if (!socket && sender()) {
       QTimer *timer = qobject_cast<QTimer*>(sender());
       if (timer) {
-          qWarning() << "O2ReplyServer::closeServer: Closing due to timeout";
+          o0warning() << "O2ReplyServer::closeServer: Closing due to timeout";
           timer->stop();
           socket = qobject_cast<QTcpSocket *>(timer->parent());
           timer->deleteLater();
@@ -129,13 +129,13 @@ void O2ReplyServer::closeServer(QTcpSocket *socket, bool hasparameters)
   if (socket) {
       QTimer *timer = socket->findChild<QTimer*>("timeoutTimer");
       if (timer) {
-          qDebug() << "O2ReplyServer::closeServer: Stopping socket's timeout timer";
+          o0debug() << "O2ReplyServer::closeServer: Stopping socket's timeout timer";
           timer->stop();
       }
       socket->disconnectFromHost();
   }
   close();
-  qDebug() << "O2ReplyServer::closeServer: Closed, no longer listening on port" << port;
+  o0debug() << "O2ReplyServer::closeServer: Closed, no longer listening on port" << port;
   Q_EMIT serverClosed(hasparameters);
 }
 

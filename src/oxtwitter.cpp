@@ -1,5 +1,5 @@
 #include <QDateTime>
-#include <QDebug>
+#include "o0debug.h"
 
 #include "oxtwitter.h"
 #include "o0globals.h"
@@ -31,14 +31,14 @@ void OXTwitter::setPassword(const QString &password) {
 }
 
 void OXTwitter::link() {
-    qDebug() << "OXTwitter::link";
+    o0debug() << "OXTwitter::link";
     if (linked()) {
-        qDebug() << "Linked already";
+        o0debug() << "Linked already";
         return;
     }
 
     if (username_.isEmpty() || password_.isEmpty()) {
-        qWarning() << "Error: XAuth parameters not set. Aborting!";
+        o0warning() << "Error: XAuth parameters not set. Aborting!";
         return;
     }
 

@@ -1,4 +1,4 @@
-#include <QDebug>
+#include "o0debug.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMap>
@@ -23,13 +23,13 @@ O2Facebook::O2Facebook(QObject *parent): O2(parent) {
 }
 
 void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
-    qDebug() << "O2Facebook::onVerificationReceived: Emitting closeBrowser()";
+    o0debug() << "O2Facebook::onVerificationReceived: Emitting closeBrowser()";
     Q_EMIT closeBrowser();
 
     if (response.contains("error")) {
-        qWarning() << "O2Facebook::onVerificationReceived: Verification failed";
+        o0warning() << "O2Facebook::onVerificationReceived: Verification failed";
         foreach (QString key, response.keys()) {
-            qWarning() << "O2Facebook::onVerificationReceived:" << key << response.value(key);
+            o0warning() << "O2Facebook::onVerificationReceived:" << key << response.value(key);
         }
         Q_EMIT linkingFailed();
         return;
@@ -64,7 +64,7 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
 }
 
 void O2Facebook::onTokenReplyFinished() {
-    qDebug() << "O2Facebook::onTokenReplyFinished";
+    o0debug() << "O2Facebook::onTokenReplyFinished";
 
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
     if (tokenReply->error() == QNetworkReply::NoError) {
@@ -87,6 +87,6 @@ void O2Facebook::onTokenReplyFinished() {
         setLinked(true);
         Q_EMIT linkingSucceeded();
     } else {
-        qWarning() << "O2Facebook::onTokenReplyFinished:" << tokenReply->errorString();
+        o0warning() << "O2Facebook::onTokenReplyFinished:" << tokenReply->errorString();
     }
 }
