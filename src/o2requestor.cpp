@@ -76,15 +76,13 @@ void O2Requestor::onRefreshFinished(QNetworkReply::NetworkError error) {
 }
 
 void O2Requestor::onRequestFinished() {
-    QNetworkReply *senderReply = qobject_cast<QNetworkReply *>(sender());
-    QNetworkReply::NetworkError error = senderReply->error();
     if (status_ == Idle) {
         return;
     }
-    if (reply_ != senderReply) {
+    if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
         return;
     }
-    if (error == QNetworkReply::NoError) {
+    if (reply_->error() == QNetworkReply::NoError) {
         QTimer::singleShot(10, this, SLOT(finish()));
     }
 }
