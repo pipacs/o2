@@ -99,6 +99,13 @@ To handle these signals, implement the following slots in your code:
     void onCloseBrowser() {
         // Close the browser window opened in openBrowser()
     }
+    
+**Note:** From _onOpenBrowser_, prefer opening a web view, instead of a full-blown external browser.
+
+**Note:** If you _must_ use an external browser on Android, change this line in the Qt-generated manifest.xml:
+
+```meta-data android:name="android.app.background_running" android:value="true"```
+
 
 ### Logging In
 
