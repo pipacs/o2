@@ -1,4 +1,4 @@
-#include <QDebug>
+#include "o0debug.h"
 #include <QDateTime>
 #include <QNetworkReply>
 #include <QNetworkAccessManager>

@@ -1,6 +1,6 @@
 #include <QCryptographicHash>
 #include <QByteArray>
-#include <QDebug>
+#include "o0debug.h"
 
 #include "o0settingsstore.h"
 

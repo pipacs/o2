@@ -1,4 +1,4 @@
-#include <QDebug>
+#include "o2debug.h"
 #include <QMap>
 #include <QString>
 #include <QStringList>
