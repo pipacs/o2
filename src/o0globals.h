@@ -57,6 +57,7 @@ const char O2_SIGNATURE_TYPE_PLAINTEXT[] = "PLAINTEXT";
 const char O2_AUTHORIZATION_CODE[] = "authorization_code";
 
 // Standard HTTP headers
+const char O2_HTTP_HTTP_HEADER[] = "HTTP";
 const char O2_HTTP_AUTHORIZATION_HEADER[] = "Authorization";
 
 #endif // O0GLOBALS_H
