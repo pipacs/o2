@@ -14,11 +14,16 @@ O2Requestor::O2Requestor(QNetworkAccessManager *manager, O2 *authenticator, QObj
     if (authenticator) {
         timedReplies_.setIgnoreSslErrors(authenticator->ignoreSslErrors());
     }
+    accessTokenInQueryFormat_ = "%1";
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(authenticator, SIGNAL(refreshFinished(QNetworkReply::NetworkError)), this, SLOT(onRefreshFinished(QNetworkReply::NetworkError)), Qt::QueuedConnection);
 }
 
 O2Requestor::~O2Requestor() {
+}
+
+void O2Requestor::setAccessTokenInQueryFormat(const QString &value) {
+    accessTokenInQueryFormat_ = value;
 }
 
 void O2Requestor::setAccessTokenInAuthenticationHTTPHeaderFormat(const QString &value) {
@@ -121,7 +126,6 @@ void O2Requestor::onUploadProgress(qint64 uploaded, qint64 total) {
 
 int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operation operation) {
     static int currentId;
-    QUrl url;
 
     if (status_ != Idle) {
         qWarning() << "O2Requestor::setup: Another request pending";
@@ -131,14 +135,19 @@ int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operat
     request_ = req;
     operation_ = operation;
     id_ = currentId++;
-    url_ = url = req.url();
+    url_ = req.url();
+    
+    QUrl url = url_;
+    if (!accessTokenInQueryFormat_.isEmpty()) {
 #if QT_VERSION < 0x050000
-    url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
+        url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, accessTokenInQueryFormat_.arg(authenticator_->token()));
 #else
-    QUrlQuery query(url);
-    query.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
-    url.setQuery(query);
+        QUrlQuery query(url);
+        query.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, accessTokenInQueryFormat_.arg(authenticator_->token()));
+        url.setQuery(query);
 #endif
+    }
+    
     request_.setUrl(url);
 	
     // If the service require the access token to be sent as a Authentication HTTP header, we add the access token.
@@ -174,13 +183,15 @@ void O2Requestor::retry() {
     reply_->disconnect(this);
     reply_->deleteLater();
     QUrl url = url_;
+    if (!accessTokenInQueryFormat_.isEmpty()) {
 #if QT_VERSION < 0x050000
-    url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
+        url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, accessTokenInQueryFormat_.arg(authenticator_->token()));
 #else
-    QUrlQuery query(url);
-    query.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
-    url.setQuery(query);
+        QUrlQuery query(url);
+        query.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, accessTokenInQueryFormat_.arg(authenticator_->token()));
+        url.setQuery(query);
 #endif
+    }
     request_.setUrl(url);
 	
     // If the service require the access token to be sent as a Authentication HTTP header,

@@ -21,6 +21,18 @@ public:
     explicit O2Requestor(QNetworkAccessManager *manager, O2 *authenticator, QObject *parent = 0);
     ~O2Requestor();
     
+    
+    /// Some services require the access token to be sent as a Authentication HTTP header
+    /// and refuse requests with the access token in the query.
+    /// This function allows to use or ignore the access token in the query.
+    /// The default value of `%1` means that the query will contain the access token.
+    /// By setting the value to an empty string, the query will not contain the access token.
+    /// See:
+    /// https://tools.ietf.org/html/draft-ietf-oauth-v2-bearer-16#section-4.3
+    /// https://tools.ietf.org/html/rfc6750#section-2.3
+    
+    void setAccessTokenInQueryFormat(const QString &value);
+
     /// Some services require the access token to be sent as a Authentication HTTP header.
     /// This is the case for Twitch and Mixer.
     /// When the access token expires and is refreshed, O2Requestor::retry() needs to update the Authentication HTTP header.
@@ -84,6 +96,7 @@ protected:
     QUrl url_;
     O2ReplyList timedReplies_;
     QNetworkReply::NetworkError error_;
+    QString accessTokenInQueryFormat_;
     QString accessTokenInAuthenticationHTTPHeaderFormat_;
 };
 
