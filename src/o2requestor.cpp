@@ -8,13 +8,12 @@
 #include "o2.h"
 #include "o0globals.h"
 
-O2Requestor::O2Requestor(QNetworkAccessManager *manager, O2 *authenticator, QObject *parent): QObject(parent), reply_(NULL), status_(Idle) {
+O2Requestor::O2Requestor(QNetworkAccessManager *manager, O2 *authenticator, QObject *parent): QObject(parent), reply_(NULL), status_(Idle), addAccessTokenInQuery_(true) {
     manager_ = manager;
     authenticator_ = authenticator;
     if (authenticator) {
         timedReplies_.setIgnoreSslErrors(authenticator->ignoreSslErrors());
     }
-    accessTokenInQueryFormat_ = "%1";
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     connect(authenticator, SIGNAL(refreshFinished(QNetworkReply::NetworkError)), this, SLOT(onRefreshFinished(QNetworkReply::NetworkError)), Qt::QueuedConnection);
 }
@@ -22,8 +21,8 @@ O2Requestor::O2Requestor(QNetworkAccessManager *manager, O2 *authenticator, QObj
 O2Requestor::~O2Requestor() {
 }
 
-void O2Requestor::setAccessTokenInQueryFormat(const QString &value) {
-    accessTokenInQueryFormat_ = value;
+void O2Requestor::setAddAccessTokenInQuery(bool value) {
+    addAccessTokenInQuery_ = value;
 }
 
 void O2Requestor::setAccessTokenInAuthenticationHTTPHeaderFormat(const QString &value) {
@@ -138,12 +137,12 @@ int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operat
     url_ = req.url();
     
     QUrl url = url_;
-    if (!accessTokenInQueryFormat_.isEmpty()) {
+    if (addAccessTokenInQuery_) {
 #if QT_VERSION < 0x050000
-        url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, accessTokenInQueryFormat_.arg(authenticator_->token()));
+        url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
 #else
         QUrlQuery query(url);
-        query.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, accessTokenInQueryFormat_.arg(authenticator_->token()));
+        query.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
         url.setQuery(query);
 #endif
     }
@@ -183,12 +182,12 @@ void O2Requestor::retry() {
     reply_->disconnect(this);
     reply_->deleteLater();
     QUrl url = url_;
-    if (!accessTokenInQueryFormat_.isEmpty()) {
+    if (addAccessTokenInQuery_) {
 #if QT_VERSION < 0x050000
-        url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, accessTokenInQueryFormat_.arg(authenticator_->token()));
+        url.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
 #else
         QUrlQuery query(url);
-        query.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, accessTokenInQueryFormat_.arg(authenticator_->token()));
+        query.addQueryItem(O2_OAUTH2_ACCESS_TOKEN, authenticator_->token());
         url.setQuery(query);
 #endif
     }
