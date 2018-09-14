@@ -66,6 +66,20 @@ int O2Requestor::put(const QNetworkRequest &req, const QByteArray &data) {
     return id_;
 }
 
+int O2Requestor::customRequest(const QNetworkRequest &req, const QByteArray &verb, const QByteArray &data)
+{
+    if (-1 == setup(req, QNetworkAccessManager::CustomOperation, verb)) {
+        return -1;
+    }
+    data_ = data;
+    reply_ = manager_->sendCustomRequest(request_, verb, data_);
+    timedReplies_.add(reply_);
+    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
+    return id_;
+}
+
 void O2Requestor::onRefreshFinished(QNetworkReply::NetworkError error) {
     if (status_ != Requesting) {
         qWarning() << "O2Requestor::onRefreshFinished: No pending request";
@@ -123,7 +137,7 @@ void O2Requestor::onUploadProgress(qint64 uploaded, qint64 total) {
     Q_EMIT uploadProgress(id_, uploaded, total);
 }
 
-int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operation operation) {
+int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operation operation, const QByteArray &verb) {
     static int currentId;
 
     if (status_ != Idle) {
@@ -150,10 +164,14 @@ int O2Requestor::setup(const QNetworkRequest &req, QNetworkAccessManager::Operat
     request_.setUrl(url);
 	
     // If the service require the access token to be sent as a Authentication HTTP header, we add the access token.
-    if(!accessTokenInAuthenticationHTTPHeaderFormat_.isEmpty()) {
+    if (!accessTokenInAuthenticationHTTPHeaderFormat_.isEmpty()) {
         request_.setRawHeader(O2_HTTP_AUTHORIZATION_HEADER, accessTokenInAuthenticationHTTPHeaderFormat_.arg(authenticator_->token()).toLatin1());
     }
 	
+    if (!verb.isEmpty()) {
+        request_.setRawHeader(O2_HTTP_HTTP_HEADER, verb);
+    }
+
     status_ = Requesting;
     error_ = QNetworkReply::NoError;
     return id_;
@@ -207,8 +225,12 @@ void O2Requestor::retry() {
     case QNetworkAccessManager::PostOperation:
         reply_ = manager_->post(request_, data_);
         break;
+    case QNetworkAccessManager::CustomOperation:
+        reply_ = manager_->sendCustomRequest(request_, request_.rawHeader(O2_HTTP_HTTP_HEADER), data_);
+        break;
     default:
         reply_ = manager_->put(request_, data_);
+        break;
     }
     timedReplies_.add(reply_);
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
