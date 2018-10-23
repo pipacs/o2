@@ -211,9 +211,10 @@ void O1::link() {
     // Create the reply server if it doesn't exist
     // and we don't use an external web interceptor
     if(!useExternalWebInterceptor_) {
-        if(replyServer_ == NULL) {
-            replyServer_ = new O2ReplyServer(this);
-            connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+        if(replyServer() == NULL) {
+            O2ReplyServer * replyServer = new O2ReplyServer(this);
+            connect(replyServer, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+            setReplyServer(replyServer);
         }
     }
 
@@ -230,8 +231,8 @@ void O1::link() {
     
     if (!useExternalWebInterceptor_) {
         // Start reply server
-        if (!replyServer_->isListening())
-            replyServer_->listen(QHostAddress::Any, localPort());
+        if (!replyServer()->isListening())
+            replyServer()->listen(QHostAddress::Any, localPort());
     }
     
     // Get any query parameters for the request

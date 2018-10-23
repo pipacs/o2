@@ -155,10 +155,11 @@ void O2::link() {
     // Create the reply server if it doesn't exist
     // and we don't use an external web interceptor
     if(!useExternalWebInterceptor_) {
-        if(replyServer_ == NULL) {
-            replyServer_ = new O2ReplyServer(this);
-            connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
-            connect(replyServer_, SIGNAL(serverClosed(bool)), this, SLOT(serverHasClosed(bool)));
+        if(replyServer() == NULL) {
+            O2ReplyServer * replyServer = new O2ReplyServer(this);
+            connect(replyServer, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+            connect(replyServer, SIGNAL(serverClosed(bool)), this, SLOT(serverHasClosed(bool)));
+            setReplyServer(replyServer);
         }
     }
 
@@ -183,8 +184,8 @@ void O2::link() {
             redirectUri_ = localhostPolicy_.arg(localPort());
         } else {
             // Start listening to authentication replies
-            if (!replyServer_->isListening()) {
-                if (replyServer_->listen(QHostAddress::Any, localPort_)) {
+            if (!replyServer()->isListening()) {
+                if (replyServer()->listen(QHostAddress::Any, localPort_)) {
                     qDebug() << "O2::link: Reply server listening on port" << localPort();
                 } else {
                     qWarning() << "O2::link: Reply server failed to start listening on port" << localPort();
@@ -194,8 +195,8 @@ void O2::link() {
             }
 
             // Save redirect URI, as we have to reuse it when requesting the access token
-            redirectUri_ = localhostPolicy_.arg(replyServer_->serverPort());
-            replyServer_->setUniqueState(uniqueState);
+            redirectUri_ = localhostPolicy_.arg(replyServer()->serverPort());
+            replyServer()->setUniqueState(uniqueState);
         }
 
         // Assemble intial authentication URL

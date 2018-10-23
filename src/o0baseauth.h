@@ -117,6 +117,11 @@ protected:
     /// Set extra tokens found in OAuth response
     void setExtraTokens(QVariantMap extraTokens);
 
+    /// Set local reply server
+    void setReplyServer(O2ReplyServer *server);
+
+    O2ReplyServer * replyServer() const;
+
 protected:
     QString clientId_;
     QString clientSecret_;
@@ -130,6 +135,9 @@ protected:
     O0AbstractStore *store_;
     QVariantMap extraTokens_;
     bool useExternalWebInterceptor_;
+    QByteArray replyContent_;
+
+private:
     O2ReplyServer *replyServer_;
 };
 
