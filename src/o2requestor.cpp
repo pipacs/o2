@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QTimer>
+#include <QBuffer>
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
 #endif
@@ -72,7 +73,10 @@ int O2Requestor::customRequest(const QNetworkRequest &req, const QByteArray &ver
         return -1;
     }
     data_ = data;
-    reply_ = manager_->sendCustomRequest(request_, verb, data_);
+    QBuffer * buffer = new QBuffer;
+    buffer->setData(data_);
+    reply_ = manager_->sendCustomRequest(request_, verb, buffer);
+    buffer->setParent(reply_);
     timedReplies_.add(reply_);
     connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
@@ -226,7 +230,12 @@ void O2Requestor::retry() {
         reply_ = manager_->post(request_, data_);
         break;
     case QNetworkAccessManager::CustomOperation:
-        reply_ = manager_->sendCustomRequest(request_, request_.rawHeader(O2_HTTP_HTTP_HEADER), data_);
+    {
+        QBuffer * buffer = new QBuffer;
+        buffer->setData(data_);
+        reply_ = manager_->sendCustomRequest(request_, request_.rawHeader(O2_HTTP_HTTP_HEADER), buffer);
+        buffer->setParent(reply_);
+    }
         break;
     default:
         reply_ = manager_->put(request_, data_);
