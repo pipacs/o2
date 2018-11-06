@@ -370,11 +370,17 @@ void O2::onTokenReplyFinished() {
 
 void O2::onTokenReplyError(QNetworkReply::NetworkError error) {
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
-    qWarning() << "O2::onTokenReplyError: " << error << ": " << tokenReply->errorString();
-    qDebug() << "O2::onTokenReplyError: " << tokenReply->readAll();
+    if (!tokenReply)
+    {
+      qDebug() << "O2::onTokenReplyError: reply is null";
+    } else {
+      qWarning() << "O2::onTokenReplyError: " << error << ": " << tokenReply->errorString();
+      qDebug() << "O2::onTokenReplyError: " << tokenReply->readAll();
+      timedReplies_.remove(tokenReply);
+    }
+	
     setToken(QString());
     setRefreshToken(QString());
-    timedReplies_.remove(tokenReply);
     Q_EMIT linkingFailed();
 }
 
