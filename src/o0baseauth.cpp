@@ -93,16 +93,13 @@ void O0BaseAuth::setUseExternalWebInterceptor(bool useExternalWebInterceptor) {
 }
 
 QByteArray O0BaseAuth::replyContent() const {
-    if(replyServer_ != NULL) {
-        return replyServer_->replyContent();
-    }
-    
-    return QByteArray();
+    return replyContent_;
 }
 
 void O0BaseAuth::setReplyContent(const QByteArray &value) {
-    if(replyServer_ != NULL) {
-        return replyServer_->setReplyContent(value);
+    replyContent_ = value;
+    if (replyServer_) {
+        replyServer_->setReplyContent(replyContent_);
     }
 }
 
@@ -133,6 +130,19 @@ void O0BaseAuth::setExtraTokens(QVariantMap extraTokens) {
     QString key = QString(O2_KEY_EXTRA_TOKENS).arg(clientId_);
     store_->setValue(key, bytes.toBase64());
     Q_EMIT extraTokensChanged();
+}
+
+void O0BaseAuth::setReplyServer(O2ReplyServer * server)
+{
+    delete replyServer_;
+
+    replyServer_ = server;
+    replyServer_->setReplyContent(replyContent_);
+}
+
+O2ReplyServer * O0BaseAuth::replyServer() const
+{
+    return replyServer_;
 }
 
 QByteArray O0BaseAuth::createQueryParameters(const QList<O0RequestParameter> &parameters) {

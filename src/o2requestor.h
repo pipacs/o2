@@ -7,6 +7,7 @@
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QByteArray>
+#include <QHttpMultiPart>
 
 #include "o0export.h"
 #include "o2reply.h"
@@ -42,24 +43,29 @@ public:
 public Q_SLOTS:
     /// Make a GET request.
     /// @return Request ID or -1 if there are too many requests in the queue.
-    int get(const QNetworkRequest &req);
+    int get(const QNetworkRequest &req, int timeout = 60*1000);
 
     /// Make a POST request.
     /// @return Request ID or -1 if there are too many requests in the queue.
-    int post(const QNetworkRequest &req, const QByteArray &data);
+    int post(const QNetworkRequest &req, const QByteArray &data, int timeout = 60*1000);
+    int post(const QNetworkRequest &req, QHttpMultiPart* data, int timeout = 60*1000);
 
     /// Make a PUT request.
     /// @return Request ID or -1 if there are too many requests in the queue.
-    int put(const QNetworkRequest &req, const QByteArray &data);
+    int put(const QNetworkRequest &req, const QByteArray &data, int timeout = 60*1000);
+    int put(const QNetworkRequest &req, QHttpMultiPart* data, int timeout = 60*1000);
 
     /// Make a custom request.
     /// @return Request ID or -1 if there are too many requests in the queue.
-    int customRequest(const QNetworkRequest &req, const QByteArray &verb, const QByteArray &data);
+    int customRequest(const QNetworkRequest &req, const QByteArray &verb, const QByteArray &data, int timeout = 60*1000);
 
 Q_SIGNALS:
 
     /// Emitted when a request has been completed or failed.
     void finished(int id, QNetworkReply::NetworkError error, QByteArray data);
+
+    /// Emitted when a request has been completed or faled. Also reply headers will be provided.
+    void finished(int id, QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers);
 
     /// Emitted when an upload has progressed.
     void uploadProgress(int id, qint64 bytesSent, qint64 bytesTotal);
@@ -94,6 +100,7 @@ protected:
     O2 *authenticator_;
     QNetworkRequest request_;
     QByteArray data_;
+    QHttpMultiPart* multipartData_;
     QNetworkReply *reply_;
     Status status_;
     int id_;
@@ -103,6 +110,7 @@ protected:
     QNetworkReply::NetworkError error_;
     bool addAccessTokenInQuery_;
     QString accessTokenInAuthenticationHTTPHeaderFormat_;
+    bool rawData_;
 };
 
 #endif // O2REQUESTOR_H

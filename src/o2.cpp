@@ -10,6 +10,7 @@
 #include <QCryptographicHash>
 #include <QTimer>
 #include <QVariantMap>
+#include <QUuid>
 
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
@@ -154,10 +155,11 @@ void O2::link() {
     // Create the reply server if it doesn't exist
     // and we don't use an external web interceptor
     if(!useExternalWebInterceptor_) {
-        if(replyServer_ == NULL) {
-            replyServer_ = new O2ReplyServer(this);
-            connect(replyServer_, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
-            connect(replyServer_, SIGNAL(serverClosed(bool)), this, SLOT(serverHasClosed(bool)));
+        if(replyServer() == NULL) {
+            O2ReplyServer * replyServer = new O2ReplyServer(this);
+            connect(replyServer, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+            connect(replyServer, SIGNAL(serverClosed(bool)), this, SLOT(serverHasClosed(bool)));
+            setReplyServer(replyServer);
         }
     }
 
@@ -176,13 +178,14 @@ void O2::link() {
 
     if (grantFlow_ == GrantFlowAuthorizationCode || grantFlow_ == GrantFlowImplicit) {
 
+        QString uniqueState = QUuid::createUuid().toString().remove(QRegExp("([^a-zA-Z0-9]|[-])"));
         if (useExternalWebInterceptor_) {
             // Save redirect URI, as we have to reuse it when requesting the access token
             redirectUri_ = localhostPolicy_.arg(localPort());
         } else {
             // Start listening to authentication replies
-            if (!replyServer_->isListening()) {
-                if (replyServer_->listen(QHostAddress::Any, localPort_)) {
+            if (!replyServer()->isListening()) {
+                if (replyServer()->listen(QHostAddress::Any, localPort_)) {
                     qDebug() << "O2::link: Reply server listening on port" << localPort();
                 } else {
                     qWarning() << "O2::link: Reply server failed to start listening on port" << localPort();
@@ -190,11 +193,12 @@ void O2::link() {
                     return;
                 }
             }
-            
+
             // Save redirect URI, as we have to reuse it when requesting the access token
-            redirectUri_ = localhostPolicy_.arg(replyServer_->serverPort());
+            redirectUri_ = localhostPolicy_.arg(replyServer()->serverPort());
+            replyServer()->setUniqueState(uniqueState);
         }
-        
+
         // Assemble intial authentication URL
         QList<QPair<QString, QString> > parameters;
         parameters.append(qMakePair(QString(O2_OAUTH2_RESPONSE_TYPE),
@@ -202,6 +206,7 @@ void O2::link() {
         parameters.append(qMakePair(QString(O2_OAUTH2_CLIENT_ID), clientId_));
         parameters.append(qMakePair(QString(O2_OAUTH2_REDIRECT_URI), redirectUri_));
         parameters.append(qMakePair(QString(O2_OAUTH2_SCOPE), scope_.replace( " ", "+" )));
+        parameters.append(qMakePair(QString(O2_OAUTH2_STATE), uniqueState));
         if ( !apiKey_.isEmpty() )
             parameters.append(qMakePair(QString(O2_OAUTH2_API_KEY), apiKey_));
         foreach (QString key, extraRequestParams().keys()) {
@@ -451,7 +456,7 @@ void O2::refresh() {
 
 void O2::onRefreshFinished() {
     QNetworkReply *refreshReply = qobject_cast<QNetworkReply *>(sender());
-    
+
     if (refreshReply->error() == QNetworkReply::NoError) {
         QByteArray reply = refreshReply->readAll();
         QVariantMap tokens = parseTokenResponse(reply);

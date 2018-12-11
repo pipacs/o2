@@ -90,6 +90,17 @@ if(o2_WITH_GOOGLE)
     )
 endif(o2_WITH_GOOGLE)
 
+if(o2_WITH_VIMEO)
+    set( o2_SRCS
+        ${o2_SRCS}
+        o2vimeo.cpp
+    )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o2vimeo.h
+    )
+endif(o2_WITH_VIMEO)
+
 if(o2_WITH_FACEBOOK)
     set( o2_SRCS
         ${o2_SRCS}
@@ -202,6 +213,10 @@ if(BUILD_SHARED_LIBS AND APPLE AND POLICY CMP0042) # in CMake >= 2.8.12
 endif(BUILD_SHARED_LIBS AND APPLE AND POLICY CMP0042)
 
 add_library( o2 ${o2_SRCS} ${o2_HDRS} )
+
+if(BUILD_SHARED_LIBS)
+    add_definitions( -DO2_SHARED_LIB )
+endif(BUILD_SHARED_LIBS)
 
 if(o2_WITH_QT5)
     target_link_libraries( o2 Qt5::Core Qt5::Network ${LINK_TARGETS})
