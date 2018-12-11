@@ -10,7 +10,7 @@
 #include <QCryptographicHash>
 #include <QTimer>
 #include <QVariantMap>
-#include <Quuid>
+#include <QUuid>
 
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
