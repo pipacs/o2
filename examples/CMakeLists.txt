@@ -19,3 +19,8 @@ endif(o2_WITH_TWITTER)
 if (o2_WITH_VIMEO)
     add_subdirectory(vimeodemo)
 endif(o2_WITH_VIMEO)
+
+if (o2_WITH_MSGRAPH)
+    add_subdirectory(msgraphdemo)
+    add_subdirectory(msgraphexternalinterceptordemo)
+endif(o2_WITH_MSGRAPH)

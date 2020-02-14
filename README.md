@@ -31,6 +31,7 @@ O2Facebook | o2facebook.h | Facebook OAuth specialization
 O2Gft | o2gft.h | Google Fusion Tables OAuth specialization
 O2Google | o2google.h | Google Oauth specialization [scopes](https://developers.google.com/identity/protocols/googlescopes)
 O2Hubic | o2hubic.h | Hubic OAuth specialization
+O2Msgraph | o2msgraph.h | Microsoft Graph OAuth specialization
 O2Reply | o2reply.h | A network request/reply that can time out
 O2ReplyServer | o2replyserver.h | HTTP server to process authentication responses
 O2Requestor | o2requestor.h | Makes authenticated OAuth 2.0 requests (GET, POST or PUT), handles timeouts and token expiry

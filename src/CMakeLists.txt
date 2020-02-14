@@ -174,6 +174,16 @@ if(o2_WITH_SMUGMUG)
     )
 endif(o2_WITH_SMUGMUG)
 
+if(o2_WITH_MSGRAPH)
+    set( o2_SRCS
+        ${o2_SRCS}
+        o2msgraph.cpp
+    )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o2msgraph.h
+    )
+endif(o2_WITH_MSGRAPH)
 
 if(o2_WITH_KEYCHAIN)
     if (Qt5Core_DIR)
