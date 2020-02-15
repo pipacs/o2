@@ -62,6 +62,7 @@ void O2Uber::onVerificationReceived(const QMap<QString, QString> response){
 #endif
 
     QNetworkRequest tokenRequest(url);
+    tokenRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     QNetworkReply *tokenReply = manager_->post(tokenRequest, QByteArray());
     timedReplies_.add(tokenReply);
     connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
