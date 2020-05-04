@@ -120,6 +120,18 @@ int O2Requestor::customRequest(const QNetworkRequest &req, const QByteArray &ver
     return id_;
 }
 
+int O2Requestor::head(const QNetworkRequest &req, int timeout/* = 60*1000*/)
+{
+    if (-1 == setup(req, QNetworkAccessManager::HeadOperation)) {
+        return -1;
+    }
+    reply_ = manager_->head(request_);
+    timedReplies_.add(new O2Reply(reply_, timeout));
+    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    return id_;
+}
+
 void O2Requestor::onRefreshFinished(QNetworkReply::NetworkError error) {
     if (status_ != Requesting) {
         qWarning() << "O2Requestor::onRefreshFinished: No pending request";
@@ -281,6 +293,9 @@ void O2Requestor::retry() {
         break;
     case QNetworkAccessManager::PutOperation:
         reply_ = rawData_ ? manager_->post(request_, data_) : manager_->put(request_, multipartData_);
+        break;
+    case QNetworkAccessManager::HeadOperation:
+        reply_ = manager_->head(request_);
         break;
     default:
         assert(!"Unspecified operation for request");
