@@ -38,7 +38,11 @@ O0SimpleCrypt::O0SimpleCrypt():
     m_protectionMode(ProtectionChecksum),
     m_lastError(ErrorNoError)
 {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
     qsrand(uint(QDateTime::currentMSecsSinceEpoch() & 0xFFFF));
+#else
+    m_rand.seed(uint(QDateTime::currentMSecsSinceEpoch() & 0xFFFF));
+#endif
 }
 
 O0SimpleCrypt::O0SimpleCrypt(quint64 key):
@@ -47,7 +51,11 @@ O0SimpleCrypt::O0SimpleCrypt(quint64 key):
     m_protectionMode(ProtectionChecksum),
     m_lastError(ErrorNoError)
 {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
     qsrand(uint(QDateTime::currentMSecsSinceEpoch() & 0xFFFF));
+#else
+    m_rand.seed(uint(QDateTime::currentMSecsSinceEpoch() & 0xFFFF));
+#endif
     splitKey();
 }
 
@@ -113,7 +121,11 @@ QByteArray O0SimpleCrypt::encryptToByteArray(QByteArray plaintext)
     }
 
     //prepend a random char to the string
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
     char randomChar = char(qrand() & 0xFF);
+#else
+    char randomChar = char(m_rand.generate() & 0xFF);
+#endif
     ba = randomChar + integrityProtection + ba;
 
     int pos(0);
