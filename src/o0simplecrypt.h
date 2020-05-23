@@ -30,7 +30,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QString>
 #include <QVector>
 #include <QFlags>
-
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+#include <QRandomGenerator>
+#endif
 #include "o0baseauth.h"
 
 /**
@@ -221,6 +223,9 @@ private:
     CompressionMode m_compressionMode;
     IntegrityProtectionMode m_protectionMode;
     Error m_lastError;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+    QRandomGenerator m_rand;
+#endif
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(O0SimpleCrypt::CryptoFlags)
 
