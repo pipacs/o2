@@ -41,14 +41,22 @@ const char O2_OAUTH2_SCOPE[] = "scope";
 const char O2_OAUTH2_GRANT_TYPE_CODE[] = "code";
 const char O2_OAUTH2_GRANT_TYPE_TOKEN[] = "token";
 const char O2_OAUTH2_GRANT_TYPE_PASSWORD[] = "password";
+const char O2_OAUTH2_GRANT_TYPE_DEVICE[] = "urn:ietf:params:oauth:grant-type:device_code";
 const char O2_OAUTH2_GRANT_TYPE[] = "grant_type";
 const char O2_OAUTH2_API_KEY[] = "api_key";
 const char O2_OAUTH2_STATE[] = "state";
+const char O2_OAUTH2_CODE[] = "code";
 
 // OAuth 2 Response Parameters
 const char O2_OAUTH2_ACCESS_TOKEN[] = "access_token";
 const char O2_OAUTH2_REFRESH_TOKEN[] = "refresh_token";
 const char O2_OAUTH2_EXPIRES_IN[] = "expires_in";
+const char O2_OAUTH2_DEVICE_CODE[] = "device_code";
+const char O2_OAUTH2_USER_CODE[] = "user_code";
+const char O2_OAUTH2_VERIFICATION_URI[] = "verification_uri";
+const char O2_OAUTH2_VERIFICATION_URL[] = "verification_url"; // Google sign-in
+const char O2_OAUTH2_VERIFICATION_URI_COMPLETE[] = "verification_uri_complete";
+const char O2_OAUTH2_INTERVAL[] = "interval";
 
 // OAuth signature types
 const char O2_SIGNATURE_TYPE_HMAC_SHA1[] = "HMAC-SHA1";

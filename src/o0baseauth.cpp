@@ -6,10 +6,11 @@
 #include "o0globals.h"
 #include "o0settingsstore.h"
 #include "o2replyserver.h"
+#include "o2pollserver.h"
 
 static const quint16 DefaultLocalPort = 1965;
 
-O0BaseAuth::O0BaseAuth(QObject *parent, O0AbstractStore *store): QObject(parent), store_(0), useExternalWebInterceptor_(false), replyServer_(NULL) {
+O0BaseAuth::O0BaseAuth(QObject *parent, O0AbstractStore *store): QObject(parent), store_(0), useExternalWebInterceptor_(false), replyServer_(NULL), pollServer_(NULL) {
     localPort_ = DefaultLocalPort;
     setStore(store);
 }
@@ -143,6 +144,19 @@ void O0BaseAuth::setReplyServer(O2ReplyServer * server)
 O2ReplyServer * O0BaseAuth::replyServer() const
 {
     return replyServer_;
+}
+
+void O0BaseAuth::setPollServer(O2PollServer *server)
+{
+    if (pollServer_)
+        pollServer_->deleteLater();
+
+    pollServer_ = server;
+}
+
+O2PollServer *O0BaseAuth::pollServer() const
+{
+    return pollServer_;
 }
 
 QByteArray O0BaseAuth::createQueryParameters(const QList<O0RequestParameter> &parameters) {

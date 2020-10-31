@@ -20,6 +20,7 @@ endif(NOT o2_WITH_QT5)
 
 set( o2_SRCS
     o2.cpp
+    o2pollserver.cpp
     o2reply.cpp
     o2replyserver.cpp
     o2requestor.cpp
@@ -31,6 +32,7 @@ set( o2_SRCS
 
 set( o2_HDRS
     o2.h
+    o2pollserver.h
     o2reply.h
     o2replyserver.h
     o2requestor.h
