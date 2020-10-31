@@ -86,11 +86,13 @@ if(o2_WITH_GOOGLE)
         ${o2_SRCS}
         o2gft.cpp
         o2google.cpp
+        o2googledevice.cpp
     )
     set( o2_HDRS
         ${o2_HDRS}
         o2gft.h
         o2google.h
+        o2googledevice.h
     )
 endif(o2_WITH_GOOGLE)
 
