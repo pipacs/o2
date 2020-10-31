@@ -255,7 +255,6 @@ void O2::unlink() {
 }
 
 void O2::onVerificationReceived(const QMap<QString, QString> response) {
-    qDebug() << "O2::onVerificationReceived:" << response;
     qDebug() << "O2::onVerificationReceived: Emitting closeBrowser()";
     Q_EMIT closeBrowser();
 
