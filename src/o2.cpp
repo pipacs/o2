@@ -14,48 +14,13 @@
 
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
-#include <QJsonDocument>
-#include <QJsonObject>
-#else
-#include <QScriptEngine>
-#include <QScriptValueIterator>
 #endif
 
 #include "o2.h"
 #include "o2replyserver.h"
 #include "o0globals.h"
+#include "o0jsonresponse.h"
 #include "o0settingsstore.h"
-
-/// Parse JSON data into a QVariantMap
-static QVariantMap parseTokenResponse(const QByteArray &data) {
-#if QT_VERSION >= 0x050000
-    QJsonParseError err;
-    QJsonDocument doc = QJsonDocument::fromJson(data, &err);
-    if (err.error != QJsonParseError::NoError) {
-        qWarning() << "parseTokenResponse: Failed to parse token response due to err:" << err.errorString();
-        return QVariantMap();
-    }
-
-    if (!doc.isObject()) {
-        qWarning() << "parseTokenResponse: Token response is not an object";
-        return QVariantMap();
-    }
-
-    return doc.object().toVariantMap();
-#else
-    QScriptEngine engine;
-    QScriptValue value = engine.evaluate("(" + QString(data) + ")");
-    QScriptValueIterator it(value);
-    QVariantMap map;
-
-    while (it.hasNext()) {
-        it.next();
-        map.insert(it.name(), it.value().toVariant());
-    }
-
-    return map;
-#endif
-}
 
 /// Add query parameters to a query
 static void addQueryParametersToUrl(QUrl &url,  QList<QPair<QString, QString> > parameters) {
@@ -340,7 +305,7 @@ void O2::onTokenReplyFinished() {
         //qDebug() << "O2::onTokenReplyFinished: replyData\n";
         //qDebug() << QString( replyData );
 
-        QVariantMap tokens = parseTokenResponse(replyData);
+        QVariantMap tokens = parseJsonResponse(replyData);
 
         // Dump tokens
         qDebug() << "O2::onTokenReplyFinished: Tokens returned:\n";
@@ -458,7 +423,7 @@ void O2::onRefreshFinished() {
 
     if (refreshReply->error() == QNetworkReply::NoError) {
         QByteArray reply = refreshReply->readAll();
-        QVariantMap tokens = parseTokenResponse(reply);
+        QVariantMap tokens = parseJsonResponse(reply);
         setToken(tokens.value(O2_OAUTH2_ACCESS_TOKEN).toString());
         setExpires((int)(QDateTime::currentMSecsSinceEpoch() / 1000 + tokens.value(O2_OAUTH2_EXPIRES_IN).toInt()));
         QString refreshToken = tokens.value(O2_OAUTH2_REFRESH_TOKEN).toString();
