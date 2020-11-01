@@ -20,16 +20,19 @@ endif(NOT o2_WITH_QT5)
 
 set( o2_SRCS
     o2.cpp
+    o2pollserver.cpp
     o2reply.cpp
     o2replyserver.cpp
     o2requestor.cpp
     o2simplecrypt.cpp
+    o0jsonresponse.cpp
     o0settingsstore.cpp
     o0baseauth.cpp
 )
 
 set( o2_HDRS
     o2.h
+    o2pollserver.h
     o2reply.h
     o2replyserver.h
     o2requestor.h
@@ -37,6 +40,7 @@ set( o2_HDRS
     o0baseauth.h
     o0export.h
     o0globals.h
+    o0jsonresponse.h
     o0requestparameter.h
     o0settingsstore.h
     o0simplecrypt.h
@@ -82,11 +86,13 @@ if(o2_WITH_GOOGLE)
         ${o2_SRCS}
         o2gft.cpp
         o2google.cpp
+        o2googledevice.cpp
     )
     set( o2_HDRS
         ${o2_HDRS}
         o2gft.h
         o2google.h
+        o2googledevice.h
     )
 endif(o2_WITH_GOOGLE)
 

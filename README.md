@@ -30,6 +30,7 @@ O2 | o2.h | Generic OAuth 2.0 authenticator
 O2Facebook | o2facebook.h | Facebook OAuth specialization
 O2Gft | o2gft.h | Google Fusion Tables OAuth specialization
 O2Google | o2google.h | Google Oauth specialization [scopes](https://developers.google.com/identity/protocols/googlescopes)
+O2GoogleDevice | o2google.h | Google [Sign-In for TVs and Devices](https://developers.google.com/identity/sign-in/devices)
 O2Hubic | o2hubic.h | Hubic OAuth specialization
 O2Msgraph | o2msgraph.h | Microsoft Graph OAuth specialization
 O2Reply | o2reply.h | A network request/reply that can time out

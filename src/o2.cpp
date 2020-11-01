@@ -14,48 +14,14 @@
 
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
-#include <QJsonDocument>
-#include <QJsonObject>
-#else
-#include <QScriptEngine>
-#include <QScriptValueIterator>
 #endif
 
 #include "o2.h"
+#include "o2pollserver.h"
 #include "o2replyserver.h"
 #include "o0globals.h"
+#include "o0jsonresponse.h"
 #include "o0settingsstore.h"
-
-/// Parse JSON data into a QVariantMap
-static QVariantMap parseTokenResponse(const QByteArray &data) {
-#if QT_VERSION >= 0x050000
-    QJsonParseError err;
-    QJsonDocument doc = QJsonDocument::fromJson(data, &err);
-    if (err.error != QJsonParseError::NoError) {
-        qWarning() << "parseTokenResponse: Failed to parse token response due to err:" << err.errorString();
-        return QVariantMap();
-    }
-
-    if (!doc.isObject()) {
-        qWarning() << "parseTokenResponse: Token response is not an object";
-        return QVariantMap();
-    }
-
-    return doc.object().toVariantMap();
-#else
-    QScriptEngine engine;
-    QScriptValue value = engine.evaluate("(" + QString(data) + ")");
-    QScriptValueIterator it(value);
-    QVariantMap map;
-
-    while (it.hasNext()) {
-        it.next();
-        map.insert(it.name(), it.value().toVariant());
-    }
-
-    return map;
-#endif
-}
 
 /// Add query parameters to a query
 static void addQueryParametersToUrl(QUrl &url,  QList<QPair<QString, QString> > parameters) {
@@ -66,6 +32,25 @@ static void addQueryParametersToUrl(QUrl &url,  QList<QPair<QString, QString> > 
     query.setQueryItems(parameters);
     url.setQuery(query);
 #endif
+}
+
+// ref: https://tools.ietf.org/html/rfc8628#section-3.2
+// Exception: Google sign-in uses "verification_url" instead of "*_uri" - we'll accept both.
+static bool hasMandatoryDeviceAuthParams(const QVariantMap& params)
+{
+    if (!params.contains(O2_OAUTH2_DEVICE_CODE))
+        return false;
+
+    if (!params.contains(O2_OAUTH2_USER_CODE))
+        return false;
+
+    if (!(params.contains(O2_OAUTH2_VERIFICATION_URI) || params.contains(O2_OAUTH2_VERIFICATION_URL)))
+        return false;
+
+    if (!params.contains(O2_OAUTH2_EXPIRES_IN))
+        return false;
+
+    return true;
 }
 
 O2::O2(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store): O0BaseAuth(parent, store) {
@@ -147,6 +132,30 @@ QString O2::refreshTokenUrl() {
 void O2::setRefreshTokenUrl(const QString &value) {
     refreshTokenUrl_ = value;
     Q_EMIT refreshTokenUrlChanged();
+}
+
+QString O2::grantType()
+{
+    if (!grantType_.isEmpty())
+        return grantType_;
+
+    switch (grantFlow_) {
+    case GrantFlowAuthorizationCode:
+        return O2_OAUTH2_GRANT_TYPE_CODE;
+    case GrantFlowImplicit:
+        return O2_OAUTH2_GRANT_TYPE_TOKEN;
+    case GrantFlowResourceOwnerPasswordCredentials:
+        return O2_OAUTH2_GRANT_TYPE_PASSWORD;
+    case GrantFlowDevice:
+        return O2_OAUTH2_GRANT_TYPE_DEVICE;
+    }
+
+    return QString();
+}
+
+void O2::setGrantType(const QString &value)
+{
+    grantType_ = value;
 }
 
 void O2::link() {
@@ -242,6 +251,20 @@ void O2::link() {
         connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
         connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
     }
+    else if (grantFlow_ == GrantFlowDevice) {
+        QList<O0RequestParameter> parameters;
+        parameters.append(O0RequestParameter(O2_OAUTH2_CLIENT_ID, clientId_.toUtf8()));
+        parameters.append(O0RequestParameter(O2_OAUTH2_SCOPE, scope_.toUtf8()));
+        QByteArray payload = O0BaseAuth::createQueryParameters(parameters);
+
+        QUrl url(requestUrl_);
+        QNetworkRequest deviceRequest(url);
+        deviceRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+        QNetworkReply *tokenReply = manager_->post(deviceRequest, payload);
+
+        connect(tokenReply, SIGNAL(finished()), this, SLOT(onDeviceAuthReplyFinished()), Qt::QueuedConnection);
+        connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+    }
 }
 
 void O2::unlink() {
@@ -289,10 +312,10 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
         timedReplies_.add(tokenReply);
         connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
         connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
-    } else if (grantFlow_ == GrantFlowImplicit) {
+    } else if (grantFlow_ == GrantFlowImplicit || grantFlow_ == GrantFlowDevice) {
       // Check for mandatory tokens
       if (response.contains(O2_OAUTH2_ACCESS_TOKEN)) {
-          qDebug() << "O2::onVerificationReceived: Access token returned for implicit flow";
+          qDebug() << "O2::onVerificationReceived: Access token returned for implicit or device flow";
           setToken(response.value(O2_OAUTH2_ACCESS_TOKEN));
           if (response.contains(O2_OAUTH2_EXPIRES_IN)) {
             bool ok = false;
@@ -302,10 +325,13 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
                 setExpires((int)(QDateTime::currentMSecsSinceEpoch() / 1000 + expiresIn));
             }
           }
+          if (response.contains(O2_OAUTH2_REFRESH_TOKEN)) {
+              setRefreshToken(response.value(O2_OAUTH2_REFRESH_TOKEN));
+          }
           setLinked(true);
           Q_EMIT linkingSucceeded();
       } else {
-          qWarning() << "O2::onVerificationReceived: Access token missing from response for implicit flow";
+          qWarning() << "O2::onVerificationReceived: Access token missing from response for implicit or device flow";
           Q_EMIT linkingFailed();
       }
     } else {
@@ -340,7 +366,7 @@ void O2::onTokenReplyFinished() {
         //qDebug() << "O2::onTokenReplyFinished: replyData\n";
         //qDebug() << QString( replyData );
 
-        QVariantMap tokens = parseTokenResponse(replyData);
+        QVariantMap tokens = parseJsonResponse(replyData);
 
         // Dump tokens
         qDebug() << "O2::onTokenReplyFinished: Tokens returned:\n";
@@ -413,6 +439,45 @@ void O2::setExpires(int v) {
     store_->setValue(key, QString::number(v));
 }
 
+void O2::startPollServer(const QVariantMap &params)
+{
+    bool ok = false;
+    int expiresIn = params[O2_OAUTH2_EXPIRES_IN].toInt(&ok);
+    if (!ok) {
+        qWarning() << "O2::startPollServer: No expired_in parameter";
+        Q_EMIT linkingFailed();
+        return;
+    }
+
+    qDebug() << "O2::startPollServer: device_ and user_code expires in" << expiresIn << "seconds";
+
+    QUrl url(tokenUrl_);
+    QNetworkRequest authRequest(url);
+    authRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    const QString deviceCode = params[O2_OAUTH2_DEVICE_CODE].toString();
+    const QString grantType = grantType_.isEmpty() ? O2_OAUTH2_GRANT_TYPE_DEVICE : grantType_;
+
+    QList<O0RequestParameter> parameters;
+    parameters.append(O0RequestParameter(O2_OAUTH2_CLIENT_ID, clientId_.toUtf8()));
+    if ( !clientSecret_.isEmpty() )
+        parameters.append(O0RequestParameter(O2_OAUTH2_CLIENT_SECRET, clientSecret_.toUtf8()));
+    parameters.append(O0RequestParameter(O2_OAUTH2_CODE, deviceCode.toUtf8()));
+    parameters.append(O0RequestParameter(O2_OAUTH2_GRANT_TYPE, grantType.toUtf8()));
+    QByteArray payload = O0BaseAuth::createQueryParameters(parameters);
+
+    O2PollServer * pollServer = new O2PollServer(manager_, authRequest, payload, expiresIn, this);
+    if (params.contains(O2_OAUTH2_INTERVAL)) {
+        int interval = params[O2_OAUTH2_INTERVAL].toInt(&ok);
+        if (ok)
+            pollServer->setInterval(interval);
+    }
+    connect(pollServer, SIGNAL(verificationReceived(QMap<QString,QString>)), this, SLOT(onVerificationReceived(QMap<QString,QString>)));
+    connect(pollServer, SIGNAL(serverClosed(bool)), this, SLOT(serverHasClosed(bool)));
+    setPollServer(pollServer);
+    pollServer->startPolling();
+}
+
 QString O2::refreshToken() {
     QString key = QString(O2_KEY_REFRESH_TOKEN).arg(clientId_);
     return store_->value(key);
@@ -458,7 +523,7 @@ void O2::onRefreshFinished() {
 
     if (refreshReply->error() == QNetworkReply::NoError) {
         QByteArray reply = refreshReply->readAll();
-        QVariantMap tokens = parseTokenResponse(reply);
+        QVariantMap tokens = parseJsonResponse(reply);
         setToken(tokens.value(O2_OAUTH2_ACCESS_TOKEN).toString());
         setExpires((int)(QDateTime::currentMSecsSinceEpoch() / 1000 + tokens.value(O2_OAUTH2_EXPIRES_IN).toInt()));
         QString refreshToken = tokens.value(O2_OAUTH2_REFRESH_TOKEN).toString();
@@ -487,12 +552,63 @@ void O2::onRefreshError(QNetworkReply::NetworkError error) {
     Q_EMIT refreshFinished(error);
 }
 
+void O2::onDeviceAuthReplyFinished()
+{
+    qDebug() << "O2::onDeviceAuthReplyFinished";
+    QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
+    if (!tokenReply)
+    {
+      qDebug() << "O2::onDeviceAuthReplyFinished: reply is null";
+      return;
+    }
+    if (tokenReply->error() == QNetworkReply::NoError) {
+        QByteArray replyData = tokenReply->readAll();
+
+        // Dump replyData
+        // SENSITIVE DATA in RelWithDebInfo or Debug builds
+        //qDebug() << "O2::onDeviceAuthReplyFinished: replyData\n";
+        //qDebug() << QString( replyData );
+
+        QVariantMap params = parseJsonResponse(replyData);
+
+        // Dump tokens
+        qDebug() << "O2::onDeviceAuthReplyFinished: Tokens returned:\n";
+        foreach (QString key, params.keys()) {
+            // SENSITIVE DATA in RelWithDebInfo or Debug builds, so it is truncated first
+            qDebug() << key << ": "<< params.value( key ).toString().left( 3 ) << "...";
+        }
+
+        // Check for mandatory parameters
+        if (hasMandatoryDeviceAuthParams(params)) {
+            qDebug() << "O2::onDeviceAuthReplyFinished: Device auth request response";
+
+            const QString userCode = params.take(O2_OAUTH2_USER_CODE).toString();
+            QUrl uri = params.take(O2_OAUTH2_VERIFICATION_URI).toUrl();
+            if (uri.isEmpty())
+                uri = params.take(O2_OAUTH2_VERIFICATION_URL).toUrl();
+
+            if (params.contains(O2_OAUTH2_VERIFICATION_URI_COMPLETE))
+                Q_EMIT openBrowser(params.take(O2_OAUTH2_VERIFICATION_URI_COMPLETE).toUrl());
+
+            Q_EMIT showVerificationUriAndCode(uri, userCode);
+
+            startPollServer(params);
+        } else {
+            qWarning() << "O2::onDeviceAuthReplyFinished: Mandatory parameters missing from response";
+            Q_EMIT linkingFailed();
+        }
+    }
+    tokenReply->deleteLater();
+}
+
 void O2::serverHasClosed(bool paramsfound)
 {
     if ( !paramsfound ) {
         // server has probably timed out after receiving first response
         Q_EMIT linkingFailed();
     }
+    // poll server is not re-used for later auth requests
+    setPollServer(NULL);
 }
 
 QString O2::localhostPolicy() const {
