@@ -21,6 +21,7 @@ SOURCES += \
     $$PWD/o0settingsstore.cpp \
     $$PWD/o2spotify.cpp \
     $$PWD/o2google.cpp \
+    $$PWD/o2googledevice.cpp \
     $$PWD/o2uber.cpp \
     $$PWD/o2msgraph.cpp
 
@@ -50,5 +51,6 @@ HEADERS += \
     $$PWD/o0settingsstore.h \
     $$PWD/o2spotify.h \
     $$PWD/o2google.h \
+    $$PWD/o2googledevice.h \
     $$PWD/o2uber.h \
     $$PWD/o2msgraph.h
