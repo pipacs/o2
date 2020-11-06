@@ -47,8 +47,7 @@ void O2PollServer::setInterval(int interval)
 void O2PollServer::startPolling()
 {
     if (expirationTimer.isActive()) {
-        // don't wait for poll timeout before firing the first request
-        onPollTimeout();
+        pollTimer.start();
     }
 }
 
