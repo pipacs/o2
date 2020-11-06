@@ -1,6 +1,7 @@
 #include "o0jsonresponse.h"
 
 #include <QByteArray>
+#include <QDebug>
 #if QT_VERSION >= 0x050000
 #include <QJsonDocument>
 #include <QJsonObject>
