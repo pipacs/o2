@@ -47,8 +47,7 @@ void O2PollServer::setInterval(int interval)
 void O2PollServer::startPolling()
 {
     if (expirationTimer.isActive()) {
-        // don't wait for poll timeout before firing the first request
-        onPollTimeout();
+        pollTimer.start();
     }
 }
 
@@ -82,12 +81,7 @@ void O2PollServer::onReplyFinished()
     // qDebug() << "O2PollServer::onReplyFinished: replyData\n";
     // qDebug() << QString( replyData );
 
-    if (reply->error() == QNetworkReply::NoError) {
-        expirationTimer.stop();
-        Q_EMIT serverClosed(true);
-        Q_EMIT verificationReceived(params);
-    }
-    else if (reply->error() == QNetworkReply::TimeoutError) {
+    if (reply->error() == QNetworkReply::TimeoutError) {
         // rfc8628#section-3.2
         // "On encountering a connection timeout, clients MUST unilaterally
         // reduce their polling frequency before retrying.  The use of an
@@ -115,7 +109,7 @@ void O2PollServer::onReplyFinished()
         else {
             expirationTimer.stop();
             Q_EMIT serverClosed(true);
-            // let O2 handle the other errors
+            // let O2 handle the other cases
             Q_EMIT verificationReceived(params);
         }
     }
