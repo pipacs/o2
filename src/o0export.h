@@ -6,7 +6,7 @@
     #ifdef O2_DLL_EXPORT
         #define O0_EXPORT __declspec(dllexport)
     #else
-        #define O0_EXPORT __declspec(dllimport)
+        #define O0_EXPORT 
     #endif
 #else
     #define O0_EXPORT
