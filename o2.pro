@@ -7,6 +7,8 @@ QT -= gui
 
 TEMPLATE = lib
 DEFINES += O2_LIBRARY
+DEFINES += O2_SHARED_LIB
+DEFINES += O2_DLL_EXPORT
 
 CONFIG += c++11
 
@@ -37,12 +39,10 @@ INSTALLS += target
 SOURCES +=
 
 HEADERS += \
-    o2.h \
-    o2_global.h
+    o2lib.h
 
 #### Headers to install
 headers.path = $$PREFIX/include/o2
-headers.files = o2_global.h o2.h
 
 include(src/src.pri)
 

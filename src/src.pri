@@ -28,6 +28,7 @@ SOURCES += \
     $$PWD/o2msgraph.cpp
 
 HEADERS += \
+    $$PWD/o0export.h \
     $$PWD/o0jsonresponse.h \
     $$PWD/o1.h \
     $$PWD/o1dropbox.h \
