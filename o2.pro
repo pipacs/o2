@@ -6,7 +6,6 @@ linux: PREFIX=/home/hans/devel/libraries/linux64
 QT -= gui
 
 TEMPLATE = lib
-DEFINES += O2_LIBRARY
 DEFINES += O2_SHARED_LIB
 DEFINES += O2_DLL_EXPORT
 
@@ -38,12 +37,10 @@ INSTALLS += target
 
 SOURCES +=
 
-HEADERS += \
-    o2lib.h
+HEADERS +=
 
 #### Headers to install
 headers.path = $$PREFIX/include/o2
 
 include(src/src.pri)
 
-message(version: $$QTEXTENSIONS_VERSION_MAJOR $$QTEXTENSIONS_VERSION_MINOR)
