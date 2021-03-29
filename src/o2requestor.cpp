@@ -105,6 +105,8 @@ int O2Requestor::put(const QNetworkRequest & req, QHttpMultiPart* data, int time
 
 int O2Requestor::customRequest(const QNetworkRequest &req, const QByteArray &verb, const QByteArray &data, int timeout/* = 60*1000*/)
 {
+    (void)timeout;
+
     if (-1 == setup(req, QNetworkAccessManager::CustomOperation, verb)) {
         return -1;
     }
