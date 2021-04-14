@@ -16,6 +16,11 @@
 #include <QMessageAuthenticationCode>
 #endif
 
+#if QT_VERSION >= 0x051500
+#include <QRandomGenerator>
+#endif
+
+
 #include "o1.h"
 #include "o2replyserver.h"
 #include "o0globals.h"
@@ -410,12 +415,16 @@ QMap<QString, QString> O1::parseResponse(const QByteArray &response) {
 }
 
 QByteArray O1::nonce() {
+    QString u = QString::number(QDateTime::currentDateTimeUtc().toTime_t());
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
+    u.append(QString::number(QRandomGenerator::global()->generate()));
+#else
     static bool firstTime = true;
     if (firstTime) {
         firstTime = false;
         qsrand(QTime::currentTime().msec());
     }
-    QString u = QString::number(QDateTime::currentDateTimeUtc().toTime_t());
     u.append(QString::number(qrand()));
+#endif
     return u.toLatin1();
 }
