@@ -16,9 +16,9 @@ class O2ReplyServer;
 class O2PollServer;
 
 /// Base class of OAuth authenticators
-class O0_EXPORT O0BaseAuth : public QObject {
+class O0_EXPORT O0BaseAuth : public QObject
+{
     Q_OBJECT
-
 public:
     explicit O0BaseAuth(QObject *parent = 0, O0AbstractStore *store = 0);
 

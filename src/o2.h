@@ -12,8 +12,10 @@
 #include "o0abstractstore.h"
 
 /// Simple OAuth2 authenticator.
-class O0_EXPORT O2: public O0BaseAuth {
+class O0_EXPORT O2: public O0BaseAuth
+{
     Q_OBJECT
+public:
     Q_ENUMS(GrantFlow)
 
 public:
