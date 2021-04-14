@@ -12,6 +12,7 @@ SOURCES += \
     $$PWD/o2.cpp \
     $$PWD/o2facebook.cpp \
     $$PWD/o2gft.cpp \
+    $$PWD/o2outlook.cpp \
     $$PWD/o2pollserver.cpp \
     $$PWD/o2reply.cpp \
     $$PWD/o2replyserver.cpp \
@@ -41,6 +42,7 @@ HEADERS += \
     $$PWD/o2.h \
     $$PWD/o2facebook.h \
     $$PWD/o2gft.h \
+    $$PWD/o2outlook.h \
     $$PWD/o2pollserver.h \
     $$PWD/o2reply.h \
     $$PWD/o2replyserver.h \
@@ -90,4 +92,5 @@ headers.files += \
     $$PWD/o2google.h \
     $$PWD/o2googledevice.h \
     $$PWD/o2uber.h \
-    $$PWD/o2msgraph.h
+    $$PWD/o2msgraph.h \
+    $$PWD/o2outlook.h

@@ -1,11 +1,10 @@
 #ifndef O2OUTLOOK_H
 #define O2OUTLOOK_H
 
-#include <o2/o2.h>
-#include <o2/o2skydrive.h>
+#include "o2skydrive.h"
 
 /// Outlook's dialect of OAuth 2.0
-class O2Outlook: public O2Skydrive
+class O0_EXPORT O2Outlook: public O2Skydrive
 {
     Q_OBJECT
 public:
