@@ -9,6 +9,8 @@ Notes to contributors:
    * Please follow the coding style of the existing source
    * Code contributions are released under Simplified BSD License, as specified in LICENSE. Do not contribute if this license does not suit your code
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A74ID8G)
+
 ## Classes
 
 Class | Header | Purpose
