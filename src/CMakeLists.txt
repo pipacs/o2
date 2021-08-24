@@ -268,8 +268,8 @@ install(FILES ${o2_HDRS}
 
 message(STATUS "Writing pkg-config file...")
 configure_file(${CMAKE_CURRENT_LIST_DIR}/../o2.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/o2.pc @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/o2.pc DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${o2_LIB_SUFFIX}/pkgconfig/")
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/o2.pc DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${o2_LIB_SUFFIX}/pkgconfig/")
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/../o2-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/o2-config.h @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/o2-config.h DESTINATION "${CMAKE_INSTALL_PREFIX}/include/o2")
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/o2-config.h DESTINATION "${CMAKE_INSTALL_PREFIX}/include/o2")
 
