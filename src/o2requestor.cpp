@@ -248,6 +248,7 @@ void O2Requestor::finish() {
     reply_->deleteLater();
     QList<QNetworkReply::RawHeaderPair> headers = reply_->rawHeaderPairs();
     Q_EMIT finished(id_, error_, data);
+    Q_EMIT finished(id_, error_, reply_->errorString(), data);
     Q_EMIT finished(id_, error_, data, headers);
 }
 
