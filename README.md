@@ -195,14 +195,16 @@ That's it. Tweets using the O2 library!
 
 O2 provides simple storage classes for writing OAuth tokens in a peristent location. Currently, a QSettings based backing store **O2SettingsStore** is provided in O2. O2SettingsStore keeps all token values in an encrypted form. You have to specify the encryption key to use while constructing the object:
 
-    O0SettingsStore settings = new O0SettingsStore("myencryptionkey");
+    O0SettingsStore *settings = new O0SettingsStore("myencryptionkey");
     // Set the store before starting OAuth, i.e before calling link()
     o1->setStore(settings);
     ...
 
+Once set, the O0BaseAuth takes ownership of the O0SettingsStore object.
+
 You can also create it with your customized QSettings object. O2SettingsStore will then use that QSettings object for storing the tokens:
 
-    O0SettingsStore settings = new O0SettingsStore(mySettingsObject, "myencryptionkey");
+    O0SettingsStore *settings = new O0SettingsStore(mySettingsObject, "myencryptionkey");
 
 Once set, O2SettingsStore takes ownership of the QSettings object.
 
