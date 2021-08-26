@@ -200,7 +200,7 @@ O2 provides simple storage classes for writing OAuth tokens in a peristent locat
     o1->setStore(settings);
     ...
 
-Once set, the O0BaseAuth takes ownership of the Q0SettingsStore object.
+Once set, the O0BaseAuth takes ownership of the O0SettingsStore object.
 
 You can also create it with your customized QSettings object. O2SettingsStore will then use that QSettings object for storing the tokens:
 
