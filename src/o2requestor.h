@@ -78,6 +78,9 @@ Q_SIGNALS:
     /// Emitted when a request has been completed or failed. Also reply headers will be provided.
     void finished(int id, QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers);
 
+    /// Emitted when a request has been completed or failed. Also reply headers will be provided.
+    void finished(int id, QNetworkReply::NetworkError error, QString errorText, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers);
+
     /// Emitted when an upload has progressed.
     void uploadProgress(int id, qint64 bytesSent, qint64 bytesTotal);
 
