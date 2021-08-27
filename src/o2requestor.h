@@ -55,6 +55,10 @@ public Q_SLOTS:
     int put(const QNetworkRequest &req, const QByteArray &data, int timeout = 60*1000);
     int put(const QNetworkRequest &req, QHttpMultiPart* data, int timeout = 60*1000);
 
+    /// Make a DELETE request.
+    /// @return Request ID or -1 if there are too many requests in the queue.
+    int deleteResource(const QNetworkRequest &req, int timeout = 60*1000);
+
     /// Make a HEAD request.
     /// @return Request ID or -1 if there are too many requests in the queue.
     int head(const QNetworkRequest &req, int timeout = 60*1000);

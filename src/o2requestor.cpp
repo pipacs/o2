@@ -103,6 +103,19 @@ int O2Requestor::put(const QNetworkRequest & req, QHttpMultiPart* data, int time
     return id_;
 }
 
+int O2Requestor::deleteResource(const QNetworkRequest & req, int timeout/* = 60*1000*/)
+{
+    if (-1 == setup(req, QNetworkAccessManager::DeleteOperation)) {
+        return -1;
+    }
+    rawData_ = false;
+    reply_ = manager_->deleteResource(request_);
+    timedReplies_.add(new O2Reply(reply_, timeout));
+    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    return id_;
+}
+
 int O2Requestor::customRequest(const QNetworkRequest &req, const QByteArray &verb, const QByteArray &data, int timeout/* = 60*1000*/)
 {
     (void)timeout;
