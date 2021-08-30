@@ -263,6 +263,7 @@ void O2Requestor::finish() {
     Q_EMIT finished(id_, error_, data);
     Q_EMIT finished(id_, error_, reply_->errorString(), data);
     Q_EMIT finished(id_, error_, data, headers);
+    Q_EMIT finished(id_, error_, reply_->errorString(), data, headers);
 }
 
 void O2Requestor::retry() {
