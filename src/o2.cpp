@@ -259,7 +259,11 @@ void O2::link() {
         QNetworkReply *tokenReply = manager_->post(tokenRequest, payload);
 
         connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
+#if QT_VERSION < 0x051500
         connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+#else
+        connect(tokenReply, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+#endif
     }
     else if (grantFlow_ == GrantFlowDevice) {
         QList<O0RequestParameter> parameters;
@@ -273,7 +277,11 @@ void O2::link() {
         QNetworkReply *tokenReply = manager_->post(deviceRequest, payload);
 
         connect(tokenReply, SIGNAL(finished()), this, SLOT(onDeviceAuthReplyFinished()), Qt::QueuedConnection);
+#if QT_VERSION < 0x051500
         connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+#else
+        connect(tokenReply, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+#endif
     }
 }
 
@@ -321,7 +329,11 @@ void O2::onVerificationReceived(const QMap<QString, QString> response) {
         QNetworkReply *tokenReply = manager_->post(tokenRequest, data);
         timedReplies_.add(tokenReply);
         connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
+#if QT_VERSION < 0x051500
         connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+#else
+        connect(tokenReply, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+#endif
     } else if (grantFlow_ == GrantFlowImplicit || grantFlow_ == GrantFlowDevice) {
       // Check for mandatory tokens
       if (response.contains(O2_OAUTH2_ACCESS_TOKEN)) {
@@ -525,7 +537,11 @@ void O2::refresh() {
     QNetworkReply *refreshReply = manager_->post(refreshRequest, data);
     timedReplies_.add(refreshReply);
     connect(refreshReply, SIGNAL(finished()), this, SLOT(onRefreshFinished()), Qt::QueuedConnection);
+#if QT_VERSION < 0x051500
     connect(refreshReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRefreshError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+#else
+    connect(refreshReply, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onRefreshError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+#endif
 }
 
 void O2::onRefreshFinished() {
