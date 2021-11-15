@@ -16,6 +16,12 @@
 #include <QUrlQuery>
 #endif
 
+#if QT_VERSION >= 0x050000
+#include <QRegularExpression>
+#else
+#include <QRegExp>
+#endif
+
 #include "o2.h"
 #include "o2pollserver.h"
 #include "o2replyserver.h"
@@ -187,7 +193,11 @@ void O2::link() {
 
     if (grantFlow_ == GrantFlowAuthorizationCode || grantFlow_ == GrantFlowImplicit) {
 
+#if QT_VERSION >= 0x050000
+        QString uniqueState = QUuid::createUuid().toString().remove(QRegularExpression("([^a-zA-Z0-9]|[-])"));
+#else
         QString uniqueState = QUuid::createUuid().toString().remove(QRegExp("([^a-zA-Z0-9]|[-])"));
+#endif
         if (useExternalWebInterceptor_) {
             // Save redirect URI, as we have to reuse it when requesting the access token
             redirectUri_ = localhostPolicy_.arg(localPort());
