@@ -32,7 +32,7 @@ public:
     void setRequestTokenUrl(const QUrl &value);
 
     /// Parameters to pass with request URL.
-    Q_PROPERTY(QList<O0RequestParameter> requestParameters READ requestParameters WRITE setRequestParameters);
+    Q_PROPERTY(QList<O0RequestParameter> requestParameters READ requestParameters WRITE setRequestParameters)
     QList<O0RequestParameter> requestParameters();
     void setRequestParameters(const QList<O0RequestParameter> &value);
 
