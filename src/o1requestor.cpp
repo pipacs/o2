@@ -45,7 +45,11 @@ QNetworkRequest O1Requestor::setup(const QNetworkRequest &req, const QList<O0Req
     oauthParams.append(O0RequestParameter(O2_OAUTH_TOKEN, authenticator_->token().toLatin1()));
     oauthParams.append(O0RequestParameter(O2_OAUTH_SIGNATURE_METHOD, authenticator_->signatureMethod().toLatin1()));
     oauthParams.append(O0RequestParameter(O2_OAUTH_NONCE, O1::nonce()));
+#if QT_VERSION >= 0x050800
+    oauthParams.append(O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentSecsSinceEpoch()).toLatin1()));
+#else
     oauthParams.append(O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
+#endif
 
     // Add signature parameter
     oauthParams.append(O0RequestParameter(O2_OAUTH_SIGNATURE, authenticator_->generateSignature(oauthParams, req, signingParameters, operation)));
