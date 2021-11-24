@@ -135,6 +135,24 @@ int O2Requestor::customRequest(const QNetworkRequest &req, const QByteArray &ver
     return id_;
 }
 
+int O2Requestor::customRequest(const QNetworkRequest &req, const QByteArray &verb, QHttpMultiPart *data, int timeout/* = 60*1000*/)
+{
+    (void)timeout;
+
+    if (-1 == setup(req, QNetworkAccessManager::CustomOperation, verb)) {
+        return -1;
+    }
+    rawData_ = false;
+    multipartData_ = data;
+    reply_ = manager_->sendCustomRequest(request_, verb, multipartData_);
+    multipartData_->setParent(reply_);
+    timedReplies_.add(new O2Reply(reply_, timeout));
+    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()), Qt::QueuedConnection);
+    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
+    return id_;
+}
+
 int O2Requestor::head(const QNetworkRequest &req, int timeout/* = 60*1000*/)
 {
     if (-1 == setup(req, QNetworkAccessManager::HeadOperation)) {

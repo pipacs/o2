@@ -66,6 +66,7 @@ public Q_SLOTS:
     /// Make a custom request.
     /// @return Request ID or -1 if there are too many requests in the queue.
     int customRequest(const QNetworkRequest &req, const QByteArray &verb, const QByteArray &data, int timeout = 60*1000);
+    int customRequest(const QNetworkRequest &req, const QByteArray &verb, QHttpMultiPart *data, int timeout = 60*1000);
 
 Q_SIGNALS:
 
