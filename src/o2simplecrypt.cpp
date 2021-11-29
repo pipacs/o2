@@ -32,6 +32,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QCryptographicHash>
 #include <QDataStream>
 
+#ifdef O0_QT6
+#include <QIODevice>
+#endif
+
 O0SimpleCrypt::O0SimpleCrypt():
     m_key(0),
     m_compressionMode(CompressionAuto),
@@ -111,7 +115,11 @@ QByteArray O0SimpleCrypt::encryptToByteArray(QByteArray plaintext)
     if (m_protectionMode == ProtectionChecksum) {
         flags |= CryptoFlagChecksum;
         QDataStream s(&integrityProtection, QIODevice::WriteOnly);
+#ifdef O0_QT6
+        s << qChecksum(QByteArrayView(ba.constData(), ba.length()));
+#else
         s << qChecksum(ba.constData(), ba.length());
+#endif
     } else if (m_protectionMode == ProtectionHash) {
         flags |= CryptoFlagHash;
         QCryptographicHash hash(QCryptographicHash::Sha1);
@@ -239,7 +247,11 @@ QByteArray O0SimpleCrypt::decryptToByteArray(QByteArray cypher)
             s >> storedChecksum;
         }
         ba = ba.mid(2);
+#ifdef O0_QT6
+        quint16 checksum = qChecksum(QByteArrayView(ba.constData(), ba.length()));
+#else
         quint16 checksum = qChecksum(ba.constData(), ba.length());
+#endif
         integrityOk = (checksum == storedChecksum);
     } else if (flags.testFlag(CryptoFlagHash)) {
         if (ba.length() < 20) {

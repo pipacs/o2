@@ -23,6 +23,10 @@
 #include "o0jsonresponse.h"
 #include "o0settingsstore.h"
 
+#ifdef O0_QT6
+#include <QRegularExpression>
+#endif
+
 /// Add query parameters to a query
 static void addQueryParametersToUrl(QUrl &url,  QList<QPair<QString, QString> > parameters) {
 #if QT_VERSION < 0x050000
@@ -187,7 +191,11 @@ void O2::link() {
 
     if (grantFlow_ == GrantFlowAuthorizationCode || grantFlow_ == GrantFlowImplicit) {
 
+#ifdef O0_QT6
+        QString uniqueState = QUuid::createUuid().toString().remove(QRegularExpression("([^a-zA-Z0-9]|[-])"));
+#else
         QString uniqueState = QUuid::createUuid().toString().remove(QRegExp("([^a-zA-Z0-9]|[-])"));
+#endif
         if (useExternalWebInterceptor_) {
             // Save redirect URI, as we have to reuse it when requesting the access token
             redirectUri_ = localhostPolicy_.arg(localPort());

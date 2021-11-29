@@ -14,4 +14,10 @@
     #define O0_EXPORT
 #endif
 
+#ifndef O0_QT6
+#  if QT_VERSION >= 0x060000
+#    define O0_QT6
+#  endif
+#endif
+
 #endif // O0_EXPORT

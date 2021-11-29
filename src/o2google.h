@@ -7,7 +7,7 @@
 
 #include "o2.h"
 
-class O2Google : public O2 {
+class O0_EXPORT O2Google : public O2 {
     Q_OBJECT
 public:
     explicit O2Google(QObject *parent = 0);

@@ -3,6 +3,13 @@ mac: PREFIX=/Users/hans/devel/libraries/osx
 win32: PREFIX=c:/devel/libraries/win64
 linux: PREFIX=/home/hans/devel/libraries/linux64
 
+# QT6 Support
+equals(QT_MAJOR_VERSION, 6) {
+win32: TARGET = o2_qt6
+mac: TARGET = o2_qt6
+}
+
+# O2 stuff
 QT -= gui
 
 TEMPLATE = lib
