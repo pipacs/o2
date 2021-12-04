@@ -18,6 +18,7 @@ set(API_VERSION ${VER_MAJOR}.${VER_MINOR}.${API_VER_PATCH})
 
 project(o2)
 
+option(o2_WITH_QT6 "Use Qt6" OFF)
 option(o2_WITH_QT5 "Use Qt5" ON)
 
 set(o2_LIB_SUFFIX "" CACHE STRING "Suffix for install 'lib' directory, e.g. 64 for lib64")
