@@ -87,7 +87,7 @@ public:
     void setRefreshTokenUrl(const QString &value);
 
     /// Grant type (if non-standard)
-    Q_PROPERTY(QString grantType READ grantType WRITE setGrantType);
+    Q_PROPERTY(QString grantType READ grantType WRITE setGrantType)
     QString grantType();
     void setGrantType(const QString &value);
 
