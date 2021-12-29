@@ -30,7 +30,7 @@ O1::O1(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store):
     setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
     manager_ = manager ? manager : new QNetworkAccessManager(this);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
-    
+
     setCallbackUrl(O2_CALLBACK_URL);
 }
 
@@ -233,13 +233,13 @@ void O1::link() {
     setToken("");
     setTokenSecret("");
     setExtraTokens(QVariantMap());
-    
+
     if (!useExternalWebInterceptor_) {
         // Start reply server
         if (!replyServer()->isListening())
             replyServer()->listen(QHostAddress::Any, localPort());
     }
-    
+
     // Get any query parameters for the request
 #if QT_VERSION >= 0x050000
     QUrlQuery requestData;
@@ -274,6 +274,10 @@ void O1::link() {
     headers.append(O0RequestParameter(O2_OAUTH_VERSION, "1.0"));
     headers.append(O0RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
     headers.append(O0RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(headers, request, requestParameters(), QNetworkAccessManager::PostOperation)));
+    qDebug() << "O1:link: Token request headers:";
+    foreach(param, headers) {
+        qDebug() << "  " << param.name << "=" << param.value;
+    }
 
     // Clear request token
     requestToken_.clear();
