@@ -27,7 +27,7 @@
 #include "o0settingsstore.h"
 
 O1::O1(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store): O0BaseAuth(parent, store) {
-    setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
+    setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA256);
     manager_ = manager ? manager : new QNetworkAccessManager(this);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
 
@@ -164,7 +164,7 @@ QByteArray O1::sign(const QList<O0RequestParameter> &oauthParams, const QList<O0
     QByteArray baseString = getRequestBase(oauthParams, otherParams, url, op);
     QByteArray secret = QUrl::toPercentEncoding(consumerSecret) + "&" + QUrl::toPercentEncoding(tokenSecret);
 #if QT_VERSION >= 0x050100
-    return QMessageAuthenticationCode::hash(baseString, secret, QCryptographicHash::Sha1).toBase64();
+    return QMessageAuthenticationCode::hash(baseString, secret, QCryptographicHash::Sha256).toBase64();
 #else
     return hmacSha1(secret, baseString);
 #endif
@@ -202,7 +202,7 @@ void O1::decorateRequest(QNetworkRequest &req, const QList<O0RequestParameter> &
 
 QByteArray O1::generateSignature(const QList<O0RequestParameter> headers, const QNetworkRequest &req, const QList<O0RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation) {
     QByteArray signature;
-    if (signatureMethod() == O2_SIGNATURE_TYPE_HMAC_SHA1) {
+    if (signatureMethod() == O2_SIGNATURE_TYPE_HMAC_SHA256) {
         signature = sign(headers, signingParameters, req.url(), operation, clientSecret(), tokenSecret());
     } else if (signatureMethod() == O2_SIGNATURE_TYPE_PLAINTEXT) {
         signature = clientSecret().toLatin1() + "&" + tokenSecret().toLatin1();
