@@ -24,6 +24,7 @@ const char O2_OAUTH_SIGNATURE[] = "oauth_signature";
 const char O2_OAUTH_SIGNATURE_METHOD[] = "oauth_signature_method";
 const char O2_OAUTH_TIMESTAMP[] = "oauth_timestamp";
 const char O2_OAUTH_VERSION[] = "oauth_version";
+
 // OAuth 1/1.1 Response Parameters
 const char O2_OAUTH_TOKEN[] = "oauth_token";
 const char O2_OAUTH_TOKEN_SECRET[] = "oauth_token_secret";
@@ -60,6 +61,7 @@ const char O2_OAUTH2_INTERVAL[] = "interval";
 
 // OAuth signature types
 const char O2_SIGNATURE_TYPE_HMAC_SHA1[] = "HMAC-SHA1";
+const char O2_SIGNATURE_TYPE_HMAC_SHA256[] = "HMAC-SHA256";
 const char O2_SIGNATURE_TYPE_PLAINTEXT[] = "PLAINTEXT";
 
 // Parameter values
