@@ -105,6 +105,21 @@ public:
     /// Get token expiration time (seconds from Epoch).
     int expires();
 
+    /// Build HTTP request body.
+    QByteArray buildRequestBody(const QMap<QString, QString> &parameters);
+
+    /// Set authentication code.
+    void setCode(const QString &v);
+
+    /// Set refresh token.
+    void setRefreshToken(const QString &v);
+
+    /// Set token expiration time.
+    void setExpires(int v);
+
+    /// Start polling authorization server
+    void startPollServer(const QVariantMap &params);
+
 public Q_SLOTS:
     /// Authenticate.
     Q_INVOKABLE virtual void link();
@@ -151,22 +166,6 @@ protected Q_SLOTS:
 
     /// Handle completion of a Device Authorization Request
     virtual void onDeviceAuthReplyFinished();
-
-protected:
-    /// Build HTTP request body.
-    QByteArray buildRequestBody(const QMap<QString, QString> &parameters);
-
-    /// Set authentication code.
-    void setCode(const QString &v);
-
-    /// Set refresh token.
-    void setRefreshToken(const QString &v);
-
-    /// Set token expiration time.
-    void setExpires(int v);
-
-    /// Start polling authorization server
-    void startPollServer(const QVariantMap &params);
 
 protected:
     QString username_;

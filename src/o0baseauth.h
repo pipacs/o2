@@ -75,6 +75,24 @@ public:
     /// Construct query string from list of headers
     static QByteArray createQueryParameters(const QList<O0RequestParameter> &parameters);
 
+    /// Set authentication token.
+    void setToken(const QString &v);
+
+    /// Set authentication token secret.
+    void setTokenSecret(const QString &v);
+
+    /// Set the linked state
+    void setLinked(bool v);
+
+    /// Set extra tokens found in OAuth response
+    void setExtraTokens(QVariantMap extraTokens);
+
+    /// Set local reply server
+    void setReplyServer(O2ReplyServer *server);
+
+    /// Set local poll server
+    void setPollServer(O2PollServer *server);
+
 public Q_SLOTS:
     /// Authenticate.
     Q_INVOKABLE virtual void link() = 0;
@@ -109,25 +127,7 @@ Q_SIGNALS:
     void extraTokensChanged();
 
 protected:
-    /// Set authentication token.
-    void setToken(const QString &v);
-
-    /// Set authentication token secret.
-    void setTokenSecret(const QString &v);
-
-    /// Set the linked state
-    void setLinked(bool v);
-
-    /// Set extra tokens found in OAuth response
-    void setExtraTokens(QVariantMap extraTokens);
-
-    /// Set local reply server
-    void setReplyServer(O2ReplyServer *server);
-
     O2ReplyServer * replyServer() const;
-
-    /// Set local poll server
-    void setPollServer(O2PollServer *server);
 
     O2PollServer * pollServer() const;
 
