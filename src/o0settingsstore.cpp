@@ -45,7 +45,7 @@ void O0SettingsStore::setValue(const QString &key, const QString &value) {
 
     const QSettings::Status status = settings_->status();
     if (status != QSettings::NoError) {
-        qCritical() << "O0SettingsStore QSettings error:" << status;
+        // qCritical() << "O0SettingsStore QSettings error:" << status;
         if (status == QSettings::AccessError) {
             qCritical() << "Did you forget to set organization name and application name "
                            "in QSettings or QCoreApplication?";
