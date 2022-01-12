@@ -13,12 +13,12 @@
 class QNetworkAccessManager;
 
 /// Poll an authorization server for token
-class O0_EXPORT O2PollServer : public QObject
-{
+class O0_EXPORT O2PollServer : public QObject {
     Q_OBJECT
 
 public:
-    explicit O2PollServer(QNetworkAccessManager * manager, const QNetworkRequest &request, const QByteArray & payload, int expiresIn, QObject *parent = 0);
+    explicit O2PollServer(QNetworkAccessManager *manager, const QNetworkRequest &request, const QByteArray &payload,
+        int expiresIn, QObject *parent = 0);
 
     /// Seconds to wait between polling requests
     Q_PROPERTY(int interval READ interval WRITE setInterval)

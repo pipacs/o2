@@ -2,18 +2,17 @@
 #define O2_H
 
 #include <QNetworkAccessManager>
-#include <QNetworkRequest>
 #include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QPair>
 
-#include "o0export.h"
-#include "o0baseauth.h"
-#include "o2reply.h"
 #include "o0abstractstore.h"
+#include "o0baseauth.h"
+#include "o0export.h"
+#include "o2reply.h"
 
 /// Simple OAuth2 authenticator.
-class O0_EXPORT O2: public O0BaseAuth
-{
+class O0_EXPORT O2 : public O0BaseAuth {
     Q_OBJECT
 public:
     Q_ENUMS(GrantFlow)
@@ -22,7 +21,7 @@ public:
     /// Authorization flow types.
     enum GrantFlow {
         GrantFlowAuthorizationCode, ///< @see http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.1
-        GrantFlowImplicit, ///< @see http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.2
+        GrantFlowImplicit,          ///< @see http://tools.ietf.org/html/draft-ietf-oauth-v2-15#section-4.2
         GrantFlowResourceOwnerPasswordCredentials,
         GrantFlowDevice ///< @see https://tools.ietf.org/html/rfc8628#section-1
     };
@@ -72,7 +71,8 @@ public:
     void setRequestUrl(const QString &value);
 
     /// User-defined extra parameters to append to request URL
-    Q_PROPERTY(QVariantMap extraRequestParams READ extraRequestParams WRITE setExtraRequestParams NOTIFY extraRequestParamsChanged)
+    Q_PROPERTY(QVariantMap extraRequestParams READ extraRequestParams WRITE setExtraRequestParams NOTIFY
+            extraRequestParamsChanged)
     QVariantMap extraRequestParams();
     void setExtraRequestParams(const QVariantMap &value);
 

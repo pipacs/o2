@@ -10,19 +10,21 @@
 #include <QUrlQuery>
 #endif
 
-#include "o2facebook.h"
 #include "o0globals.h"
+#include "o2facebook.h"
 
 static const char *FbEndpoint = "https://graph.facebook.com/oauth/authorize?display=touch";
 static const char *FbTokenUrl = "https://graph.facebook.com/oauth/access_token";
 static const char *FbExpiresKey = "expires_in";
 
-O2Facebook::O2Facebook(QObject *parent): O2(parent) {
+O2Facebook::O2Facebook(QObject *parent) : O2(parent)
+{
     setRequestUrl(FbEndpoint);
     setTokenUrl(FbTokenUrl);
 }
 
-void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
+void O2Facebook::onVerificationReceived(const QMap<QString, QString> response)
+{
     qDebug() << "O2Facebook::onVerificationReceived: Emitting closeBrowser()";
     Q_EMIT closeBrowser();
 
@@ -60,10 +62,12 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response) {
     QNetworkReply *tokenReply = manager_->get(tokenRequest);
     timedReplies_.add(tokenReply);
     connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
-    connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
+    connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this,
+        SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
 }
 
-void O2Facebook::onTokenReplyFinished() {
+void O2Facebook::onTokenReplyFinished()
+{
     qDebug() << "O2Facebook::onTokenReplyFinished";
 
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
@@ -86,7 +90,8 @@ void O2Facebook::onTokenReplyFinished() {
         timedReplies_.remove(tokenReply);
         setLinked(true);
         Q_EMIT linkingSucceeded();
-    } else {
+    }
+    else {
         qWarning() << "O2Facebook::onTokenReplyFinished:" << tokenReply->errorString();
     }
 }

@@ -12,9 +12,10 @@ static const char *SMEndpoint = "https://api.surveymonkey.net/oauth/authorize";
 static const char *SMTokenUrl = "https://api.surveymonkey.net/oauth/token";
 static const quint16 SMLocalPort = 8000;
 
-O2SurveyMonkey::O2SurveyMonkey(QObject *parent): O2(parent) {
+O2SurveyMonkey::O2SurveyMonkey(QObject *parent) : O2(parent)
+{
     setRequestUrl(SMEndpoint);
     setTokenUrl(SMTokenUrl);
     setLocalPort(SMLocalPort);
-    setIgnoreSslErrors(true); //needed on Mac
+    setIgnoreSslErrors(true); // needed on Mac
 }

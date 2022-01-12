@@ -5,7 +5,7 @@
 #include "o1twitter.h"
 
 /// Twitter authenticator using Twitter XAuth
-class O0_EXPORT OXTwitter: public O1Twitter {
+class O0_EXPORT OXTwitter : public O1Twitter {
     Q_OBJECT
 
 public:

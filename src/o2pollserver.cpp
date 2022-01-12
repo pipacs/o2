@@ -1,26 +1,21 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-#include "o2pollserver.h"
 #include "o0jsonresponse.h"
+#include "o2pollserver.h"
 
 static QMap<QString, QString> toVerificationParams(const QVariantMap &map)
 {
     QMap<QString, QString> params;
-    for (QVariantMap::const_iterator i = map.constBegin();
-         i != map.constEnd(); ++i)
-    {
+    for (QVariantMap::const_iterator i = map.constBegin(); i != map.constEnd(); ++i) {
         params[i.key()] = i.value().toString();
     }
     return params;
 }
 
-O2PollServer::O2PollServer(QNetworkAccessManager *manager, const QNetworkRequest &request, const QByteArray &payload, int expiresIn, QObject *parent)
-    : QObject(parent)
-    , manager_(manager)
-    , request_(request)
-    , payload_(payload)
-    , expiresIn_(expiresIn)
+O2PollServer::O2PollServer(QNetworkAccessManager *manager, const QNetworkRequest &request, const QByteArray &payload,
+    int expiresIn, QObject *parent)
+    : QObject(parent), manager_(manager), request_(request), payload_(payload), expiresIn_(expiresIn)
 {
     expirationTimer.setTimerType(Qt::VeryCoarseTimer);
     expirationTimer.setInterval(expiresIn * 1000);
@@ -54,7 +49,7 @@ void O2PollServer::startPolling()
 void O2PollServer::onPollTimeout()
 {
     qDebug() << "O2PollServer::onPollTimeout: retrying";
-    QNetworkReply * reply = manager_->post(request_, payload_);
+    QNetworkReply *reply = manager_->post(request_, payload_);
     connect(reply, SIGNAL(finished()), this, SLOT(onReplyFinished()));
 }
 

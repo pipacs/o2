@@ -25,22 +25,15 @@
 /// builder.setPrepopulatedUsername(lastUsername_);
 /// o1_->initAuthorizationUrl(builder);
 /// @endcode
-class O0_EXPORT O1SmugMug: public O1 {
+class O0_EXPORT O1SmugMug : public O1 {
     Q_OBJECT
     Q_ENUMS(Access)
     Q_ENUMS(Permissions)
 
 public:
-    enum Access {
-        AccessPublic,
-        AccessFull
-    };
+    enum Access { AccessPublic, AccessFull };
 
-    enum Permissions {
-        PermissionsRead,
-        PermissionsAdd,
-        PermissionsModify
-    };
+    enum Permissions { PermissionsRead, PermissionsAdd, PermissionsModify };
 
     Q_INVOKABLE void initAuthorizationUrl(Access access, Permissions permissions);
 

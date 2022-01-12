@@ -10,21 +10,22 @@
 #include <QUrlQuery>
 #endif
 
-#include "o2uber.h"
 #include "o0globals.h"
+#include "o2uber.h"
 
 static const char *UberEndpoint = "https://login.uber.com/oauth/v2/authorize";
 static const char *UberTokenUrl = "https://login.uber.com/oauth/v2/token";
 static const char *UberExpiresIn = "expires_in";
 static const char *UberGrantType = "authorization_code";
 
-O2Uber::O2Uber(QObject *parent): O2(parent)
+O2Uber::O2Uber(QObject *parent) : O2(parent)
 {
     setRequestUrl(UberEndpoint);
     setTokenUrl(UberTokenUrl);
 }
 
-void O2Uber::onVerificationReceived(const QMap<QString, QString> response){
+void O2Uber::onVerificationReceived(const QMap<QString, QString> response)
+{
 
     qDebug() << "O2Uber::onVerificationReceived: Emitting closeBrowser()";
     Q_EMIT closeBrowser();
@@ -66,11 +67,12 @@ void O2Uber::onVerificationReceived(const QMap<QString, QString> response){
     QNetworkReply *tokenReply = manager_->post(tokenRequest, QByteArray());
     timedReplies_.add(tokenReply);
     connect(tokenReply, SIGNAL(finished()), this, SLOT(onTokenReplyFinished()), Qt::QueuedConnection);
-    connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
-
+    connect(tokenReply, SIGNAL(error(QNetworkReply::NetworkError)), this,
+        SLOT(onTokenReplyError(QNetworkReply::NetworkError)), Qt::QueuedConnection);
 }
 
-void O2Uber::onTokenReplyFinished(){
+void O2Uber::onTokenReplyFinished()
+{
     qDebug() << "O2Uber::onTokenReplyFinished";
 
     QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
@@ -93,7 +95,8 @@ void O2Uber::onTokenReplyFinished(){
         timedReplies_.remove(tokenReply);
         setLinked(true);
         Q_EMIT linkingSucceeded();
-    } else {
+    }
+    else {
         qWarning() << "O2Uber::onTokenReplyFinished:" << tokenReply->errorString();
     }
 }

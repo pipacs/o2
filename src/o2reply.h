@@ -1,17 +1,17 @@
 #ifndef O2TIMEDREPLYLIST_H
 #define O2TIMEDREPLYLIST_H
 
-#include <QList>
-#include <QTimer>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QNetworkAccessManager>
 #include <QByteArray>
+#include <QList>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QTimer>
 
 #include "o0export.h"
 
 /// A network request/reply pair that can time out.
-class O0_EXPORT O2Reply: public QTimer {
+class O0_EXPORT O2Reply : public QTimer {
     Q_OBJECT
 
 public:
@@ -31,7 +31,10 @@ public:
 /// List of O2Replies.
 class O0_EXPORT O2ReplyList {
 public:
-    O2ReplyList() { ignoreSslErrors_ = false; }
+    O2ReplyList()
+    {
+        ignoreSslErrors_ = false;
+    }
 
     /// Destructor.
     /// Deletes all O2Reply instances in the list.

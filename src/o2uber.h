@@ -4,7 +4,7 @@
 #include "o0export.h"
 #include "o2.h"
 
-class O0_EXPORT O2Uber: public O2{
+class O0_EXPORT O2Uber : public O2 {
     Q_OBJECT
 
 public:

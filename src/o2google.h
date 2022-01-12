@@ -13,5 +13,4 @@ public:
     explicit O2Google(QObject *parent = 0);
 };
 
-
-#endif //O2_O2GOOGLE_H
+#endif // O2_O2GOOGLE_H

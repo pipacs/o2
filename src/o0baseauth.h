@@ -2,22 +2,21 @@
 #define O0BASEAUTH_H
 
 #include <QByteArray>
-#include <QObject>
 #include <QMap>
+#include <QObject>
 #include <QString>
 #include <QUrl>
 #include <QVariantMap>
 
-#include "o0export.h"
 #include "o0abstractstore.h"
+#include "o0export.h"
 #include "o0requestparameter.h"
 
 class O2ReplyServer;
 class O2PollServer;
 
 /// Base class of OAuth authenticators
-class O0_EXPORT O0BaseAuth : public QObject
-{
+class O0_EXPORT O0BaseAuth : public QObject {
     Q_OBJECT
 public:
     explicit O0BaseAuth(QObject *parent = 0, O0AbstractStore *store = 0);
@@ -40,13 +39,15 @@ public:
     QVariantMap extraTokens();
 
     /// Client application ID.
-    /// O1 instances with the same (client ID, client secret) share the same "linked", "token" and "tokenSecret" properties.
+    /// O1 instances with the same (client ID, client secret) share the same "linked", "token" and "tokenSecret"
+    /// properties.
     Q_PROPERTY(QString clientId READ clientId WRITE setClientId NOTIFY clientIdChanged)
     QString clientId();
     void setClientId(const QString &value);
 
     /// Client application secret.
-    /// O1 instances with the same (client ID, client secret) share the same "linked", "token" and "tokenSecret" properties.
+    /// O1 instances with the same (client ID, client secret) share the same "linked", "token" and "tokenSecret"
+    /// properties.
     Q_PROPERTY(QString clientSecret READ clientSecret WRITE setClientSecret NOTIFY clientSecretChanged)
     QString clientSecret();
     void setClientSecret(const QString &value);
@@ -127,9 +128,9 @@ Q_SIGNALS:
     void extraTokensChanged();
 
 protected:
-    O2ReplyServer * replyServer() const;
+    O2ReplyServer *replyServer() const;
 
-    O2PollServer * pollServer() const;
+    O2PollServer *pollServer() const;
 
 protected:
     QString clientId_;

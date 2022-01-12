@@ -5,7 +5,7 @@
 #include "o2.h"
 
 /// SurveyMonkey's dialect of OAuth 2.0
-class O0_EXPORT O2SurveyMonkey: public O2 {
+class O0_EXPORT O2SurveyMonkey : public O2 {
     Q_OBJECT
 
 public:

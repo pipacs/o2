@@ -5,7 +5,8 @@ static const char *VimeoScope = "public";
 static const char *VimeoEndpoint = "https://api.vimeo.com/oauth/authorize";
 static const char *VimeoTokenUrl = "https://api.vimeo.com/oauth/access_token";
 
-O2Vimeo::O2Vimeo(QObject *parent): O2(parent) {
+O2Vimeo::O2Vimeo(QObject *parent) : O2(parent)
+{
     setRequestUrl(VimeoEndpoint);
     setTokenUrl(VimeoTokenUrl);
     setRefreshTokenUrl(VimeoTokenUrl);

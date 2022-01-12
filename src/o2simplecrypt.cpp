@@ -26,17 +26,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "o0simplecrypt.h"
 #include <QByteArray>
-#include <QtDebug>
-#include <QtGlobal>
-#include <QDateTime>
 #include <QCryptographicHash>
 #include <QDataStream>
+#include <QDateTime>
+#include <QtDebug>
+#include <QtGlobal>
 
-O0SimpleCrypt::O0SimpleCrypt():
-    m_key(0),
-    m_compressionMode(CompressionAuto),
-    m_protectionMode(ProtectionChecksum),
-    m_lastError(ErrorNoError)
+O0SimpleCrypt::O0SimpleCrypt()
+    : m_key(0), m_compressionMode(CompressionAuto), m_protectionMode(ProtectionChecksum), m_lastError(ErrorNoError)
 {
 #if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
     qsrand(uint(QDateTime::currentMSecsSinceEpoch() & 0xFFFF));
@@ -45,11 +42,8 @@ O0SimpleCrypt::O0SimpleCrypt():
 #endif
 }
 
-O0SimpleCrypt::O0SimpleCrypt(quint64 key):
-    m_key(key),
-    m_compressionMode(CompressionAuto),
-    m_protectionMode(ProtectionChecksum),
-    m_lastError(ErrorNoError)
+O0SimpleCrypt::O0SimpleCrypt(quint64 key)
+    : m_key(key), m_compressionMode(CompressionAuto), m_protectionMode(ProtectionChecksum), m_lastError(ErrorNoError)
 {
 #if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
     qsrand(uint(QDateTime::currentMSecsSinceEpoch() & 0xFFFF));
@@ -69,16 +63,16 @@ void O0SimpleCrypt::splitKey()
 {
     m_keyParts.clear();
     m_keyParts.resize(8);
-    for (int i=0;i<8;i++) {
+    for (int i = 0; i < 8; i++) {
         quint64 part = m_key;
-        for (int j=i; j>0; j--)
+        for (int j = i; j > 0; j--)
             part = part >> 8;
         part = part & 0xff;
         m_keyParts[i] = static_cast<char>(part);
     }
 }
 
-QByteArray O0SimpleCrypt::encryptToByteArray(const QString& plaintext)
+QByteArray O0SimpleCrypt::encryptToByteArray(const QString &plaintext)
 {
     QByteArray plaintextArray = plaintext.toUtf8();
     return encryptToByteArray(plaintextArray);
@@ -92,14 +86,14 @@ QByteArray O0SimpleCrypt::encryptToByteArray(QByteArray plaintext)
         return QByteArray();
     }
 
-
     QByteArray ba = plaintext;
 
     CryptoFlags flags = CryptoFlagNone;
     if (m_compressionMode == CompressionAlways) {
-        ba = qCompress(ba, 9); //maximum compression
+        ba = qCompress(ba, 9); // maximum compression
         flags |= CryptoFlagCompression;
-    } else if (m_compressionMode == CompressionAuto) {
+    }
+    else if (m_compressionMode == CompressionAuto) {
         QByteArray compressed = qCompress(ba, 9);
         if (compressed.count() < ba.count()) {
             ba = compressed;
@@ -112,7 +106,8 @@ QByteArray O0SimpleCrypt::encryptToByteArray(QByteArray plaintext)
         flags |= CryptoFlagChecksum;
         QDataStream s(&integrityProtection, QIODevice::WriteOnly);
         s << qChecksum(ba.constData(), ba.length());
-    } else if (m_protectionMode == ProtectionHash) {
+    }
+    else if (m_protectionMode == ProtectionHash) {
         flags |= CryptoFlagHash;
         QCryptographicHash hash(QCryptographicHash::Sha1);
         hash.addData(ba);
@@ -120,7 +115,7 @@ QByteArray O0SimpleCrypt::encryptToByteArray(QByteArray plaintext)
         integrityProtection += hash.result();
     }
 
-    //prepend a random char to the string
+    // prepend a random char to the string
 #if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
     char randomChar = char(qrand() & 0xFF);
 #else
@@ -140,15 +135,15 @@ QByteArray O0SimpleCrypt::encryptToByteArray(QByteArray plaintext)
     }
 
     QByteArray resultArray;
-    resultArray.append(char(0x03));  //version for future updates to algorithm
-    resultArray.append(char(flags)); //encryption flags
+    resultArray.append(char(0x03));  // version for future updates to algorithm
+    resultArray.append(char(flags)); // encryption flags
     resultArray.append(ba);
 
     m_lastError = ErrorNoError;
     return resultArray;
 }
 
-QString O0SimpleCrypt::encryptToString(const QString& plaintext)
+QString O0SimpleCrypt::encryptToString(const QString &plaintext)
 {
     QByteArray plaintextArray = plaintext.toUtf8();
     QByteArray cypher = encryptToByteArray(plaintextArray);
@@ -180,7 +175,7 @@ QString O0SimpleCrypt::decryptToString(QByteArray cypher)
     return plaintext;
 }
 
-QByteArray O0SimpleCrypt::decryptToByteArray(const QString& cyphertext)
+QByteArray O0SimpleCrypt::decryptToByteArray(const QString &cyphertext)
 {
     QByteArray cyphertextArray = QByteArray::fromBase64(cyphertext.toLatin1());
     QByteArray ba = decryptToByteArray(cyphertextArray);
@@ -205,7 +200,7 @@ QByteArray O0SimpleCrypt::decryptToByteArray(QByteArray cypher)
 
     char version = ba.at(0);
 
-    if (version !=3) {  //we only work with version 3
+    if (version != 3) { // we only work with version 3
         m_lastError = ErrorUnknownVersion;
         qWarning() << "Invalid version or not a cyphertext.";
         return QByteArray();
@@ -225,7 +220,7 @@ QByteArray O0SimpleCrypt::decryptToByteArray(QByteArray cypher)
         ++pos;
     }
 
-    ba = ba.mid(1); //chop off the random number at the start
+    ba = ba.mid(1); // chop off the random number at the start
 
     bool integrityOk(true);
     if (flags.testFlag(CryptoFlagChecksum)) {
@@ -241,7 +236,8 @@ QByteArray O0SimpleCrypt::decryptToByteArray(QByteArray cypher)
         ba = ba.mid(2);
         quint16 checksum = qChecksum(ba.constData(), ba.length());
         integrityOk = (checksum == storedChecksum);
-    } else if (flags.testFlag(CryptoFlagHash)) {
+    }
+    else if (flags.testFlag(CryptoFlagHash)) {
         if (ba.length() < 20) {
             m_lastError = ErrorIntegrityFailed;
             return QByteArray();

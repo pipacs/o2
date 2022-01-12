@@ -10,7 +10,8 @@
 #include <QScriptValueIterator>
 #endif
 
-QVariantMap parseJsonResponse(const QByteArray &data) {
+QVariantMap parseJsonResponse(const QByteArray &data)
+{
 #if QT_VERSION >= 0x050000
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(data, &err);

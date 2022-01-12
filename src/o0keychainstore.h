@@ -4,9 +4,9 @@
 #ifndef O2_O0KEYCHAINSTORE_H
 #define O2_O0KEYCHAINSTORE_H
 
-#include <QtCore/QMap>
 #include "o0abstractstore.h"
 #include <QString>
+#include <QtCore/QMap>
 
 namespace QKeychain {
 class Job;
@@ -19,10 +19,10 @@ class Job;
 /// For example: fetchFromKeychain() can be called immediately after
 /// creating a keychain store; persist() - after a successful authorization;
 /// clearFromKeychain() - when the user logs out from the service.
-class O0_EXPORT o0keyChainStore  : public  O0AbstractStore{
+class O0_EXPORT o0keyChainStore : public O0AbstractStore {
     Q_OBJECT
 public:
-    explicit o0keyChainStore(const QString& app,const QString& name,QObject *parent = 0);
+    explicit o0keyChainStore(const QString &app, const QString &name, QObject *parent = 0);
 
     /// Retrieve a string value by key.
     QString value(const QString &key, const QString &defaultValue = QString());
@@ -52,9 +52,7 @@ private:
 
     QString app_;
     QString name_;
-    QMap<QString,QString> pairs_;
-
+    QMap<QString, QString> pairs_;
 };
 
-
-#endif //O2_O0KEYCHAINSTORE_H
+#endif // O2_O0KEYCHAINSTORE_H

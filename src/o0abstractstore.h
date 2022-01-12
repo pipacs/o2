@@ -7,11 +7,10 @@
 #include "o0export.h"
 
 /// Storage for strings.
-class O0_EXPORT O0AbstractStore: public QObject {
+class O0_EXPORT O0AbstractStore : public QObject {
 
 public:
-    explicit O0AbstractStore(QObject *parent = 0): QObject(parent) {
-    }
+    explicit O0AbstractStore(QObject *parent = 0) : QObject(parent) {}
 
     /// Retrieve a string value by key.
     virtual QString value(const QString &key, const QString &defaultValue = QString()) = 0;

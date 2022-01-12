@@ -5,7 +5,7 @@
 #include "o2google.h"
 
 /// Google Fusion Tables' dialect of OAuth 2.0
-class O0_EXPORT O2Gft: public O2Google{
+class O0_EXPORT O2Gft : public O2Google {
     Q_OBJECT
 
 public:
