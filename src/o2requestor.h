@@ -15,6 +15,14 @@
 
 class O2;
 
+namespace td {
+struct NR {
+    QNetworkReply::NetworkError error;
+    QString error_message;
+    QByteArray response;
+};
+} // namespace td
+
 /// Makes authenticated requests.
 class O0_EXPORT O2Requestor : public QObject {
     Q_OBJECT
@@ -87,7 +95,7 @@ Q_SIGNALS:
         QList<QNetworkReply::RawHeaderPair> headers);
 
     /// Emitted when a request has been completed or failed.
-    void finished(QPair<QNetworkReply::NetworkError, QByteArray>);
+    void finished(td::NR);
 
     /// Emitted when an upload has progressed.
     void uploadProgress(int id, qint64 bytesSent, qint64 bytesTotal);

@@ -309,7 +309,7 @@ void O2Requestor::finish()
     Q_EMIT finished(id_, error_, reply_->errorString(), data);
     Q_EMIT finished(id_, error_, data, headers);
     Q_EMIT finished(id_, error_, reply_->errorString(), data, headers);
-    Q_EMIT finished(qMakePair(error_, data));
+    Q_EMIT finished(td::NR{error_, reply_->errorString(), data});
 }
 
 void O2Requestor::retry()

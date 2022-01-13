@@ -116,6 +116,7 @@ void O1::unlink()
     setTokenSecret("");
     setExtraTokens(QVariantMap());
     Q_EMIT linkingSucceeded();
+    Q_EMIT linkingDone();
 }
 
 #if QT_VERSION < 0x050100
@@ -261,6 +262,7 @@ void O1::link()
     if (linked()) {
         qDebug() << "O1::link: Linked already";
         Q_EMIT linkingSucceeded();
+        Q_EMIT linkingDone();
         return;
     }
 
@@ -326,6 +328,7 @@ void O1::onTokenRequestError(QNetworkReply::NetworkError error)
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     qWarning() << "O1::onTokenRequestError:" << (int)error << reply->errorString() << reply->readAll();
     Q_EMIT linkingFailed();
+    Q_EMIT linkingDone();
 }
 
 void O1::onTokenRequestFinished()
@@ -354,6 +357,7 @@ void O1::onTokenRequestFinished()
                       "response :"
                    << data;
         Q_EMIT linkingFailed();
+        Q_EMIT linkingDone();
         return;
     }
 
@@ -383,6 +387,7 @@ void O1::onVerificationReceived(QMap<QString, QString> params)
     else {
         qWarning() << "O1::onVerificationReceived: oauth_token missing or doesn't match";
         Q_EMIT linkingFailed();
+        Q_EMIT linkingDone();
     }
 }
 
@@ -418,6 +423,7 @@ void O1::onTokenExchangeError(QNetworkReply::NetworkError error)
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     qWarning() << "O1::onTokenExchangeError:" << (int)error << reply->errorString() << reply->readAll();
     Q_EMIT linkingFailed();
+    Q_EMIT linkingDone();
 }
 
 void O1::onTokenExchangeFinished()
@@ -447,10 +453,12 @@ void O1::onTokenExchangeFinished()
         }
         setLinked(true);
         Q_EMIT linkingSucceeded();
+        Q_EMIT linkingDone();
     }
     else {
         qWarning() << "O1::onTokenExchangeFinished: oauth_token or oauth_token_secret missing from response" << data;
         Q_EMIT linkingFailed();
+        Q_EMIT linkingDone();
     }
 }
 

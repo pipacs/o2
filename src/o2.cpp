@@ -193,6 +193,7 @@ void O2::link()
     if (linked()) {
         qDebug() << "O2::link: Linked already";
         Q_EMIT linkingSucceeded();
+        Q_EMIT linkingDone();
         return;
     }
 
@@ -219,6 +220,7 @@ void O2::link()
                 else {
                     qWarning() << "O2::link: Reply server failed to start listening on port" << localPort();
                     Q_EMIT linkingFailed();
+                    Q_EMIT linkingDone();
                     return;
                 }
             }
@@ -300,6 +302,7 @@ void O2::unlink()
     setExpires(0);
     setExtraTokens(QVariantMap());
     Q_EMIT linkingSucceeded();
+    Q_EMIT linkingDone();
 }
 
 void O2::onVerificationReceived(const QMap<QString, QString> response)
@@ -310,6 +313,7 @@ void O2::onVerificationReceived(const QMap<QString, QString> response)
     if (response.contains("error")) {
         qWarning() << "O2::onVerificationReceived: Verification failed:" << response;
         Q_EMIT linkingFailed();
+        Q_EMIT linkingDone();
         return;
     }
 
@@ -358,10 +362,12 @@ void O2::onVerificationReceived(const QMap<QString, QString> response)
             }
             setLinked(true);
             Q_EMIT linkingSucceeded();
+            Q_EMIT linkingDone();
         }
         else {
             qWarning() << "O2::onVerificationReceived: Access token missing from response for implicit or device flow";
             Q_EMIT linkingFailed();
+            Q_EMIT linkingDone();
         }
     }
     else {
@@ -422,10 +428,12 @@ void O2::onTokenReplyFinished()
             timedReplies_.remove(tokenReply);
             setLinked(true);
             Q_EMIT linkingSucceeded();
+            Q_EMIT linkingDone();
         }
         else {
             qWarning() << "O2::onTokenReplyFinished: Access token missing from response";
             Q_EMIT linkingFailed();
+            Q_EMIT linkingDone();
         }
     }
     tokenReply->deleteLater();
@@ -446,6 +454,7 @@ void O2::onTokenReplyError(QNetworkReply::NetworkError error)
     setToken(QString());
     setRefreshToken(QString());
     Q_EMIT linkingFailed();
+    Q_EMIT linkingDone();
 }
 
 QByteArray O2::buildRequestBody(const QMap<QString, QString> &parameters)
@@ -484,6 +493,7 @@ void O2::startPollServer(const QVariantMap &params)
     if (!ok) {
         qWarning() << "O2::startPollServer: No expired_in parameter";
         Q_EMIT linkingFailed();
+        Q_EMIT linkingDone();
         return;
     }
 
@@ -580,6 +590,7 @@ void O2::onRefreshFinished()
         timedReplies_.remove(refreshReply);
         setLinked(true);
         Q_EMIT linkingSucceeded();
+        Q_EMIT linkingDone();
         Q_EMIT refreshFinished(QNetworkReply::NoError);
         qDebug() << " New token expires in" << expires() << "seconds";
     }
@@ -642,6 +653,7 @@ void O2::onDeviceAuthReplyFinished()
         else {
             qWarning() << "O2::onDeviceAuthReplyFinished: Mandatory parameters missing from response";
             Q_EMIT linkingFailed();
+            Q_EMIT linkingDone();
         }
     }
     tokenReply->deleteLater();
@@ -652,6 +664,7 @@ void O2::serverHasClosed(bool paramsfound)
     if (!paramsfound) {
         // server has probably timed out after receiving first response
         Q_EMIT linkingFailed();
+        Q_EMIT linkingDone();
     }
     // poll server is not re-used for later auth requests
     setPollServer(NULL);

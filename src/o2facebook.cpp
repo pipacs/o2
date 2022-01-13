@@ -34,6 +34,7 @@ void O2Facebook::onVerificationReceived(const QMap<QString, QString> response)
             qWarning() << "O2Facebook::onVerificationReceived:" << key << response.value(key);
         }
         Q_EMIT linkingFailed();
+        Q_EMIT linkingDone();
         return;
     }
 
@@ -90,6 +91,7 @@ void O2Facebook::onTokenReplyFinished()
         timedReplies_.remove(tokenReply);
         setLinked(true);
         Q_EMIT linkingSucceeded();
+        Q_EMIT linkingDone();
     }
     else {
         qWarning() << "O2Facebook::onTokenReplyFinished:" << tokenReply->errorString();

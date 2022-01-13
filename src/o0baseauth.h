@@ -117,6 +117,9 @@ Q_SIGNALS:
     /// Emitted when authentication/deauthentication failed.
     void linkingFailed();
 
+    /// Emitted when authentication/deauthentication succeeded/failed.
+    void linkingDone();
+
     // Property change signals
 
     void linkedChanged();

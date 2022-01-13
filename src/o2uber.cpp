@@ -36,6 +36,7 @@ void O2Uber::onVerificationReceived(const QMap<QString, QString> response)
             qWarning() << "O2Uber::onVerificationReceived:" << key << response.value(key);
         }
         Q_EMIT linkingFailed();
+        Q_EMIT linkingDone();
         return;
     }
 
@@ -95,6 +96,7 @@ void O2Uber::onTokenReplyFinished()
         timedReplies_.remove(tokenReply);
         setLinked(true);
         Q_EMIT linkingSucceeded();
+        Q_EMIT linkingDone();
     }
     else {
         qWarning() << "O2Uber::onTokenReplyFinished:" << tokenReply->errorString();

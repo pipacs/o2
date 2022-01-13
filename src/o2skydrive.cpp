@@ -73,6 +73,7 @@ void O2Skydrive::redirected(const QUrl &url)
         if (urlCode.isEmpty()) {
             qDebug() << "O2Skydrive::redirected: Code not received";
             Q_EMIT linkingFailed();
+            Q_EMIT linkingDone();
             return;
         }
         setCode(urlCode);
@@ -126,10 +127,12 @@ void O2Skydrive::redirected(const QUrl &url)
         setExpires(QDateTime::currentMSecsSinceEpoch() / 1000 + urlExpiresIn);
         if (urlToken.isEmpty()) {
             Q_EMIT linkingFailed();
+            Q_EMIT linkingDone();
         }
         else {
             setLinked(true);
             Q_EMIT linkingSucceeded();
+            Q_EMIT linkingDone();
         }
     }
 }
