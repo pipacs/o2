@@ -25,9 +25,8 @@
 #include "o1.h"
 #include "o2replyserver.h"
 
-O1::O1(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store) : O0BaseAuth(parent, store)
-{
-    setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA1);
+O1::O1(QObject *parent, QNetworkAccessManager *manager, O0AbstractStore *store): O0BaseAuth(parent, store) {
+    setSignatureMethod(O2_SIGNATURE_TYPE_HMAC_SHA256);
     manager_ = manager ? manager : new QNetworkAccessManager(this);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
 
@@ -192,7 +191,7 @@ QByteArray O1::sign(const QList<O0RequestParameter> &oauthParams, const QList<O0
     QByteArray baseString = getRequestBase(oauthParams, otherParams, url, op);
     QByteArray secret = QUrl::toPercentEncoding(consumerSecret) + "&" + QUrl::toPercentEncoding(tokenSecret);
 #if QT_VERSION >= 0x050100
-    return QMessageAuthenticationCode::hash(baseString, secret, QCryptographicHash::Sha1).toBase64();
+    return QMessageAuthenticationCode::hash(baseString, secret, QCryptographicHash::Sha256).toBase64();
 #else
     return hmacSha1(secret, baseString);
 #endif
@@ -235,7 +234,7 @@ QByteArray O1::generateSignature(const QList<O0RequestParameter> headers, const 
     const QList<O0RequestParameter> &signingParameters, QNetworkAccessManager::Operation operation)
 {
     QByteArray signature;
-    if (signatureMethod() == O2_SIGNATURE_TYPE_HMAC_SHA1) {
+    if (signatureMethod() == O2_SIGNATURE_TYPE_HMAC_SHA256) {
         signature = sign(headers, signingParameters, req.url(), operation, clientSecret(), tokenSecret());
     }
     else if (signatureMethod() == O2_SIGNATURE_TYPE_PLAINTEXT) {
@@ -303,12 +302,18 @@ void O1::link()
     headers.append(O0RequestParameter(O2_OAUTH_CALLBACK, callbackUrl().arg(localPort()).toLatin1()));
     headers.append(O0RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
     headers.append(O0RequestParameter(O2_OAUTH_NONCE, nonce()));
-    headers.append(
-        O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
+#if QT_VERSION >= 0x050800
+    headers.append(O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentSecsSinceEpoch()).toLatin1()));
+#else
+    headers.append(O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
+#endif
     headers.append(O0RequestParameter(O2_OAUTH_VERSION, "1.0"));
     headers.append(O0RequestParameter(O2_OAUTH_SIGNATURE_METHOD, signatureMethod().toLatin1()));
-    headers.append(O0RequestParameter(O2_OAUTH_SIGNATURE,
-        generateSignature(headers, request, requestParameters(), QNetworkAccessManager::PostOperation)));
+    headers.append(O0RequestParameter(O2_OAUTH_SIGNATURE, generateSignature(headers, request, requestParameters(), QNetworkAccessManager::PostOperation)));
+    qDebug() << "O1:link: Token request headers:";
+    foreach(param, headers) {
+        qDebug() << "  " << param.name << "=" << param.value;
+    }
 
     // Clear request token
     requestToken_.clear();
@@ -318,8 +323,11 @@ void O1::link()
     decorateRequest(request, headers);
     request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
     QNetworkReply *reply = manager_->post(request, QByteArray());
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this,
-        SLOT(onTokenRequestError(QNetworkReply::NetworkError)));
+#if QT_VERSION < 0x051500
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenRequestError(QNetworkReply::NetworkError)));
+#else
+    connect(reply, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onTokenRequestError(QNetworkReply::NetworkError)));
+#endif
     connect(reply, SIGNAL(finished()), this, SLOT(onTokenRequestFinished()));
 }
 
@@ -400,8 +408,11 @@ void O1::exchangeToken()
     QList<O0RequestParameter> oauthParams;
     oauthParams.append(O0RequestParameter(O2_OAUTH_CONSUMER_KEY, clientId().toLatin1()));
     oauthParams.append(O0RequestParameter(O2_OAUTH_VERSION, "1.0"));
-    oauthParams.append(
-        O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
+#if QT_VERSION >= 0x050800
+    oauthParams.append(O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentSecsSinceEpoch()).toLatin1()));
+#else
+    oauthParams.append(O0RequestParameter(O2_OAUTH_TIMESTAMP, QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1()));
+#endif
     oauthParams.append(O0RequestParameter(O2_OAUTH_NONCE, nonce()));
     oauthParams.append(O0RequestParameter(O2_OAUTH_TOKEN, requestToken_.toLatin1()));
     oauthParams.append(O0RequestParameter(O2_OAUTH_VERFIER, verifier_.toLatin1()));
@@ -413,8 +424,11 @@ void O1::exchangeToken()
     decorateRequest(request, oauthParams);
     request.setHeader(QNetworkRequest::ContentTypeHeader, O2_MIME_TYPE_XFORM);
     QNetworkReply *reply = manager_->post(request, QByteArray());
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this,
-        SLOT(onTokenExchangeError(QNetworkReply::NetworkError)));
+#if QT_VERSION < 0x051500
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onTokenExchangeError(QNetworkReply::NetworkError)));
+#else
+    connect(reply, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onTokenExchangeError(QNetworkReply::NetworkError)));
+#endif
     connect(reply, SIGNAL(finished()), this, SLOT(onTokenExchangeFinished()));
 }
 
@@ -474,9 +488,12 @@ QMap<QString, QString> O1::parseResponse(const QByteArray &response)
     return ret;
 }
 
-QByteArray O1::nonce()
-{
-    QString u = QString::number(QDateTime::currentDateTimeUtc().toTime_t());
+QByteArray O1::nonce() {
+#if QT_VERSION >= 0x050800
+    QString u = QString::number(QDateTime::currentSecsSinceEpoch()).toLatin1();
+#else
+    QString u = QString::number(QDateTime::currentDateTimeUtc().toTime_t()).toLatin1();
+#endif
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
     u.append(QString::number(QRandomGenerator::global()->generate()));
 #else
