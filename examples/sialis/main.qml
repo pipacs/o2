@@ -1,7 +1,7 @@
-import QtQuick 2.3
-import QtQuick.Controls 1.4
-import QtWebView 1.1
-import com.pipacs.o2 1.0
+import QtQuick
+import QtQuick.Controls
+import QtWebView
+import com.pipacs.o2
 
 ApplicationWindow {
     id: app
@@ -13,8 +13,9 @@ ApplicationWindow {
 
     O1Twitter {
         id: o1Twitter
-        clientId: "2vHeyIxjywIadjEhvbDpg"
-        clientSecret: "Xfwe195Kp3ZpcCKgkYs7RKfugTm8EfpLkQvsKfX2vvs"
+        clientId: "The app's API Key from developer.twitter.com"
+        clientSecret: "The app's API Secret from developer.twitter.com "
+        localPort: 8888
 
         onOpenBrowser: {
             browser.url = url
@@ -36,7 +37,7 @@ ApplicationWindow {
         authenticator: o1Twitter
     }
 
-    statusBar: StatusBar {
+    footer: ToolBar {
         Label {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter

@@ -29,8 +29,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QCryptographicHash>
 #include <QDataStream>
 #include <QDateTime>
-#include <QtDebug>
-#include <QtGlobal>
+#include <QDebug>
+#include <QIODevice>
 
 O0SimpleCrypt::O0SimpleCrypt()
     : m_key(0), m_compressionMode(CompressionAuto), m_protectionMode(ProtectionChecksum), m_lastError(ErrorNoError)
@@ -105,7 +105,11 @@ QByteArray O0SimpleCrypt::encryptToByteArray(QByteArray plaintext)
     if (m_protectionMode == ProtectionChecksum) {
         flags |= CryptoFlagChecksum;
         QDataStream s(&integrityProtection, QIODevice::WriteOnly);
+#if QT_VERSION >= 0x060000
+        s << qChecksum(QByteArrayView(ba));
+#else
         s << qChecksum(ba.constData(), ba.length());
+#endif
     }
     else if (m_protectionMode == ProtectionHash) {
         flags |= CryptoFlagHash;
@@ -234,7 +238,11 @@ QByteArray O0SimpleCrypt::decryptToByteArray(QByteArray cypher)
             s >> storedChecksum;
         }
         ba = ba.mid(2);
+#if QT_VERSION >= 0x060000
+        quint16 checksum = qChecksum(QByteArrayView(ba));
+#else
         quint16 checksum = qChecksum(ba.constData(), ba.length());
+#endif
         integrityOk = (checksum == storedChecksum);
     }
     else if (flags.testFlag(CryptoFlagHash)) {
