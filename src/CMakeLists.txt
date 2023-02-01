@@ -1,22 +1,12 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.16)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
-if(o2_WITH_QT5)
-    find_package(Qt5 COMPONENTS Core Network REQUIRED)
-else(o2_WITH_QT5)
-    set(QT_USE_QTNETWORK true)
-    set(QT_USE_QTSCRIPT true)
-    find_package(Qt4 REQUIRED)
-endif(o2_WITH_QT5)
-#find_package(QJson REQUIRED)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Network)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network)
 
-if (NOT o2_WITH_QT5)
-    include( ${QT_USE_FILE} )
-endif(NOT o2_WITH_QT5)
-
+# collect all sources
 
 set( o2_SRCS
     o2.cpp
@@ -192,69 +182,82 @@ if(o2_WITH_MSGRAPH)
 endif(o2_WITH_MSGRAPH)
 
 if(o2_WITH_KEYCHAIN)
-    if (Qt5Core_DIR)
-        find_package(Qt5Keychain REQUIRED)
-    else()
-        find_package(QtKeychain REQUIRED)
-    endif()
-    if(QTKEYCHAIN_FOUND OR QT5KEYCHAIN_FOUND)
-        MESSAGE("Found QTKeychain")
-        list(APPEND LINK_TARGETS ${QTKEYCHAIN_LIBRARY})
-        include_directories(${QTKEYCHAIN_INCLUDE_DIR})
-        set( o2_SRCS
-                ${o2_SRCS}
-                o0keychainstore.cpp
-                )
-        set( o2_HDRS
-                ${o2_HDRS}
-                o0keychainstore.h
-                )
-    else()
-        MESSAGE("Qt5Keychain or QtKeychain is required")
+
+    include(FetchContent)
+    FetchContent_Declare(
+      QtKeychain
+      GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain.git
+      GIT_TAG        841f31c7ca177e45647fd705200d7fcbeee056e5 # master Jan 30, 2023 (Qt 6.4 compatible)
+    )
+
+    if (Qt6Core_FOUND)
+        set(BUILD_WITH_QT6 ON)
     endif()
 
+    FetchContent_MakeAvailable(QtKeychain)
 
+    # patch include path to find QtKeychain headers without installing it
+    include_directories(${qtkeychain_SOURCE_DIR})
+
+    list(APPEND LINK_TARGETS qt${Qt_MAJOR_VERSION}keychain)
+
+    set( o2_SRCS
+        ${o2_SRCS}
+        o0keychainstore.cpp
+    )
+    set( o2_HDRS
+        ${o2_HDRS}
+        o0keychainstore.h
+    )
 endif(o2_WITH_KEYCHAIN)
 
+# compose the library
 
+add_library(o2 ${o2_SRCS} ${o2_HDRS})
 
+target_include_directories(o2 PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}
+)
 
-if(NOT o2_WITH_QT5)
-    add_definitions(${QT4_DEFINITIONS})
-endif(NOT o2_WITH_QT5)
+target_link_libraries(o2
+    PUBLIC
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Network
 
-if(BUILD_SHARED_LIBS AND APPLE AND POLICY CMP0042) # in CMake >= 2.8.12
-    cmake_policy(SET CMP0042 OLD)
-    set(CMAKE_MACOSX_RPATH OFF) # don't embed @rpath in install name
-endif(BUILD_SHARED_LIBS AND APPLE AND POLICY CMP0042)
+    PRIVATE
+    ${LINK_TARGETS}
+)
 
-add_library( o2 ${o2_SRCS} ${o2_HDRS} )
-
-if(BUILD_SHARED_LIBS)
-    add_definitions( -DO2_SHARED_LIB )
-endif(BUILD_SHARED_LIBS)
-
-if(o2_WITH_QT5)
-    target_link_libraries( o2 Qt5::Core Qt5::Network ${LINK_TARGETS})
-else(o2_WITH_QT5)
-    target_link_libraries( o2 ${QT_LIBRARIES} ${LINK_TARGETS})
-endif(o2_WITH_QT5)
+if (MSVC)
+    target_compile_options(o2 PRIVATE /W3)
+else()
+    target_compile_options(o2 PRIVATE -Wall)
+endif()
 
 if(BUILD_SHARED_LIBS)
     if(APPLE)
-      set_target_properties(o2
-          PROPERTIES INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib
-      )
-    endif(APPLE)
+        set_target_properties(o2 PROPERTIES
+            BUILD_WITH_INSTALL_NAME_DIR ON
+            INSTALL_NAME_DIR ${CMAKE_INSTALL_PREFIX}/lib
+        )
+    elseif(WIN32)
+        target_compile_definitions(o2
+            PRIVATE O2_DLL_EXPORT
+            PUBLIC O2_SHARED_LIB
+        )
+    endif()
+
     set_target_properties(o2
         PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${API_VERSION}
     )
-else(BUILD_SHARED_LIBS)
+else()
     # needed for statically linked o2 in shared libs on x86_64
     set_target_properties(o2
         PROPERTIES POSITION_INDEPENDENT_CODE TRUE
     )
-endif(BUILD_SHARED_LIBS)
+endif()
+
+# install target
 
 install(TARGETS o2
     RUNTIME DESTINATION bin
@@ -272,4 +275,3 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/o2.pc DESTINATION "${CMAKE_INSTALL_PRE
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/../o2-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/o2-config.h @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/o2-config.h DESTINATION "${CMAKE_INSTALL_PREFIX}/include/o2")
-
