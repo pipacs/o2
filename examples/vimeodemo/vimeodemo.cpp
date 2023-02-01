@@ -4,8 +4,11 @@
 #include <QDesktopServices>
 #include <QMetaEnum>
 #include <QDebug>
+#if QT_VERSION >= 0x060000
+#include <QRegularExpression>
+#else
 #include <QRegExp>
-
+#endif
 #include "vimeodemo.h"
 #include "o0globals.h"
 #include "o0settingsstore.h"
@@ -111,13 +114,25 @@ void VimeoDemo::onFinished(int requestId, QNetworkReply::NetworkError error, QBy
         return;
     }
 
+#if QT_VERSION >= 0x060000
+    QRegularExpression nameRE("\"name\":\"([^\"]+)\"");
+    QRegularExpressionMatch match = nameRE.match(reply);
+
+    bool hasMatch = match.hasMatch();
+    QString name = match.captured();
+#else
     QRegExp nameRE("\"name\":\"([^\"]+)\"");
-    if (nameRE.indexIn(reply) == -1) {
+
+    bool hasMatch = (nameRE.indexIn(reply) != -1);
+    QString name = nameRE.cap(1);
+#endif
+
+    if (!hasMatch){
         qDebug() << "Can not parse reply:" << reply;
         emit userNameFailed();
         return;
     }
 
-    qInfo() << "User name: " << nameRE.cap(1);
+    qInfo() << "User name: " << name;
     emit userNameReceived();
 }

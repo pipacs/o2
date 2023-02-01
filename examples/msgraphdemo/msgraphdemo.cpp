@@ -4,7 +4,11 @@
 #include <QDesktopServices>
 #include <QMetaEnum>
 #include <QDebug>
+#if QT_VERSION >= 0x060000
+#include <QRegularExpression>
+#else
 #include <QRegExp>
+#endif
 
 #include "msgraphdemo.h"
 #include "o0globals.h"
@@ -114,13 +118,25 @@ void MsgraphDemo::onFinished(int requestId, QNetworkReply::NetworkError error, Q
         return;
     }
 
-    QRegExp userPrincipalNameRE("\"userPrincipalName\":\"([^\"]+)\"");
-    if (userPrincipalNameRE.indexIn(reply) == -1) {
+#if QT_VERSION >= 0x060000
+    QRegularExpression nameRE("\"userPrincipalName\":\"([^\"]+)\"");
+    QRegularExpressionMatch match = nameRE.match(reply);
+
+    bool hasMatch = match.hasMatch();
+    QString name = match.captured();
+#else
+    QRegExp nameRE("\"userPrincipalName\":\"([^\"]+)\"");
+
+    bool hasMatch = (nameRE.indexIn(reply) != -1);
+    QString name = nameRE.cap(1);
+#endif
+
+    if (!hasMatch) {
         qDebug() << "Can not parse reply:" << reply;
         emit userPrincipalNameFailed();
         return;
     }
 
-    qInfo() << "userPrincipalName: " << userPrincipalNameRE.cap(1);
+    qInfo() << "userPrincipalName: " << name;
     emit userPrincipalNameReceived();
 }

@@ -25,9 +25,6 @@ public:
 public slots:
     void processArgs() {
         QStringList argList = qApp->arguments();
-        QByteArray help = QString(USAGE).arg(OPT_OAUTH_CODE,
-                                             OPT_VALIDATE_TOKEN).toLatin1();
-        const char* helpText = help.constData();
         connect(&fbdemo_, SIGNAL(linkingFailed()), this, SLOT(onLinkingFailed()));
         connect(&fbdemo_, SIGNAL(linkingSucceeded()), this, SLOT(onLinkingSucceeded()));
         if (argList.contains(OPT_OAUTH_CODE)) {
@@ -36,7 +33,7 @@ public slots:
         } else if (argList.contains(OPT_VALIDATE_TOKEN)) {
             fbdemo_.validateToken();
         } else {
-            qDebug() << helpText;
+            qDebug() << QString(USAGE).arg(OPT_OAUTH_CODE, OPT_VALIDATE_TOKEN);
             qApp->exit(1);
         }
     }

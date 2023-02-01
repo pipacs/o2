@@ -66,7 +66,7 @@ void FBDemo::onAuthWindowCallbackCalled(const QString &inURLString)
         QUrlQuery query(getTokenUrl);
         QList< QPair<QString, QString> > tokens = query.queryItems();
 
-        QMultiMap<QString, QString> queryParams;
+        QMap<QString, QString> queryParams;
         QPair<QString, QString> tokenPair;
         foreach (tokenPair, tokens) {
             // FIXME: We are decoding key and value again. This helps with Google OAuth, but is it mandated by the standard?
