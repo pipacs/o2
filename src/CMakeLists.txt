@@ -239,6 +239,7 @@ target_include_directories(o2
 
 if(BUILD_SHARED_LIBS)
     add_definitions( -DO2_SHARED_LIB )
+    target_compile_definitions(o2 INTERFACE O2_SHARED_LIB)
 endif(BUILD_SHARED_LIBS)
 
 if(o2_WITH_QT5)
