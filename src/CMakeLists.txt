@@ -229,9 +229,17 @@ if(BUILD_SHARED_LIBS AND APPLE AND POLICY CMP0042) # in CMake >= 2.8.12
 endif(BUILD_SHARED_LIBS AND APPLE AND POLICY CMP0042)
 
 add_library( o2 ${o2_SRCS} ${o2_HDRS} )
+set_target_properties(o2 PROPERTIES PUBLIC_HEADER "${o2_HDRS}")
+
+target_include_directories(o2
+    INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include>
+)
 
 if(BUILD_SHARED_LIBS)
     add_definitions( -DO2_SHARED_LIB )
+    target_compile_definitions(o2 INTERFACE O2_SHARED_LIB)
 endif(BUILD_SHARED_LIBS)
 
 if(o2_WITH_QT5)
@@ -257,13 +265,11 @@ else(BUILD_SHARED_LIBS)
 endif(BUILD_SHARED_LIBS)
 
 install(TARGETS o2
+    EXPORT o2
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib${o2_LIB_SUFFIX}
     ARCHIVE DESTINATION lib${o2_LIB_SUFFIX}
-)
-
-install(FILES ${o2_HDRS}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/o2
+    PUBLIC_HEADER DESTINATION include/o2
 )
 
 message(STATUS "Writing pkg-config file...")
